@@ -18,12 +18,6 @@ public class ShapesArray
 		seriesDelta = delta;
 	}
 
-    /// <summary>
-    /// Indexer
-    /// </summary>
-    /// <param name="row"></param>
-    /// <param name="column"></param>
-    /// <returns></returns>
     public GameObject this[int row, int column]
     {
         get
@@ -32,10 +26,9 @@ public class ShapesArray
             {
                 return shapes[row, column];
             }
-            catch (Exception ex)
+            catch
             {
-                
-                throw ex;
+                return null;
             }
         }
         set

@@ -3,8 +3,8 @@ using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.UI;
-using System.IO; 
-
+using System.IO;
+using System;
 
 public class ShapesManager : MonoBehaviour
 {
@@ -17,6 +17,7 @@ public class ShapesManager : MonoBehaviour
     private int score;
 	private int seriesDelta = 1;
 	private int numberStyle = 0;
+    private int[] numberCounts;
 
     public readonly Vector2 BottomRight = new Vector2(-2.37f, -4.27f);
     public readonly Vector2 CandySize = new Vector2(0.85f, 0.85f);
@@ -31,11 +32,8 @@ public class ShapesManager : MonoBehaviour
 	public static int Rows;
 	public static int Columns;
 	private Sprite[] numberSquare_sprites;
-    //public GameObject[] BonusPrefabs;
 
     //private IEnumerator CheckPotentialMatchesCoroutine;
-    //private IEnumerator AnimatePotentialMatchesCoroutine;
-
     //IEnumerable<GameObject> potentialMatches;
 
     public SoundManager soundManager;
@@ -55,13 +53,12 @@ public class ShapesManager : MonoBehaviour
     }
 
 	public void InitializeBoardConstants(){
-		var directory_information = new DirectoryInfo ("Assets/Resources/Images/Numbers");
-		var files_info = directory_information.GetFiles ("*.jpg");
-		MAX_NUMBER = files_info.Length;
-		Rows = MAX_NUMBER;
+        numberSquare_sprites = Resources.LoadAll<Sprite>("Images/Numbers");
+        numberSquare_sprites = numberSquare_sprites.OrderBy(t =>Convert.ToInt32(t.name)).ToArray();
+        MAX_NUMBER = numberSquare_sprites.Count();
+        Rows = MAX_NUMBER;
 		Columns = MAX_NUMBER;
-		numberSquare_sprites = Resources.LoadAll<Sprite> ("Images/Numbers");
-
+        numberCounts = new int[MAX_NUMBER+1];
 	}
 
     public void InitializeCandyAndSpawnPositionsFromPremadeLevel()
@@ -111,33 +108,64 @@ public class ShapesManager : MonoBehaviour
 
 				GameObject newCandy = numberSquare_prefab;
 				var newCandyShape = newCandy.GetComponent<Shape>();
-				newCandyShape.Value=Random.Range (0, ShapesManager.MAX_NUMBER);
-
-                //check if two previous horizontal are of the same type
-                while (column >= 2 && shapes[row, column - 1].GetComponent<Shape>()
-                    .IsPartOfSeries(newCandy.GetComponent<Shape>(),seriesDelta)
-                    && shapes[row, column - 2].GetComponent<Shape>().IsPartOfSeries(newCandy.GetComponent<Shape>(),seriesDelta))
-                {
-					newCandyShape.Value = Random.Range (0, ShapesManager.MAX_NUMBER);
-                }
-
-                //check if two previous vertical are of the same type
-                while (row >= 2 && shapes[row - 1, column].GetComponent<Shape>()
-                    .IsPartOfSeries(newCandy.GetComponent<Shape>(),seriesDelta)
-                    && shapes[row - 2, column].GetComponent<Shape>().IsPartOfSeries(newCandy.GetComponent<Shape>(),seriesDelta))
-                {
-					newCandyShape.Value = Random.Range (0, ShapesManager.MAX_NUMBER);
-                }
-
+                newCandyShape.Value = generateNumber();
+                numberCounts[newCandyShape.Value]++;
                 InstantiateAndPlaceNewCandy(row, column, newCandy);
 
+                //           //check if two previous horizontal are of the same type
+                //           while (column >= 2 && shapes[row, column - 1].GetComponent<Shape>().IsPartOfSeries(newCandyShape,seriesDelta)
+                //               && shapes[row, column - 2].GetComponent<Shape>().IsPartOfSeries(newCandyShape,seriesDelta))
+                //           {
+                //newCandyShape.Value = generateNumber();
+                //           }
+
+                //           //check if two previous vertical are of the same type
+                //           while (row >= 2 && shapes[row - 1, column].GetComponent<Shape>().IsPartOfSeries(newCandy.GetComponent<Shape>(),seriesDelta)
+                //               && shapes[row - 2, column].GetComponent<Shape>().IsPartOfSeries(newCandyShape,seriesDelta))
+                //           {
+                //newCandyShape.Value = generateNumber();
+                //           }
             }
         }
-
         SetupSpawnPositions();
+        clearBoardMatches();
     }
 
+    private void clearBoardMatches()
+    {
+        MatchesInfo matches = new MatchesInfo();
+        for (int row=0;row<Rows;row++)
+            for (int col=0;col<Columns;col++)
+                if (shapes[row, col] != null)
+                {
+                    matches.AddObjectRange(shapes.GetMatches(shapes[row, col]).MatchedCandy);
+                }
+        foreach (var item in matches.MatchedCandy)
+        {
+            numberCounts[item.GetComponent<Shape>().Value]--;
+            shapes.Remove(item);
+            RemoveFromScene(item);
+        }
+        var columns = matches.MatchedCandy.Select(go => go.GetComponent<Shape>().Column).Distinct();
+        CreateNewCandyInSpecificColumns(columns);
+        if (matches.MatchedCandy.Count()!=0)
+        {
+            clearBoardMatches();
+        }
+    }
 
+    private int generateNumber()
+    {
+        List<int> chances = new List<int>();
+        for (int i=1;i<MAX_NUMBER+1;i++)
+        {
+            for (int j=0;j<MAX_NUMBER-numberCounts[i];j++)
+            {
+                chances.Add(i);
+            }
+        }
+        return chances[UnityEngine.Random.Range(0, chances.Count)];
+    }
 
     private void InstantiateAndPlaceNewCandy(int row, int column, GameObject newCandy)
     {
@@ -148,7 +176,7 @@ public class ShapesManager : MonoBehaviour
 		int number_value = newCandy.GetComponent<Shape> ().Value;
         //assign the specific properties
 		go.GetComponent<Shape>().Assign(number_value, row, column);
-		go.GetComponent<SpriteRenderer> ().sprite =numberSquare_sprites[number_value];
+		go.GetComponent<SpriteRenderer> ().sprite =numberSquare_sprites[number_value-1];
         shapes[row, column] = go;
     }
 
@@ -162,12 +190,6 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
-
-
-
-    /// <summary>
-    /// Destroy all candy gameobjects
-    /// </summary>
     private void DestroyAllCandy()
     {
         for (int row = 0; row < Rows; row++)
@@ -230,11 +252,6 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Modifies sorting layers for better appearance when dragging/animating
-    /// </summary>
-    /// <param name="hitGo"></param>
-    /// <param name="hitGo2"></param>
     private void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
     {
         SpriteRenderer sp1 = hitGo.GetComponent<SpriteRenderer>();
@@ -245,9 +262,6 @@ public class ShapesManager : MonoBehaviour
             sp2.sortingOrder = 0;
         }
     }
-
-
-
 
     private IEnumerator FindMatchesAndCollapse(RaycastHit2D hit2)
     {
@@ -280,6 +294,7 @@ public class ShapesManager : MonoBehaviour
 
             foreach (var item in totalMatches)
             {
+                numberCounts[item.GetComponent<Shape>().Value]--;
                 shapes.Remove(item);
                 RemoveFromScene(item);
             }
@@ -328,7 +343,8 @@ public class ShapesManager : MonoBehaviour
             {
 				var go = numberSquare_prefab;
 				var newCandyShape = go.GetComponent<Shape> ();
-				newCandyShape.Value = Random.Range (0, ShapesManager.MAX_NUMBER);
+                newCandyShape.Value = generateNumber();
+                numberCounts[newCandyShape.Value]++;
 
                 GameObject newCandy = Instantiate(go, SpawnPositions[column], Quaternion.identity)
                     as GameObject;
@@ -393,7 +409,7 @@ public class ShapesManager : MonoBehaviour
     /// <returns></returns>
     private GameObject GetRandomExplosion()
     {
-        return ExplosionPrefabs[Random.Range(0, ExplosionPrefabs.Length)];
+        return ExplosionPrefabs[UnityEngine.Random.Range(0, ExplosionPrefabs.Length)];
     }
 
     /// <summary>

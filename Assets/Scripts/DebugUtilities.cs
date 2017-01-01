@@ -77,11 +77,9 @@ public static class DebugUtilities
                 {
                     var shape = shapes[row, column].GetComponent<Shape>();
                     x += shape.Row.ToString("D2")
-                        + "-" + shape.Column.ToString("D2");
-
-                    x += shape.Value;
-
-                    x += " | ";
+                        + "-" + shape.Column.ToString("D2")
+                        + "-" + shape.Value.ToString("D2")
+                        + " | ";
                 }
             }
             x += Environment.NewLine;

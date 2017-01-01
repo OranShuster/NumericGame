@@ -21,8 +21,10 @@ public class Shape : MonoBehaviour
     /// <returns></returns>
 	public bool IsPartOfSeries(Shape otherShape,int delta)
     {
-        if (otherShape == null || !(otherShape is Shape))
+        if (!(otherShape is Shape))
             throw new ArgumentException("otherShape");
+        if (otherShape != null)
+            return false;
 
 		return Math.Abs(this.Value - (otherShape as Shape).Value) == delta;
     }

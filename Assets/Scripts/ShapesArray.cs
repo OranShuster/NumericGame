@@ -9,14 +9,9 @@ using UnityEngine;
 /// </summary>
 public class ShapesArray
 {
-
 	private GameObject[,] shapes = new GameObject[ShapesManager.Rows, ShapesManager.Columns];
-	private int seriesDelta = 1;
-
-	public void changeSeriesDelta(int delta)
-	{
-		seriesDelta = delta;
-	}
+	public int seriesDelta = 1;
+    private int[] numberCounts = new int[ShapesManager.MAX_NUMBER+1];
 
     public GameObject this[int row, int column]
     {
@@ -33,6 +28,8 @@ public class ShapesArray
         }
         set
         {
+            if (value != null)
+                this.numberCounts[value.GetComponent<Shape>().Value]++;
             shapes[row, column] = value;
         }
     }
@@ -49,10 +46,10 @@ public class ShapesArray
         var g2Shape = g2.GetComponent<Shape>();
 
         //get array indexes
-        int g1Row = g1Shape.Row;
-        int g1Column = g1Shape.Column;
-        int g2Row = g2Shape.Row;
-        int g2Column = g2Shape.Column;
+        var g1Row = g1Shape.Row;
+        var g1Column = g1Shape.Column;
+        var g2Row = g2Shape.Row;
+        var g2Column = g2Shape.Column;
 
         //swap them in the array
         var temp = shapes[g1Row, g1Column];
@@ -73,7 +70,7 @@ public class ShapesArray
     /// <returns></returns>
     public IEnumerable<GameObject> GetMatches(IEnumerable<GameObject> gos)
     {
-        List<GameObject> matches = new List<GameObject>();
+        var matches = new List<GameObject>();
         foreach (var go in gos)
         {
             matches.AddRange(GetMatches(go).MatchedCandy);
@@ -88,13 +85,13 @@ public class ShapesArray
     /// <returns></returns>
     public MatchesInfo GetMatches(GameObject go)
     {
-        MatchesInfo matchesInfo = new MatchesInfo();
+        var matchesInfo = new MatchesInfo();
 
-        var horizontalMatches = GetMatchesHorizontally(go);
-        matchesInfo.AddObjectRange(horizontalMatches);
+        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,seriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,-seriesDelta));
 
-        var verticalMatches = GetMatchesVertically(go);
-        matchesInfo.AddObjectRange(verticalMatches);
+        matchesInfo.AddObjectRange(GetMatchesVertically(go,seriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesVertically(go,-seriesDelta));
 
         return matchesInfo;
     }
@@ -104,31 +101,28 @@ public class ShapesArray
     /// </summary>
     /// <param name="go"></param>
     /// <returns></returns>
-    private IEnumerable<GameObject> GetMatchesHorizontally(GameObject go)
+    private IEnumerable<GameObject> GetMatchesHorizontally(GameObject go,int delta)
     {
-        List<GameObject> matches = new List<GameObject>();
-        matches.Add(go);
+        var matches = new List<GameObject> {go};
         var shape = go.GetComponent<Shape>();
         //check left
         if (shape.Column != 0)
-            for (int column = shape.Column - 1; column >= 0; column--)
+            for (var column = shape.Column - 1; column >= 0; column--)
             {
-                if (shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,seriesDelta))
-                {
+                var curDelta = delta * Math.Abs(shape.Column - column);
+                if (shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
                     matches.Add(shapes[shape.Row, column]);
-                }
                 else
                     break;
             }
 
         //check right
-		if (shape.Column != ShapesManager.Columns - 1)
-			for (int column = shape.Column + 1; column < ShapesManager.Columns; column++)
+        if (shape.Column != ShapesManager.Columns - 1)
+			for (var column = shape.Column + 1; column < ShapesManager.Columns; column++)
             {
-                if (shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,seriesDelta))
-                {
+                var curDelta = delta * Math.Abs(shape.Column - column);
+                if (shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
                     matches.Add(shapes[shape.Row, column]);
-                }
                 else
                     break;
             }
@@ -145,17 +139,17 @@ public class ShapesArray
     /// </summary>
     /// <param name="go"></param>
     /// <returns></returns>
-    private IEnumerable<GameObject> GetMatchesVertically(GameObject go)
+    private IEnumerable<GameObject> GetMatchesVertically(GameObject go,int delta)
     {
-        List<GameObject> matches = new List<GameObject>();
-        matches.Add(go);
+        var matches = new List<GameObject> {go};
         var shape = go.GetComponent<Shape>();
         //check bottom
         if (shape.Row != 0)
-            for (int row = shape.Row - 1; row >= 0; row--)
+            for (var row = shape.Row - 1; row >= 0; row--)
             {
+                var curDelta = delta * Math.Abs(shape.Row - row); 
                 if (shapes[row, shape.Column] != null &&
-                    shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,seriesDelta))
+                    shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
                 {
                     matches.Add(shapes[row, shape.Column]);
                 }
@@ -165,10 +159,11 @@ public class ShapesArray
 
         //check top
 		if (shape.Row != ShapesManager.Rows - 1)
-			for (int row = shape.Row + 1; row < ShapesManager.Rows; row++)
+			for (var row = shape.Row + 1; row < ShapesManager.Rows; row++)
             {
+                var curDelta = delta * Math.Abs(shape.Row - row);
                 if (shapes[row, shape.Column] != null && 
-                    shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,seriesDelta))
+                    shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
                 {
                     matches.Add(shapes[row, shape.Column]);
                 }
@@ -189,6 +184,7 @@ public class ShapesArray
     /// <param name="item"></param>
     public void Remove(GameObject item)
     {
+        numberCounts[item.GetComponent<Shape>().Value]--;
         shapes[item.GetComponent<Shape>().Row, item.GetComponent<Shape>().Column] = null;
     }
 
@@ -199,20 +195,18 @@ public class ShapesArray
     /// <returns>Info about the GameObjects that were moved</returns>
     public AlteredCandyInfo Collapse(IEnumerable<int> columns)
     {
-        AlteredCandyInfo collapseInfo = new AlteredCandyInfo();
-
-
-        ///search in every column
+        var collapseInfo = new AlteredCandyInfo();
+        //search in every column
         foreach (var column in columns)
         {
             //begin from bottom row
-			for (int row = 0; row < ShapesManager.Rows - 1; row++)
+			for (var row = 0; row < ShapesManager.Rows - 1; row++)
             {
                 //if you find a null item
                 if (shapes[row, column] == null)
                 {
                     //start searching for the first non-null
-					for (int row2 = row + 1; row2 < ShapesManager.Rows; row2++)
+					for (var row2 = row + 1; row2 < ShapesManager.Rows; row2++)
                     {
                         //if you find one, bring it down (i.e. replace it with the null you found)
                         if (shapes[row2, column] != null)
@@ -246,13 +240,26 @@ public class ShapesArray
     /// <returns></returns>
     public IEnumerable<ShapeInfo> GetEmptyItemsOnColumn(int column)
     {
-        List<ShapeInfo> emptyItems = new List<ShapeInfo>();
-		for (int row = 0; row < ShapesManager.Rows; row++)
+        var emptyItems = new List<ShapeInfo>();
+		for (var row = 0; row < ShapesManager.Rows; row++)
         {
             if (shapes[row, column] == null)
                 emptyItems.Add(new ShapeInfo() { Row = row, Column = column });
         }
         return emptyItems;
+    }
+
+    public  int GenerateNumber(int maxNumber)
+    {
+        var chances = new List<int>();
+        for (var i = 1; i < maxNumber + 1; i++)
+        {
+            for (var j = 0; j < maxNumber - numberCounts[i]; j++)
+            {
+                chances.Add(i);
+            }
+        }
+        return chances[UnityEngine.Random.Range(0, chances.Count)];
     }
 
 }

@@ -78,7 +78,7 @@ public class AbstractGoTweenCollection : AbstractGoTween
 	/// </summary>
 	public List<GoTween> tweensWithTarget( object target )
 	{
-		List<GoTween> list = new List<GoTween>();
+		var list = new List<GoTween>();
 		
 		foreach( var flowItem in _tweenFlows )
 		{
@@ -224,7 +224,7 @@ public class AbstractGoTweenCollection : AbstractGoTween
         {
             if ( isReversed || _isLoopingBackOnPingPong )
             {
-                for ( int i = 0; i < _tweenFlows.Count; ++i )
+                for ( var i = 0; i < _tweenFlows.Count; ++i )
                 {
                     flowItem = _tweenFlows[i];
 
@@ -239,7 +239,7 @@ public class AbstractGoTweenCollection : AbstractGoTween
             }
             else
             {
-                for ( int i = _tweenFlows.Count - 1; i >= 0; --i )
+                for ( var i = _tweenFlows.Count - 1; i >= 0; --i )
                 {
                     flowItem = _tweenFlows[i];
 
@@ -285,7 +285,7 @@ public class AbstractGoTweenCollection : AbstractGoTween
             }
             else
             {
-                for ( int i = 0; i < _tweenFlows.Count; ++i )
+                for ( var i = 0; i < _tweenFlows.Count; ++i )
                 {
                     flowItem = _tweenFlows[i];
 
@@ -415,7 +415,7 @@ public class AbstractGoTweenCollection : AbstractGoTween
         if ( isReversed || _isLoopingBackOnPingPong )
         {
             // flowItems in the future of the timeline
-            for ( int i = 0; i < _tweenFlows.Count; ++i )
+            for ( var i = 0; i < _tweenFlows.Count; ++i )
             {
                 flowItem = _tweenFlows[i];
 
@@ -429,7 +429,7 @@ public class AbstractGoTweenCollection : AbstractGoTween
             }
 
             // flowItems in the past & current part of the timeline
-            for ( int i = _tweenFlows.Count - 1; i >= 0; --i )
+            for ( var i = _tweenFlows.Count - 1; i >= 0; --i )
             {
                 flowItem = _tweenFlows[i];
 
@@ -445,7 +445,7 @@ public class AbstractGoTweenCollection : AbstractGoTween
         else
         {
             // flowItems in the future of the timeline
-            for ( int i = _tweenFlows.Count - 1; i >= 0; --i )
+            for ( var i = _tweenFlows.Count - 1; i >= 0; --i )
             {
                 flowItem = _tweenFlows[i];
 
@@ -459,7 +459,7 @@ public class AbstractGoTweenCollection : AbstractGoTween
             }
 
             // flowItems in the past & current part of the timeline
-            for ( int i = 0; i < _tweenFlows.Count; ++i )
+            for ( var i = 0; i < _tweenFlows.Count; ++i )
             {
                 flowItem = _tweenFlows[i];
 

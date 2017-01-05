@@ -23,10 +23,10 @@ public class Shape : MonoBehaviour
     {
         if (!(otherShape is Shape))
             throw new ArgumentException("otherShape");
-        if (otherShape != null)
+        if (otherShape == null)
             return false;
 
-		return Math.Abs(this.Value - (otherShape as Shape).Value) == delta;
+		return this.Value - (otherShape as Shape).Value == delta;
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public class Shape : MonoBehaviour
     /// <param name="b"></param>
     public static void SwapFields(Shape a, Shape b)
     {
-        int temp = a.Row;
+        var temp = a.Row;
         a.Row = b.Row;
         b.Row = temp;
 
@@ -58,9 +58,6 @@ public class Shape : MonoBehaviour
         a.Column = b.Column;
         b.Column = temp;
 
-		temp = a.Value;
-		a.Value = b.Value;
-		b.Value = temp;
 	}
 		
 }

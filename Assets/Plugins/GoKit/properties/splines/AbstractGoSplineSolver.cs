@@ -22,7 +22,7 @@ public abstract class AbstractGoSplineSolver
 	{
 		var totalSudivisions = _nodes.Count * totalSubdivisionsPerNodeForLookupTable;
 		_pathLength = 0;
-		float timePerSlice = 1f / totalSudivisions;
+		var timePerSlice = 1f / totalSudivisions;
 		
 		// we dont care about the first node for distances because they are always t:0 and len:0
 		_segmentTimeForDistance = new Dictionary<float, float>( totalSudivisions );
@@ -34,7 +34,7 @@ public abstract class AbstractGoSplineSolver
         for( var i = 1; i < totalSudivisions + 1; i++ )
         {
 			// what is the current time along the path?
-            float currentTime = timePerSlice * i;
+            var currentTime = timePerSlice * i;
 
             var currentPoint = getPoint( currentTime );
             _pathLength += Vector3.Distance( currentPoint, lastPoint );

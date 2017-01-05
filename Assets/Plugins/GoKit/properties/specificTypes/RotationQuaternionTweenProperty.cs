@@ -65,7 +65,7 @@ public class RotationQuaternionTweenProperty : AbstractQuaternionTweenProperty
 	public override void tick( float totalElapsedTime )
 	{
 		var easedTime = _easeFunction( totalElapsedTime, 0, 1, _ownerTween.duration );
-		Quaternion newOrientation = Quaternion.Slerp (_startValue, _endValue, easedTime);
+		var newOrientation = Quaternion.Slerp (_startValue, _endValue, easedTime);
 		
 		if( _useLocalRotation )
 			_target.localRotation = newOrientation;

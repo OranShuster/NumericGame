@@ -14,8 +14,8 @@ public class GoEaseElastic
 		{
 			return b + c;
 		}
-		float p = d * .3f;
-		float s = p / 4;
+		var p = d * .3f;
+		var s = p / 4;
 		return -(float)( c * Math.Pow( 2, 10 * ( t -= 1 ) ) * Math.Sin( ( t * d - s ) * ( 2 * Math.PI ) / p ) ) + b;
 	}
 
@@ -29,8 +29,8 @@ public class GoEaseElastic
 		{
 			return b + c;
 		}
-		float p = d * .3f;
-		float s = p / 4;
+		var p = d * .3f;
+		var s = p / 4;
 		return (float)( c * Math.Pow( 2, -10 * t ) * Math.Sin( ( t * d - s ) * ( 2 * Math.PI ) / p ) + c + b );
 	}
 
@@ -44,9 +44,9 @@ public class GoEaseElastic
 		{
 			return b + c;
 		}
-		float p = d * ( .3f * 1.5f );
-		float a = c;
-		float s = p / 4;
+		var p = d * ( .3f * 1.5f );
+		var a = c;
+		var s = p / 4;
 		if( t < 1 )
 		{
 			return -.5f * (float)( a * Math.Pow( 2, 10 * ( t -= 1 ) ) * Math.Sin( ( t * d - s ) * ( 2 * Math.PI ) / p ) ) + b;

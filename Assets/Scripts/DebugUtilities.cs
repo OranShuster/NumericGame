@@ -11,16 +11,16 @@ public static class DebugUtilities
 
     public static string[,] FillShapesArrayFromResourcesData()
     {
-		string[,] shapes = new string[ShapesManager.Rows,ShapesManager.Columns];
+		var shapes = new string[ShapesManager.Rows,ShapesManager.Columns];
 
-        TextAsset txt = Resources.Load("level") as TextAsset;
-        string level = txt.text;
+        var txt = Resources.Load("level") as TextAsset;
+        var level = txt.text;
 
-        string[] lines = level.Split(new string[] { System.Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-		for (int row = ShapesManager.Rows - 1; row >= 0; row--)
+        var lines = level.Split(new string[] { System.Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+		for (var row = ShapesManager.Rows - 1; row >= 0; row--)
         {
-            string[] items = lines[row].Split('|');
-			for (int column = 0; column < ShapesManager.Columns; column++)
+            var items = lines[row].Split('|');
+			for (var column = 0; column < ShapesManager.Columns; column++)
             {
                 shapes[row, column] = items[column];
             }
@@ -36,14 +36,14 @@ public static class DebugUtilities
 
     public static void DebugAlpha(GameObject go)
     {
-        Color c = go.GetComponent<SpriteRenderer>().color;
+        var c = go.GetComponent<SpriteRenderer>().color;
         c.a = 0.6f;
         go.GetComponent<SpriteRenderer>().color = c;
     }
 
     public static void DebugPositions(GameObject hitGo, GameObject hitGo2)
     {
-        string lala =
+        var lala =
                         hitGo.GetComponent<Shape>().Row + "-"
                         + hitGo.GetComponent<Shape>().Column + "-"
                          + hitGo2.GetComponent<Shape>().Row + "-"
@@ -58,18 +58,13 @@ public static class DebugUtilities
         Debug.Log(GetArrayContents(shapes));
     }
 
-    /// <summary>
-    /// Creates a string with the contents of the shapes array
-    /// </summary>
-    /// <param name="shapes"></param>
-    /// <returns></returns>
     public static string GetArrayContents(ShapesArray shapes)
     {
-        string x = string.Empty;
-		for (int row = ShapesManager.Rows - 1; row >= 0; row--)
+        var x = string.Empty;
+		for (var row = ShapesManager.Rows - 1; row >= 0; row--)
         {
 
-			for (int column = 0; column < ShapesManager.Columns; column++)
+			for (var column = 0; column < ShapesManager.Columns; column++)
             {
                 if (shapes[row, column] == null)
                     x += "NULL  |";

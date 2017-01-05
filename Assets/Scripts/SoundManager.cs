@@ -16,7 +16,7 @@ public class SoundManager : MonoBehaviour {
 
     AudioSource AddAudio( AudioClip audioClip)
     {
-        AudioSource audioSource = this.gameObject.AddComponent<AudioSource>();
+        var audioSource = this.gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
         audioSource.clip = audioClip;
         return audioSource;

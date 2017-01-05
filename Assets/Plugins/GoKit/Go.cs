@@ -366,7 +366,7 @@ public class Go : MonoBehaviour
 	/// </summary>
 	public static List<GoTween> tweensWithTarget( object target, bool traverseCollections = false )
 	{
-		List<GoTween> list = new List<GoTween>();
+		var list = new List<GoTween>();
 
 		foreach( var item in _tweens )
 		{

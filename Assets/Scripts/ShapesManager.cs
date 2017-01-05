@@ -17,7 +17,6 @@ public class ShapesManager : MonoBehaviour
     private int score;
 	private int seriesDelta = 1;
 	private int numberStyle = 0;
-    private int[] numberCounts;
 
     public readonly Vector2 BottomRight = new Vector2(-2.37f, -4.27f);
     public readonly Vector2 CandySize = new Vector2(0.85f, 0.85f);
@@ -31,7 +30,7 @@ public class ShapesManager : MonoBehaviour
 	public static int MAX_NUMBER;
 	public static int Rows;
 	public static int Columns;
-	private Sprite[] numberSquare_sprites;
+	public Sprite[] numberSquare_sprites;
 
     //private IEnumerator CheckPotentialMatchesCoroutine;
     //IEnumerable<GameObject> potentialMatches;
@@ -58,7 +57,6 @@ public class ShapesManager : MonoBehaviour
         MAX_NUMBER = numberSquare_sprites.Count();
         Rows = MAX_NUMBER;
 		Columns = MAX_NUMBER;
-        numberCounts = new int[MAX_NUMBER+1];
 	}
 
     public void InitializeCandyAndSpawnPositionsFromPremadeLevel()
@@ -73,9 +71,9 @@ public class ShapesManager : MonoBehaviour
         shapes = new ShapesArray();
         SpawnPositions = new Vector2[Columns];
 
-        for (int row = 0; row < Rows; row++)
+        for (var row = 0; row < Rows; row++)
         {
-            for (int column = 0; column < Columns; column++)
+            for (var column = 0; column < Columns; column++)
             {
 
                 GameObject newCandy = null;
@@ -101,15 +99,14 @@ public class ShapesManager : MonoBehaviour
         shapes = new ShapesArray();
         SpawnPositions = new Vector2[Columns];
 
-        for (int row = 0; row < Rows; row++)
+        for (var row = 0; row < Rows; row++)
         {
-            for (int column = 0; column < Columns; column++)
+            for (var column = 0; column < Columns; column++)
             {
 
-				GameObject newCandy = numberSquare_prefab;
+				var newCandy = numberSquare_prefab;
 				var newCandyShape = newCandy.GetComponent<Shape>();
-                newCandyShape.Value = generateNumber();
-                numberCounts[newCandyShape.Value]++;
+                newCandyShape.Value = shapes.GenerateNumber(MAX_NUMBER);
                 InstantiateAndPlaceNewCandy(row, column, newCandy);
 
                 //           //check if two previous horizontal are of the same type
@@ -133,47 +130,23 @@ public class ShapesManager : MonoBehaviour
 
     private void clearBoardMatches()
     {
-        MatchesInfo matches = new MatchesInfo();
-        for (int row=0;row<Rows;row++)
-            for (int col=0;col<Columns;col++)
-                if (shapes[row, col] != null)
-                {
+        var matches = new MatchesInfo();
+        for (var row = 0; row < Rows; row++)
+            for (var col = 0; col < Columns; col++)
+                if (!matches.MatchedCandy.Contains(shapes[row, col]))
                     matches.AddObjectRange(shapes.GetMatches(shapes[row, col]).MatchedCandy);
-                }
-        foreach (var item in matches.MatchedCandy)
-        {
-            numberCounts[item.GetComponent<Shape>().Value]--;
-            shapes.Remove(item);
-            RemoveFromScene(item);
-        }
-        var columns = matches.MatchedCandy.Select(go => go.GetComponent<Shape>().Column).Distinct();
-        CreateNewCandyInSpecificColumns(columns);
-        if (matches.MatchedCandy.Count()!=0)
-        {
-            clearBoardMatches();
-        }
+        var totalMatches = matches.MatchedCandy;
+        handleMatches(totalMatches, false, false);
     }
 
-    private int generateNumber()
-    {
-        List<int> chances = new List<int>();
-        for (int i=1;i<MAX_NUMBER+1;i++)
-        {
-            for (int j=0;j<MAX_NUMBER-numberCounts[i];j++)
-            {
-                chances.Add(i);
-            }
-        }
-        return chances[UnityEngine.Random.Range(0, chances.Count)];
-    }
 
     private void InstantiateAndPlaceNewCandy(int row, int column, GameObject newCandy)
     {
-        GameObject go = Instantiate(newCandy,
+        var go = Instantiate(newCandy,
             BottomRight + new Vector2(column * CandySize.x, row * CandySize.y), Quaternion.identity)
             as GameObject;
 
-		int number_value = newCandy.GetComponent<Shape> ().Value;
+		var number_value = newCandy.GetComponent<Shape> ().Value;
         //assign the specific properties
 		go.GetComponent<Shape>().Assign(number_value, row, column);
 		go.GetComponent<SpriteRenderer> ().sprite =numberSquare_sprites[number_value-1];
@@ -183,7 +156,7 @@ public class ShapesManager : MonoBehaviour
     private void SetupSpawnPositions()
     {
         //create the spawn positions for the new shapes (will pop from the 'ceiling')
-        for (int column = 0; column < Columns; column++)
+        for (var column = 0; column < Columns; column++)
         {
             SpawnPositions[column] = BottomRight
                 + new Vector2(column * CandySize.x, Rows * CandySize.y);
@@ -192,9 +165,9 @@ public class ShapesManager : MonoBehaviour
 
     private void DestroyAllCandy()
     {
-        for (int row = 0; row < Rows; row++)
+        for (var row = 0; row < Rows; row++)
         {
-            for (int column = 0; column < Columns; column++)
+            for (var column = 0; column < Columns; column++)
             {
                 Destroy(shapes[row, column]);
             }
@@ -228,8 +201,6 @@ public class ShapesManager : MonoBehaviour
             //user dragged
             if (Input.GetMouseButton(0))
             {
-                
-
                 var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
                 //we have a hit
                 if (hit.collider != null && hitGo != hit.collider.gameObject)
@@ -254,8 +225,8 @@ public class ShapesManager : MonoBehaviour
 
     private void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
     {
-        SpriteRenderer sp1 = hitGo.GetComponent<SpriteRenderer>();
-        SpriteRenderer sp2 = hitGo2.GetComponent<SpriteRenderer>();
+        var sp1 = hitGo.GetComponent<SpriteRenderer>();
+        var sp2 = hitGo2.GetComponent<SpriteRenderer>();
         if (sp1.sortingOrder <= sp2.sortingOrder)
         {
             sp1.sortingOrder = 1;
@@ -278,27 +249,35 @@ public class ShapesManager : MonoBehaviour
         var hitGomatchesInfo = shapes.GetMatches(hitGo);
         var hitGo2matchesInfo = shapes.GetMatches(hitGo2);
 
-        var totalMatches = hitGomatchesInfo.MatchedCandy
-            .Union(hitGo2matchesInfo.MatchedCandy).Distinct();
+        var totalMatches = hitGomatchesInfo.MatchedCandy.Union(hitGo2matchesInfo.MatchedCandy).Distinct();
 
-        int timesRun = 1;
+        StartCoroutine(handleMatches(totalMatches));
+
+        state = GameState.None;
+    }
+
+    public IEnumerator handleMatches(IEnumerable<GameObject> totalMatches, bool withScore = true, bool withEffects = true)
+    {
+        var timesRun = 1;
         while (totalMatches.Count() >= Constants.MinimumMatches)
         {
             //increase score
-            IncreaseScore((totalMatches.Count() - 2) * Constants.Match3Score);
+            if (withScore)
+            {
+                IncreaseScore((totalMatches.Count() - 2) * Constants.Match3Score);
 
-            if (timesRun >= 2)
-                IncreaseScore(Constants.SubsequentMatchScore);
+                if (timesRun >= 2)
+                    IncreaseScore(Constants.SubsequentMatchScore);
+            }
 
             soundManager.PlayCrincle();
 
             foreach (var item in totalMatches)
             {
-                numberCounts[item.GetComponent<Shape>().Value]--;
                 shapes.Remove(item);
-                RemoveFromScene(item);
+                RemoveFromScene(item,withEffects);
             }
-				
+
             //get the columns that we had a collapse
             var columns = totalMatches.Select(go => go.GetComponent<Shape>().Column).Distinct();
 
@@ -308,7 +287,7 @@ public class ShapesManager : MonoBehaviour
             //create new ones
             var newCandyInfo = CreateNewCandyInSpecificColumns(columns);
 
-            int maxDistance = Mathf.Max(collapsedCandyInfo.MaxDistance, newCandyInfo.MaxDistance);
+            var maxDistance = Mathf.Max(collapsedCandyInfo.MaxDistance, newCandyInfo.MaxDistance);
 
             MoveAndAnimate(newCandyInfo.AlteredCandy, maxDistance);
             MoveAndAnimate(collapsedCandyInfo.AlteredCandy, maxDistance);
@@ -322,8 +301,6 @@ public class ShapesManager : MonoBehaviour
 
             timesRun++;
         }
-
-        state = GameState.None;
     }
 
     /// <summary>
@@ -333,21 +310,22 @@ public class ShapesManager : MonoBehaviour
     /// <returns>Info about new candies created</returns>
     private AlteredCandyInfo CreateNewCandyInSpecificColumns(IEnumerable<int> columnsWithMissingCandy)
     {
-        AlteredCandyInfo newCandyInfo = new AlteredCandyInfo();
+        var newCandyInfo = new AlteredCandyInfo();
 
         //find how many null values the column has
-        foreach (int column in columnsWithMissingCandy)
+        foreach (var column in columnsWithMissingCandy)
         {
             var emptyItems = shapes.GetEmptyItemsOnColumn(column);
             foreach (var item in emptyItems)
             {
 				var go = numberSquare_prefab;
 				var newCandyShape = go.GetComponent<Shape> ();
-                newCandyShape.Value = generateNumber();
-                numberCounts[newCandyShape.Value]++;
+                newCandyShape.Value = shapes.GenerateNumber(MAX_NUMBER);
 
-                GameObject newCandy = Instantiate(go, SpawnPositions[column], Quaternion.identity)
+                var newCandy = Instantiate(go, SpawnPositions[column], Quaternion.identity)
                     as GameObject;
+
+                newCandy.GetComponent<SpriteRenderer>().sprite = numberSquare_sprites[newCandyShape.Value-1];
 				
 				newCandy.GetComponent<Shape>().Assign(go.GetComponent<Shape>().Value, item.Row, item.Column);
 
@@ -378,9 +356,9 @@ public class ShapesManager : MonoBehaviour
     /// Destroys the item from the scene and instantiates a new explosion gameobject
     /// </summary>
     /// <param name="item"></param>
-    private void RemoveFromScene(GameObject item)
+    private void RemoveFromScene(GameObject item,bool withEffects=true)
     {
-        GameObject explosion = GetRandomExplosion();
+        var explosion = GetRandomExplosion();
         var newExplosion = Instantiate(explosion, item.transform.position, Quaternion.identity) as GameObject;
         Destroy(newExplosion, Constants.ExplosionDuration);
         Destroy(item);

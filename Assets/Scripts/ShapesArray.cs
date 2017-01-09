@@ -9,9 +9,9 @@ using UnityEngine;
 /// </summary>
 public class ShapesArray
 {
-	private GameObject[,] shapes = new GameObject[ShapesManager.Rows, ShapesManager.Columns];
-	public int seriesDelta = 1;
-    private int[] numberCounts = new int[ShapesManager.MAX_NUMBER+1];
+	private GameObject[,] _shapes = new GameObject[ShapesManager.Rows, ShapesManager.Columns];
+	public int SeriesDelta = 1;
+    private int[] _numberCounts = new int[ShapesManager.MaxNumber+1];
 
     public GameObject this[int row, int column]
     {
@@ -19,7 +19,7 @@ public class ShapesArray
         {
             try
             {
-                return shapes[row, column];
+                return _shapes[row, column];
             }
             catch
             {
@@ -29,8 +29,8 @@ public class ShapesArray
         set
         {
             if (value != null)
-                this.numberCounts[value.GetComponent<Shape>().Value]++;
-            shapes[row, column] = value;
+                this._numberCounts[value.GetComponent<Shape>().Value]++;
+            _shapes[row, column] = value;
         }
     }
 
@@ -52,9 +52,9 @@ public class ShapesArray
         var g2Column = g2Shape.Column;
 
         //swap them in the array
-        var temp = shapes[g1Row, g1Column];
-        shapes[g1Row, g1Column] = shapes[g2Row, g2Column];
-        shapes[g2Row, g2Column] = temp;
+        var temp = _shapes[g1Row, g1Column];
+        _shapes[g1Row, g1Column] = _shapes[g2Row, g2Column];
+        _shapes[g2Row, g2Column] = temp;
 
         //swap their respective properties
         Shape.SwapFields(g1Shape, g2Shape);
@@ -87,11 +87,11 @@ public class ShapesArray
     {
         var matchesInfo = new MatchesInfo();
 
-        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,seriesDelta));
-        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,-seriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,SeriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,-SeriesDelta));
 
-        matchesInfo.AddObjectRange(GetMatchesVertically(go,seriesDelta));
-        matchesInfo.AddObjectRange(GetMatchesVertically(go,-seriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesVertically(go,SeriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesVertically(go,-SeriesDelta));
 
         return matchesInfo;
     }
@@ -110,8 +110,8 @@ public class ShapesArray
             for (var column = shape.Column - 1; column >= 0; column--)
             {
                 var curDelta = delta * Math.Abs(shape.Column - column);
-                if (shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
-                    matches.Add(shapes[shape.Row, column]);
+                if (_shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
+                    matches.Add(_shapes[shape.Row, column]);
                 else
                     break;
             }
@@ -121,8 +121,8 @@ public class ShapesArray
 			for (var column = shape.Column + 1; column < ShapesManager.Columns; column++)
             {
                 var curDelta = delta * Math.Abs(shape.Column - column);
-                if (shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
-                    matches.Add(shapes[shape.Row, column]);
+                if (_shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
+                    matches.Add(_shapes[shape.Row, column]);
                 else
                     break;
             }
@@ -148,10 +148,10 @@ public class ShapesArray
             for (var row = shape.Row - 1; row >= 0; row--)
             {
                 var curDelta = delta * Math.Abs(shape.Row - row); 
-                if (shapes[row, shape.Column] != null &&
-                    shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
+                if (_shapes[row, shape.Column] != null &&
+                    _shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
                 {
-                    matches.Add(shapes[row, shape.Column]);
+                    matches.Add(_shapes[row, shape.Column]);
                 }
                 else
                     break;
@@ -162,10 +162,10 @@ public class ShapesArray
 			for (var row = shape.Row + 1; row < ShapesManager.Rows; row++)
             {
                 var curDelta = delta * Math.Abs(shape.Row - row);
-                if (shapes[row, shape.Column] != null && 
-                    shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
+                if (_shapes[row, shape.Column] != null && 
+                    _shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
                 {
-                    matches.Add(shapes[row, shape.Column]);
+                    matches.Add(_shapes[row, shape.Column]);
                 }
                 else
                     break;
@@ -184,8 +184,8 @@ public class ShapesArray
     /// <param name="item"></param>
     public void Remove(GameObject item)
     {
-        numberCounts[item.GetComponent<Shape>().Value]--;
-        shapes[item.GetComponent<Shape>().Row, item.GetComponent<Shape>().Column] = null;
+        _numberCounts[item.GetComponent<Shape>().Value]--;
+        _shapes[item.GetComponent<Shape>().Row, item.GetComponent<Shape>().Column] = null;
     }
 
     /// <summary>
@@ -203,26 +203,26 @@ public class ShapesArray
 			for (var row = 0; row < ShapesManager.Rows - 1; row++)
             {
                 //if you find a null item
-                if (shapes[row, column] == null)
+                if (_shapes[row, column] == null)
                 {
                     //start searching for the first non-null
 					for (var row2 = row + 1; row2 < ShapesManager.Rows; row2++)
                     {
                         //if you find one, bring it down (i.e. replace it with the null you found)
-                        if (shapes[row2, column] != null)
+                        if (_shapes[row2, column] != null)
                         {
-                            shapes[row, column] = shapes[row2, column];
-                            shapes[row2, column] = null;
+                            _shapes[row, column] = _shapes[row2, column];
+                            _shapes[row2, column] = null;
 
                             //calculate the biggest distance
                             if (row2 - row > collapseInfo.MaxDistance) 
                                 collapseInfo.MaxDistance = row2 - row;
 
                             //assign new row and column (name does not change)
-                            shapes[row, column].GetComponent<Shape>().Row = row;
-                            shapes[row, column].GetComponent<Shape>().Column = column;
+                            _shapes[row, column].GetComponent<Shape>().Row = row;
+                            _shapes[row, column].GetComponent<Shape>().Column = column;
 
-                            collapseInfo.AddCandy(shapes[row, column]);
+                            collapseInfo.AddCandy(_shapes[row, column]);
                             break;
                         }
                     }
@@ -243,7 +243,7 @@ public class ShapesArray
         var emptyItems = new List<ShapeInfo>();
 		for (var row = 0; row < ShapesManager.Rows; row++)
         {
-            if (shapes[row, column] == null)
+            if (_shapes[row, column] == null)
                 emptyItems.Add(new ShapeInfo() { Row = row, Column = column });
         }
         return emptyItems;
@@ -254,7 +254,7 @@ public class ShapesArray
         var chances = new List<int>();
         for (var i = 1; i < maxNumber + 1; i++)
         {
-            for (var j = 0; j < maxNumber - numberCounts[i]; j++)
+            for (var j = 0; j < maxNumber - _numberCounts[i]; j++)
             {
                 chances.Add(i);
             }

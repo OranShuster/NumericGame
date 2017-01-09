@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.IO;
 using System;
+using UnityEditor;
 
 public class ShapesManager : MonoBehaviour
 {
@@ -12,30 +13,30 @@ public class ShapesManager : MonoBehaviour
     public bool ShowDebugInfo = false;
     //candy graphics taken from http://opengameart.org/content/candy-pack-1
 
-    public ShapesArray shapes;
+    public ShapesArray Shapes;
 
-    private int score;
-	private int seriesDelta = 1;
-	private int numberStyle = 0;
+    private int _score;
+	private int _seriesDelta = 1;
+	private int _numberStyle = 0;
 
     public readonly Vector2 BottomRight = new Vector2(-2.37f, -4.27f);
     public readonly Vector2 CandySize = new Vector2(0.85f, 0.85f);
 
-    private GameState state = GameState.None;
-    private GameObject hitGo = null;
-    private Vector2[] SpawnPositions;
-    public GameObject numberSquare_prefab;
+    private GameState _state = GameState.None;
+    private GameObject _hitGo = null;
+    private Vector2[] _spawnPositions;
+    public GameObject NumberSquarePrefab;
     public GameObject[] ExplosionPrefabs;
 
-	public static int MAX_NUMBER;
+	public static int MaxNumber;
 	public static int Rows;
 	public static int Columns;
-	public Sprite[] numberSquare_sprites;
+	public Sprite[] NumberSquareSprites;
 
     //private IEnumerator CheckPotentialMatchesCoroutine;
     //IEnumerable<GameObject> potentialMatches;
 
-    public SoundManager soundManager;
+    public SoundManager SoundManager;
     void Awake()
     {
         DebugText.enabled = ShowDebugInfo;
@@ -52,11 +53,11 @@ public class ShapesManager : MonoBehaviour
     }
 
 	public void InitializeBoardConstants(){
-        numberSquare_sprites = Resources.LoadAll<Sprite>("Images/Numbers");
-        numberSquare_sprites = numberSquare_sprites.OrderBy(t =>Convert.ToInt32(t.name)).ToArray();
-        MAX_NUMBER = numberSquare_sprites.Count();
-        Rows = MAX_NUMBER;
-		Columns = MAX_NUMBER;
+        NumberSquareSprites = Resources.LoadAll<Sprite>("Images/Numbers");
+        NumberSquareSprites = NumberSquareSprites.OrderBy(t =>Convert.ToInt32(t.name)).ToArray();
+        MaxNumber = NumberSquareSprites.Count();
+        Rows = MaxNumber;
+		Columns = MaxNumber;
 	}
 
     public void InitializeCandyAndSpawnPositionsFromPremadeLevel()
@@ -65,11 +66,11 @@ public class ShapesManager : MonoBehaviour
 
         var premadeLevel = DebugUtilities.FillShapesArrayFromResourcesData();
 
-        if (shapes != null)
+        if (Shapes != null)
             DestroyAllCandy();
 
-        shapes = new ShapesArray();
-        SpawnPositions = new Vector2[Columns];
+        Shapes = new ShapesArray();
+        _spawnPositions = new Vector2[Columns];
 
         for (var row = 0; row < Rows; row++)
         {
@@ -93,20 +94,20 @@ public class ShapesManager : MonoBehaviour
     {
         InitializeVariables();
 
-        if (shapes != null)
+        if (Shapes != null)
             DestroyAllCandy();
 
-        shapes = new ShapesArray();
-        SpawnPositions = new Vector2[Columns];
+        Shapes = new ShapesArray();
+        _spawnPositions = new Vector2[Columns];
 
         for (var row = 0; row < Rows; row++)
         {
             for (var column = 0; column < Columns; column++)
             {
 
-				var newCandy = numberSquare_prefab;
+				var newCandy = NumberSquarePrefab;
 				var newCandyShape = newCandy.GetComponent<Shape>();
-                newCandyShape.Value = shapes.GenerateNumber(MAX_NUMBER);
+                newCandyShape.Value = Shapes.GenerateNumber(MaxNumber);
                 InstantiateAndPlaceNewCandy(row, column, newCandy);
 
                 //           //check if two previous horizontal are of the same type
@@ -125,18 +126,18 @@ public class ShapesManager : MonoBehaviour
             }
         }
         SetupSpawnPositions();
-        clearBoardMatches();
+        ClearBoardMatches();
     }
 
-    private void clearBoardMatches()
+    private void ClearBoardMatches()
     {
         var matches = new MatchesInfo();
         for (var row = 0; row < Rows; row++)
             for (var col = 0; col < Columns; col++)
-                if (!matches.MatchedCandy.Contains(shapes[row, col]))
-                    matches.AddObjectRange(shapes.GetMatches(shapes[row, col]).MatchedCandy);
+                if (!matches.MatchedCandy.Contains(Shapes[row, col]))
+                    matches.AddObjectRange(Shapes.GetMatches(Shapes[row, col]).MatchedCandy);
         var totalMatches = matches.MatchedCandy;
-        handleMatches(totalMatches, false, false);
+        StartCoroutine(HandleMatches(totalMatches, false, false));
     }
 
 
@@ -146,11 +147,11 @@ public class ShapesManager : MonoBehaviour
             BottomRight + new Vector2(column * CandySize.x, row * CandySize.y), Quaternion.identity)
             as GameObject;
 
-		var number_value = newCandy.GetComponent<Shape> ().Value;
+		var numberValue = newCandy.GetComponent<Shape> ().Value;
         //assign the specific properties
-		go.GetComponent<Shape>().Assign(number_value, row, column);
-		go.GetComponent<SpriteRenderer> ().sprite =numberSquare_sprites[number_value-1];
-        shapes[row, column] = go;
+		go.GetComponent<Shape>().Assign(numberValue, row, column);
+		go.GetComponent<SpriteRenderer> ().sprite =NumberSquareSprites[numberValue-1];
+        Shapes[row, column] = go;
     }
 
     private void SetupSpawnPositions()
@@ -158,7 +159,7 @@ public class ShapesManager : MonoBehaviour
         //create the spawn positions for the new shapes (will pop from the 'ceiling')
         for (var column = 0; column < Columns; column++)
         {
-            SpawnPositions[column] = BottomRight
+            _spawnPositions[column] = BottomRight
                 + new Vector2(column * CandySize.x, Rows * CandySize.y);
         }
     }
@@ -169,7 +170,7 @@ public class ShapesManager : MonoBehaviour
         {
             for (var column = 0; column < Columns; column++)
             {
-                Destroy(shapes[row, column]);
+                Destroy(Shapes[row, column]);
             }
         }
     }
@@ -179,9 +180,9 @@ public class ShapesManager : MonoBehaviour
     void Update()
     {
         if (ShowDebugInfo)
-            DebugText.text = DebugUtilities.GetArrayContents(shapes);
+            DebugText.text = DebugUtilities.GetArrayContents(Shapes);
 
-        if (state == GameState.None)
+        if (_state == GameState.None)
         {
             //user has clicked or touched
             if (Input.GetMouseButtonDown(0))
@@ -190,32 +191,32 @@ public class ShapesManager : MonoBehaviour
                 var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
                 if (hit.collider != null) //we have a hit!!!
                 {
-                    hitGo = hit.collider.gameObject;
-                    state = GameState.SelectionStarted;
+                    _hitGo = hit.collider.gameObject;
+                    _hitGo.GetComponent<SpriteRenderer>().color = Color.red;
+                    _state = GameState.SelectionStarted;
                 }
                 
             }
         }
-        else if (state == GameState.SelectionStarted)
+        else if (_state == GameState.SelectionStarted)
         {
             //user dragged
             if (Input.GetMouseButton(0))
             {
                 var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
                 //we have a hit
-                if (hit.collider != null && hitGo != hit.collider.gameObject)
+                if (hit.collider != null && _hitGo != hit.collider.gameObject)
                 {
-
                     //if the two shapes are diagonally aligned (different row and column), just return
-                    if (!Utilities.AreVerticalOrHorizontalNeighbors(hitGo.GetComponent<Shape>(),
+                    if (!Utilities.AreVerticalOrHorizontalNeighbors(_hitGo.GetComponent<Shape>(),
                         hit.collider.gameObject.GetComponent<Shape>()))
                     {
-                        state = GameState.None;
+                        _state = GameState.None;
                     }
                     else
                     {
-                        state = GameState.Animating;
-                        FixSortingLayer(hitGo, hit.collider.gameObject);
+                        _state = GameState.Animating;
+                        FixSortingLayer(_hitGo, hit.collider.gameObject);
                         StartCoroutine(FindMatchesAndCollapse(hit));
                     }
                 }
@@ -237,26 +238,30 @@ public class ShapesManager : MonoBehaviour
     private IEnumerator FindMatchesAndCollapse(RaycastHit2D hit2)
     {
         //get the second item that was part of the swipe
-        var hitGo2 = hit2.collider.gameObject;
-        shapes.Swap(hitGo, hitGo2);
+        var _hitGo2 = hit2.collider.gameObject;
+        _hitGo2.GetComponent<SpriteRenderer>().color=Color.red;
+        Shapes.Swap(_hitGo, _hitGo2);
 
         //move the swapped ones
-        hitGo.transform.positionTo(Constants.AnimationDuration, hitGo2.transform.position);
-        hitGo2.transform.positionTo(Constants.AnimationDuration, hitGo.transform.position);
+        _hitGo.transform.positionTo(Constants.AnimationDuration, _hitGo2.transform.position);
+        _hitGo2.transform.positionTo(Constants.AnimationDuration, _hitGo.transform.position);
         yield return new WaitForSeconds(Constants.AnimationDuration);
 
+        //remove selection color from squares
+        _hitGo2.GetComponent<SpriteRenderer>().color = new Color(1,1,1,1);
+        _hitGo.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+
         //get the matches via the helper methods
-        var hitGomatchesInfo = shapes.GetMatches(hitGo);
-        var hitGo2matchesInfo = shapes.GetMatches(hitGo2);
+        var hitGomatchesInfo = Shapes.GetMatches(_hitGo);
+        var hitGo2MatchesInfo = Shapes.GetMatches(_hitGo2);
 
-        var totalMatches = hitGomatchesInfo.MatchedCandy.Union(hitGo2matchesInfo.MatchedCandy).Distinct();
+        var totalMatches = hitGomatchesInfo.MatchedCandy.Union(hitGo2MatchesInfo.MatchedCandy).Distinct();
 
-        StartCoroutine(handleMatches(totalMatches));
-
-        state = GameState.None;
+        StartCoroutine(HandleMatches(totalMatches));
+        _state = GameState.None;
     }
 
-    public IEnumerator handleMatches(IEnumerable<GameObject> totalMatches, bool withScore = true, bool withEffects = true)
+    public IEnumerator HandleMatches(IEnumerable<GameObject> totalMatches, bool withScore = true, bool withEffects = true)
     {
         var timesRun = 1;
         while (totalMatches.Count() >= Constants.MinimumMatches)
@@ -270,11 +275,17 @@ public class ShapesManager : MonoBehaviour
                     IncreaseScore(Constants.SubsequentMatchScore);
             }
 
-            soundManager.PlayCrincle();
+            SoundManager.PlayCrincle();
 
             foreach (var item in totalMatches)
             {
-                shapes.Remove(item);
+                item.GetComponent<SpriteRenderer>().color = Color.blue;
+            }
+            yield return new WaitForSeconds(1);
+
+            foreach (var item in totalMatches)
+            {
+                Shapes.Remove(item);
                 RemoveFromScene(item,withEffects);
             }
 
@@ -283,7 +294,7 @@ public class ShapesManager : MonoBehaviour
 
             //the order the 2 methods below get called is important!!!
             //collapse the ones gone
-            var collapsedCandyInfo = shapes.Collapse(columns);
+            var collapsedCandyInfo = Shapes.Collapse(columns);
             //create new ones
             var newCandyInfo = CreateNewCandyInSpecificColumns(columns);
 
@@ -296,8 +307,8 @@ public class ShapesManager : MonoBehaviour
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
             //search if there are matches with the new/collapsed items
-            totalMatches = shapes.GetMatches(collapsedCandyInfo.AlteredCandy).
-                Union(shapes.GetMatches(newCandyInfo.AlteredCandy)).Distinct();
+            totalMatches = Shapes.GetMatches(collapsedCandyInfo.AlteredCandy).
+                Union(Shapes.GetMatches(newCandyInfo.AlteredCandy)).Distinct();
 
             timesRun++;
         }
@@ -315,24 +326,24 @@ public class ShapesManager : MonoBehaviour
         //find how many null values the column has
         foreach (var column in columnsWithMissingCandy)
         {
-            var emptyItems = shapes.GetEmptyItemsOnColumn(column);
+            var emptyItems = Shapes.GetEmptyItemsOnColumn(column);
             foreach (var item in emptyItems)
             {
-				var go = numberSquare_prefab;
+				var go = NumberSquarePrefab;
 				var newCandyShape = go.GetComponent<Shape> ();
-                newCandyShape.Value = shapes.GenerateNumber(MAX_NUMBER);
+                newCandyShape.Value = Shapes.GenerateNumber(MaxNumber);
 
-                var newCandy = Instantiate(go, SpawnPositions[column], Quaternion.identity)
+                var newCandy = Instantiate(go, _spawnPositions[column], Quaternion.identity)
                     as GameObject;
 
-                newCandy.GetComponent<SpriteRenderer>().sprite = numberSquare_sprites[newCandyShape.Value-1];
+                newCandy.GetComponent<SpriteRenderer>().sprite = NumberSquareSprites[newCandyShape.Value-1];
 				
 				newCandy.GetComponent<Shape>().Assign(go.GetComponent<Shape>().Value, item.Row, item.Column);
 
-				if (ShapesManager.MAX_NUMBER - item.Row > newCandyInfo.MaxDistance)
-					newCandyInfo.MaxDistance = ShapesManager.MAX_NUMBER - item.Row;
+				if (ShapesManager.MaxNumber - item.Row > newCandyInfo.MaxDistance)
+					newCandyInfo.MaxDistance = ShapesManager.MaxNumber - item.Row;
 
-                shapes[item.Row, item.Column] = newCandy;
+                Shapes[item.Row, item.Column] = newCandy;
                 newCandyInfo.AddCandy(newCandy);
             }
         }
@@ -358,27 +369,31 @@ public class ShapesManager : MonoBehaviour
     /// <param name="item"></param>
     private void RemoveFromScene(GameObject item,bool withEffects=true)
     {
-        var explosion = GetRandomExplosion();
-        var newExplosion = Instantiate(explosion, item.transform.position, Quaternion.identity) as GameObject;
-        Destroy(newExplosion, Constants.ExplosionDuration);
+        item.GetComponent<SpriteRenderer>().color = Color.blue;
+        if (withEffects)
+        {
+            var explosion = GetRandomExplosion();
+            var newExplosion = Instantiate(explosion, item.transform.position, Quaternion.identity) as GameObject;
+            Destroy(newExplosion, Constants.ExplosionDuration);
+        }
         Destroy(item);
     }
 
     private void InitializeVariables()
     {
-        score = 0;
+        _score = 0;
         ShowScore();
     }
 
     private void IncreaseScore(int amount)
     {
-        score += amount;
+        _score += amount;
         ShowScore();
     }
 
     private void ShowScore()
     {
-        ScoreText.text = "Score: " + score.ToString();
+        ScoreText.text = "Score: " + _score.ToString();
     }
 
     /// <summary>
@@ -397,7 +412,7 @@ public class ShapesManager : MonoBehaviour
     /// <returns></returns>
     private GameObject GetSpecificCandyForPremadeLevel(string info)
     {
-		var newCandy = numberSquare_prefab;
+		var newCandy = NumberSquarePrefab;
 		newCandy.GetComponent<Shape>().Value = int.Parse(info);
 		return newCandy;
     }

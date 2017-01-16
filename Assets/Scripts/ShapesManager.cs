@@ -16,8 +16,10 @@ public class ShapesManager : MonoBehaviour
     public ShapesArray Shapes;
 
     private int _score;
-	private int _seriesDelta = 1;
 	private int _numberStyle = 0;
+    private int _seriesDelta = 0;
+    private int _nextLevelScore=1000;
+
 
     public readonly Vector2 BottomRight = new Vector2(-2.37f, -4.27f);
     public readonly Vector2 CandySize = new Vector2(0.85f, 0.85f);
@@ -27,8 +29,13 @@ public class ShapesManager : MonoBehaviour
     private Vector2[] _spawnPositions;
     public GameObject NumberSquarePrefab;
     public GameObject[] ExplosionPrefabs;
+    public Texture2D EmptyProgressBar;
+    public Texture2D FullProgressBar;
 
-	public static int MaxNumber;
+    public static Texture2D ProgressBarTexture;
+    public static GUIStyle ProgressBarStyle;
+
+    public static int MaxNumber;
 	public static int Rows;
 	public static int Columns;
 	public Sprite[] NumberSquareSprites;
@@ -40,6 +47,8 @@ public class ShapesManager : MonoBehaviour
     void Awake()
     {
         DebugText.enabled = ShowDebugInfo;
+        ProgressBarTexture = new Texture2D(1, 1);
+        ProgressBarStyle = new GUIStyle();
     }
 
     // Use this for initialization
@@ -135,7 +144,7 @@ public class ShapesManager : MonoBehaviour
         for (var row = 0; row < Rows; row++)
             for (var col = 0; col < Columns; col++)
                 if (!matches.MatchedCandy.Contains(Shapes[row, col]))
-                    matches.AddObjectRange(Shapes.GetMatches(Shapes[row, col]).MatchedCandy);
+                    matches.AddObjectRange(Shapes.GetMatches(Shapes[row, col],_seriesDelta).MatchedCandy);
         var totalMatches = matches.MatchedCandy;
         StartCoroutine(HandleMatches(totalMatches, false, false));
     }
@@ -175,6 +184,18 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
+    void OnGUI()
+    {
+        
+    }
+
+    public static void GuiDrawRect(Rect position, Color color)
+    {
+        ProgressBarTexture.SetPixel(0, 0, color);
+        ProgressBarTexture.Apply();
+        ProgressBarStyle.normal.background = ProgressBarTexture;
+        GUI.Box(position, GUIContent.none, ProgressBarStyle);
+    }
 
     // Update is called once per frame
     void Update()
@@ -252,8 +273,8 @@ public class ShapesManager : MonoBehaviour
         _hitGo.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
 
         //get the matches via the helper methods
-        var hitGomatchesInfo = Shapes.GetMatches(_hitGo);
-        var hitGo2MatchesInfo = Shapes.GetMatches(_hitGo2);
+        var hitGomatchesInfo = Shapes.GetMatches(_hitGo,_seriesDelta);
+        var hitGo2MatchesInfo = Shapes.GetMatches(_hitGo2,_seriesDelta);
 
         var totalMatches = hitGomatchesInfo.MatchedCandy.Union(hitGo2MatchesInfo.MatchedCandy).Distinct();
 
@@ -307,8 +328,8 @@ public class ShapesManager : MonoBehaviour
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
             //search if there are matches with the new/collapsed items
-            totalMatches = Shapes.GetMatches(collapsedCandyInfo.AlteredCandy).
-                Union(Shapes.GetMatches(newCandyInfo.AlteredCandy)).Distinct();
+            totalMatches = Shapes.GetMatches(collapsedCandyInfo.AlteredCandy,_seriesDelta).
+                Union(Shapes.GetMatches(newCandyInfo.AlteredCandy,_seriesDelta)).Distinct();
 
             timesRun++;
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.IO;
 using System;
+using System.Xml.Schema;
 using UnityEditor;
 
 public class ShapesManager : MonoBehaviour
@@ -285,16 +286,17 @@ public class ShapesManager : MonoBehaviour
 
     public IEnumerator HandleMatches(IEnumerable<GameObject> totalMatches, bool withScore = true, bool withEffects = true)
     {
-        var timesRun = 1;
+        int score=0;
         while (totalMatches.Count() >= Constants.MinimumMatches)
         {
             //increase score
             if (withScore)
             {
-                IncreaseScore((totalMatches.Count() - 2) * Constants.Match3Score);
-
-                if (timesRun >= 2)
-                    IncreaseScore(Constants.SubsequentMatchScore);
+                foreach (var match in totalMatches)
+                {
+                    score += match.GetComponent<Shape>().Value;
+                }
+                IncreaseScore(score);
             }
 
             SoundManager.PlayCrincle();
@@ -331,8 +333,6 @@ public class ShapesManager : MonoBehaviour
             //search if there are matches with the new/collapsed items
             totalMatches = Shapes.GetMatches(collapsedCandyInfo.AlteredCandy,_seriesDelta).
                 Union(Shapes.GetMatches(newCandyInfo.AlteredCandy,_seriesDelta)).Distinct();
-
-            timesRun++;
         }
         if (_score >= _nextLevelScore)
             LevelUp();

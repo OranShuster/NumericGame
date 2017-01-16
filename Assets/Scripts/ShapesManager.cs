@@ -333,6 +333,14 @@ public class ShapesManager : MonoBehaviour
 
             timesRun++;
         }
+        if (_score >= _nextLevelScore)
+            LevelUp();
+    }
+
+    private void LevelUp()
+    {
+        _nextLevelScore += 1000;
+        _seriesDelta += 1;
     }
 
     /// <summary>

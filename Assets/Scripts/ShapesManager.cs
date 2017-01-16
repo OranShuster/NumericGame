@@ -232,6 +232,7 @@ public class ShapesManager : MonoBehaviour
                     if (!Utilities.AreVerticalOrHorizontalNeighbors(_hitGo.GetComponent<Shape>(),
                         hit.collider.gameObject.GetComponent<Shape>()))
                     {
+                        _hitGo.GetComponent<SpriteRenderer>().color = new Color(1,1,1,1);
                         _state = GameState.None;
                     }
                     else

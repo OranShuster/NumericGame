@@ -10,7 +10,6 @@ using UnityEngine;
 public class ShapesArray
 {
 	private GameObject[,] _shapes = new GameObject[ShapesManager.Rows, ShapesManager.Columns];
-	public int SeriesDelta = 1;
     private int[] _numberCounts = new int[ShapesManager.MaxNumber+1];
 
     public GameObject this[int row, int column]
@@ -67,13 +66,14 @@ public class ShapesArray
     /// not the one inflicted by user's drag
     /// </summary>
     /// <param name="gos"></param>
+    /// <param name="seriesDelta"></param>
     /// <returns></returns>
-    public IEnumerable<GameObject> GetMatches(IEnumerable<GameObject> gos)
+    public IEnumerable<GameObject> GetMatches(IEnumerable<GameObject> gos,int seriesDelta)
     {
         var matches = new List<GameObject>();
         foreach (var go in gos)
         {
-            matches.AddRange(GetMatches(go).MatchedCandy);
+            matches.AddRange(GetMatches(go,seriesDelta).MatchedCandy);
         }
         return matches.Distinct();
     }
@@ -82,24 +82,26 @@ public class ShapesArray
     /// Returns the matches found for a single GameObject
     /// </summary>
     /// <param name="go"></param>
+    /// <param name="seriesDelta"></param>
     /// <returns></returns>
-    public MatchesInfo GetMatches(GameObject go)
+    public MatchesInfo GetMatches(GameObject go,int seriesDelta)
     {
         var matchesInfo = new MatchesInfo();
 
-        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,SeriesDelta));
-        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,-SeriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,seriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,-seriesDelta));
 
-        matchesInfo.AddObjectRange(GetMatchesVertically(go,SeriesDelta));
-        matchesInfo.AddObjectRange(GetMatchesVertically(go,-SeriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesVertically(go,seriesDelta));
+        matchesInfo.AddObjectRange(GetMatchesVertically(go,-seriesDelta));
 
         return matchesInfo;
     }
-		
+
     /// <summary>
     /// Searches horizontally for matches
     /// </summary>
     /// <param name="go"></param>
+    /// <param name="delta"></param>
     /// <returns></returns>
     private IEnumerable<GameObject> GetMatchesHorizontally(GameObject go,int delta)
     {
@@ -138,6 +140,7 @@ public class ShapesArray
     /// Searches vertically for matches
     /// </summary>
     /// <param name="go"></param>
+    /// <param name="delta"></param>
     /// <returns></returns>
     private IEnumerable<GameObject> GetMatchesVertically(GameObject go,int delta)
     {
@@ -249,18 +252,15 @@ public class ShapesArray
         return emptyItems;
     }
 
-    public  int GenerateNumber(int maxNumber)
+    public int GenerateNumber(int maxNumber)
     {
         var chances = new List<int>();
-        for (var i = 1; i < maxNumber + 1; i++)
+        var totalSquares = (int)Math.Pow(maxNumber,2);
+        for (var currentNum = 1; currentNum < maxNumber + 1; currentNum++)
         {
-            for (var j = 0; j < maxNumber - _numberCounts[i]; j++)
-            {
-                chances.Add(i);
-            }
+            chances.AddRange(Enumerable.Repeat(currentNum, totalSquares - _numberCounts[currentNum]));
         }
-        return chances[UnityEngine.Random.Range(0, chances.Count)];
+        return chances[UnityEngine.Random.Range(0, chances.Count-1)];
     }
-
 }
 

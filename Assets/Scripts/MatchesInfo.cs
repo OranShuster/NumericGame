@@ -8,6 +8,8 @@ using UnityEngine;
 public class MatchesInfo
 {
     private List<GameObject> _matchedCandies;
+    public int NumberOfMatches;
+    public int AddedScore;
 
     /// <summary>
     /// Returns distinct list of matched candy
@@ -16,7 +18,7 @@ public class MatchesInfo
     {
         get
         {
-            return _matchedCandies.Distinct();
+            return _matchedCandies;
         }
     }
 
@@ -32,11 +34,14 @@ public class MatchesInfo
         {
             AddObject(item);
         }
+        if (gos.Count() >= 3)
+            NumberOfMatches++;
     }
 
     public MatchesInfo()
     {
         _matchedCandies = new List<GameObject>();
+        NumberOfMatches = 0;
     }
 }
 

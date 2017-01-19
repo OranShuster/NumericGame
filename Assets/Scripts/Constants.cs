@@ -17,8 +17,9 @@ using System.Text;
 
         public static readonly int MinimumMatches = 3;
 
-        public static readonly int Match3Score = 60;
-        public static readonly int SubsequentMatchScore = 1000;
+        public static readonly float StartingGameTimer = 30;
+        public static readonly int NextLevelScore = 1000;
+
     }
 
    

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEditor;
 using UnityEngine;
 
 /// <summary>
@@ -10,6 +11,7 @@ using UnityEngine;
 public class ShapesArray
 {
 	private GameObject[,] _shapes = new GameObject[ShapesManager.Rows, ShapesManager.Columns];
+    private int[,] _shapes_val = new int[ShapesManager.Rows, ShapesManager.Columns];
     private int[] _numberCounts = new int[ShapesManager.MaxNumber+1];
 
     public GameObject this[int row, int column]
@@ -28,8 +30,11 @@ public class ShapesArray
         set
         {
             if (value != null)
+            {
                 this._numberCounts[value.GetComponent<Shape>().Value]++;
-            _shapes[row, column] = value;
+                _shapes[row, column] = value;
+                _shapes_val[row, column] = value.GetComponent<Shape>().Value;
+            }
         }
     }
 
@@ -61,124 +66,176 @@ public class ShapesArray
     }
 
     /// <summary>
-    /// Returns the matches found for a list of GameObjects
-    /// MatchesInfo class is not used as this method is called on subsequent collapses/checks, 
-    /// not the one inflicted by user's drag
+    /// Returns the matches for the board
     /// </summary>
-    /// <param name="gos"></param>
+    /// <param name="boardSize"></param>
     /// <param name="seriesDelta"></param>
+    /// <param name="countScore"></param>
     /// <returns></returns>
-    public IEnumerable<GameObject> GetMatches(IEnumerable<GameObject> gos,int seriesDelta)
-    {
-        var matches = new List<GameObject>();
-        foreach (var go in gos)
-        {
-            matches.AddRange(GetMatches(go,seriesDelta).MatchedCandy);
-        }
-        return matches.Distinct();
-    }
-
-    /// <summary>
-    /// Returns the matches found for a single GameObject
-    /// </summary>
-    /// <param name="go"></param>
-    /// <param name="seriesDelta"></param>
-    /// <returns></returns>
-    public MatchesInfo GetMatches(GameObject go,int seriesDelta)
+    public MatchesInfo GetMatches(int boardSize,int seriesDelta,IEnumerable<GameObject> matchedGameObjects, bool countScore = true)
     {
         var matchesInfo = new MatchesInfo();
-
-        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,seriesDelta));
-        matchesInfo.AddObjectRange(GetMatchesHorizontally(go,-seriesDelta));
-
-        matchesInfo.AddObjectRange(GetMatchesVertically(go,seriesDelta));
-        matchesInfo.AddObjectRange(GetMatchesVertically(go,-seriesDelta));
-
+        for (int ind = 0; ind < boardSize; ind++)
+        {
+            var horizontalMatches = GetMatchesHorizontally(ind, boardSize, seriesDelta, matchedGameObjects);
+            matchesInfo.AddObjectRange(horizontalMatches.MatchedCandy);
+            if (countScore)
+                matchesInfo.AddedScore += horizontalMatches.AddedScore;
+            var verticalMatches = GetMatchesVertically(ind, boardSize, seriesDelta, matchedGameObjects);
+            matchesInfo.AddObjectRange(verticalMatches.MatchedCandy);
+            if (countScore)
+                matchesInfo.AddedScore += verticalMatches.AddedScore;
+        }
         return matchesInfo;
     }
+
 
     /// <summary>
     /// Searches horizontally for matches
     /// </summary>
-    /// <param name="go"></param>
+    /// <param name="rowToCheck"></param>
+    /// <param name="rowLength"></param>
     /// <param name="delta"></param>
     /// <returns></returns>
-    private IEnumerable<GameObject> GetMatchesHorizontally(GameObject go,int delta)
+    private MatchesInfo GetMatchesHorizontally(int rowToCheck,int rowLength,int delta,IEnumerable<GameObject> matchedGameObjects)
     {
-        var matches = new List<GameObject> {go};
-        var shape = go.GetComponent<Shape>();
-        //check left
-        if (shape.Column != 0)
-            for (var column = shape.Column - 1; column >= 0; column--)
+        var allMatches = new MatchesInfo();
+        var curMatches = new List<GameObject>();
+        int[] diffArray = new int[rowLength];
+        int curDiff=0;
+        //go left to right
+        for (int col = 0; col < rowLength-1; col++)
+        {
+            if (!matchedGameObjects.Contains(_shapes[rowToCheck, col]))
             {
-                var curDelta = delta * Math.Abs(shape.Column - column);
-                if (_shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
-                    matches.Add(_shapes[shape.Row, column]);
-                else
-                    break;
-            }
+                curDiff = _shapes[rowToCheck, col].GetComponent<Shape>().Value -
+                          _shapes[rowToCheck, col +1].GetComponent<Shape>().Value;
+                if (curDiff == delta)
+                {
+                    curMatches.Add(_shapes[rowToCheck, col]);
+                    curMatches.Add(_shapes[rowToCheck, col + 1]);
+                    curMatches = new List<GameObject>(curMatches.Distinct());
+                }
 
-        //check right
-        if (shape.Column != ShapesManager.Columns - 1)
-			for (var column = shape.Column + 1; column < ShapesManager.Columns; column++)
+                else
+                {
+                    if (curMatches.Count >= 3)
+                    {
+                        allMatches.AddObjectRange(curMatches);
+                        allMatches.NumberOfMatches++;
+                        foreach (var item in curMatches)
+                        {
+                            allMatches.AddedScore += item.GetComponent<Shape>().Value;
+                        }
+                    }
+                    curMatches.Clear();
+                }
+            }
+        }
+        curMatches.Clear();
+        //right to left
+        for (int col = rowLength-1; col >0; col--)
+        {
+            if (!matchedGameObjects.Contains(_shapes[rowToCheck, col]))
             {
-                var curDelta = delta * Math.Abs(shape.Column - column);
-                if (_shapes[shape.Row, column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
-                    matches.Add(_shapes[shape.Row, column]);
+                curDiff = _shapes[rowToCheck, col].GetComponent<Shape>().Value -
+                          _shapes[rowToCheck, col - 1].GetComponent<Shape>().Value;
+                if (curDiff == delta)
+                {
+                    curMatches.Add(_shapes[rowToCheck, col]);
+                    curMatches.Add(_shapes[rowToCheck, col - 1]);
+                    curMatches = new List<GameObject>(curMatches.Distinct());
+                }
+
                 else
-                    break;
+                {
+                    if (curMatches.Count >= 3)
+                    {
+                        allMatches.AddObjectRange(curMatches);
+                        allMatches.NumberOfMatches++;
+                        foreach (var item in curMatches)
+                        {
+                            allMatches.AddedScore += item.GetComponent<Shape>().Value;
+                        }
+                    }
+                    curMatches.Clear();
+                }
             }
-
-        //we want more than three matches
-        if (matches.Count < Constants.MinimumMatches)
-            matches.Clear();
-
-        return matches.Distinct();
+        }
+        return allMatches;
     }
 
     /// <summary>
     /// Searches vertically for matches
     /// </summary>
-    /// <param name="go"></param>
+    /// <param name="colToCheck"></param>
+    /// <param name="colLength"></param>
     /// <param name="delta"></param>
     /// <returns></returns>
-    private IEnumerable<GameObject> GetMatchesVertically(GameObject go,int delta)
+    private MatchesInfo GetMatchesVertically(int colToCheck,int colLength,int delta, IEnumerable<GameObject> matchedGameObjects)
     {
-        var matches = new List<GameObject> {go};
-        var shape = go.GetComponent<Shape>();
-        //check bottom
-        if (shape.Row != 0)
-            for (var row = shape.Row - 1; row >= 0; row--)
+        var allMatches = new MatchesInfo();
+        var curMatches = new List<GameObject>();
+        var curDiff = 0;
+        //bottom to top
+        for (int row = 0; row < colLength-1; row++)
+        {
+            if (!matchedGameObjects.Contains(_shapes[row, colToCheck]))
             {
-                var curDelta = delta * Math.Abs(shape.Row - row); 
-                if (_shapes[row, shape.Column] != null &&
-                    _shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
+                curDiff = _shapes[row, colToCheck].GetComponent<Shape>().Value -
+                 _shapes[row + 1, colToCheck].GetComponent<Shape>().Value;
+                if (curDiff == delta)
                 {
-                    matches.Add(_shapes[row, shape.Column]);
+                    curMatches.Add(_shapes[row, colToCheck]);
+                    curMatches.Add(_shapes[row + 1, colToCheck]);
+                    curMatches = new List<GameObject>(curMatches.Distinct());
+                }
+
+                else
+                {
+                    if (curMatches.Count >= 3)
+                    {
+                        allMatches.AddObjectRange(curMatches);
+                        allMatches.NumberOfMatches++;
+                        foreach (var item in curMatches)
+                        {
+                            allMatches.AddedScore += item.GetComponent<Shape>().Value;
+                        }
+                    }
+                    curMatches.Clear();
+                }
+            }
+        }
+        curMatches.Clear();
+        //top to bottom
+        for (int row = colLength - 1; row > 0; row--)
+        {
+            if (!matchedGameObjects.Contains(_shapes[row, colToCheck]))
+            {
+                curDiff = _shapes[row, colToCheck].GetComponent<Shape>().Value -
+                  _shapes[row - 1, colToCheck].GetComponent<Shape>().Value;
+                if (curDiff == delta)
+                {
+                    curMatches.Add(_shapes[row, colToCheck]);
+                    curMatches.Add(_shapes[row - 1, colToCheck]);
+                    curMatches = new List<GameObject>(curMatches.Distinct());
                 }
                 else
-                    break;
-            }
-
-        //check top
-		if (shape.Row != ShapesManager.Rows - 1)
-			for (var row = shape.Row + 1; row < ShapesManager.Rows; row++)
-            {
-                var curDelta = delta * Math.Abs(shape.Row - row);
-                if (_shapes[row, shape.Column] != null && 
-                    _shapes[row, shape.Column].GetComponent<Shape>().IsPartOfSeries(shape,curDelta))
                 {
-                    matches.Add(_shapes[row, shape.Column]);
+                    if (curMatches.Count >= 3)
+                    {
+                        allMatches.AddObjectRange(curMatches);
+                        allMatches.NumberOfMatches++;
+                        foreach (var item in curMatches)
+                        {
+                            allMatches.AddedScore += item.GetComponent<Shape>().Value;
+                        }
+                    }
+                    curMatches.Clear();
                 }
-                else
-                    break;
             }
-
-
-        if (matches.Count < Constants.MinimumMatches)
-            matches.Clear();
-
-        return matches.Distinct();
+        }
+        return allMatches;
     }
 
     /// <summary>

@@ -10,7 +10,7 @@ using UnityEditor;
 
 public class ShapesManager : MonoBehaviour
 {
-    public Text DebugText, ScoreText;
+    public Text DebugText, ScoreText, TimerText,SeriesDelta,LostText;
     public bool ShowDebugInfo = false;
     //candy graphics taken from http://opengameart.org/content/candy-pack-1
 
@@ -18,8 +18,9 @@ public class ShapesManager : MonoBehaviour
 
     private int _score;
 	private int _numberStyle = 0;
-    private int _seriesDelta = 0;
-    private int _nextLevelScore=1000;
+    private int _seriesDelta = 1;
+    private int _nextLevelScore = Constants.NextLevelScore;
+    public float gameTimer = Constants.StartingGameTimer;
 
 
     public readonly Vector2 BottomRight = new Vector2(-2.37f, -4.27f);
@@ -141,13 +142,11 @@ public class ShapesManager : MonoBehaviour
 
     private void ClearBoardMatches()
     {
-        var matches = new MatchesInfo();
-        for (var row = 0; row < Rows; row++)
-            for (var col = 0; col < Columns; col++)
-                if (!matches.MatchedCandy.Contains(Shapes[row, col]))
-                    matches.AddObjectRange(Shapes.GetMatches(Shapes[row, col],_seriesDelta).MatchedCandy);
-        var totalMatches = matches.MatchedCandy;
-        StartCoroutine(HandleMatches(totalMatches, false, false));
+        var totalMatches = Shapes.GetMatches(MaxNumber, _seriesDelta,new List<GameObject>(),false);
+        var sameMatches = Shapes.GetMatches(MaxNumber, 0,totalMatches.MatchedCandy,false);
+        totalMatches.AddObjectRange(sameMatches.MatchedCandy);
+        StartCoroutine(HandleMatches(totalMatches,false, false));
+        gameTimer = Constants.StartingGameTimer;
     }
 
 
@@ -206,6 +205,12 @@ public class ShapesManager : MonoBehaviour
 
         if (_state == GameState.None)
         {
+            //update timer
+            gameTimer -= Time.deltaTime;
+            TimerText.text = "Timer: " + Mathf.FloorToInt(gameTimer).ToString();
+
+            SeriesDelta.text = "Delta: " + _seriesDelta.ToString();
+
             //user has clicked or touched
             if (Input.GetMouseButtonDown(0))
             {
@@ -260,6 +265,7 @@ public class ShapesManager : MonoBehaviour
 
     private IEnumerator FindMatchesAndCollapse(RaycastHit2D hit2)
     {
+        MatchesInfo sameMatches=new MatchesInfo();
         //get the second item that was part of the swipe
         var _hitGo2 = hit2.collider.gameObject;
         _hitGo2.GetComponent<SpriteRenderer>().color=Color.red;
@@ -275,46 +281,49 @@ public class ShapesManager : MonoBehaviour
         _hitGo.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
 
         //get the matches via the helper methods
-        var hitGomatchesInfo = Shapes.GetMatches(_hitGo,_seriesDelta);
-        var hitGo2MatchesInfo = Shapes.GetMatches(_hitGo2,_seriesDelta);
-
-        var totalMatches = hitGomatchesInfo.MatchedCandy.Union(hitGo2MatchesInfo.MatchedCandy).Distinct();
-
+        var totalMatches = Shapes.GetMatches(MaxNumber, _seriesDelta,new List<GameObject>());
+        if (_seriesDelta != 0)
+        {
+            sameMatches = Shapes.GetMatches(MaxNumber, 0,totalMatches.MatchedCandy, false);
+        }
+        gameTimer += 5 * totalMatches.NumberOfMatches;
+        totalMatches.AddObjectRange(sameMatches.MatchedCandy);
         StartCoroutine(HandleMatches(totalMatches));
+        if(totalMatches.NumberOfMatches==0)
+        {
+            IncreaseScore(-5);
+            if (_score < 0)
+            {
+                LostText.enabled = true;
+                //_state = GameState.Lost;
+            }
+        }
         _state = GameState.None;
     }
 
-    public IEnumerator HandleMatches(IEnumerable<GameObject> totalMatches, bool withScore = true, bool withEffects = true)
+    public IEnumerator HandleMatches(MatchesInfo totalMatches,bool withScore=true, bool withEffects = true)
     {
-        int score=0;
-        while (totalMatches.Count() >= Constants.MinimumMatches)
+        while (totalMatches.MatchedCandy.Count() >= Constants.MinimumMatches)
         {
-            //increase score
             if (withScore)
-            {
-                foreach (var match in totalMatches)
-                {
-                    score += match.GetComponent<Shape>().Value;
-                }
-                IncreaseScore(score);
+            {                
+                IncreaseScore(totalMatches.AddedScore);
             }
-
-            SoundManager.PlayCrincle();
-
-            foreach (var item in totalMatches)
+            foreach (var item in totalMatches.MatchedCandy)
             {
                 item.GetComponent<SpriteRenderer>().color = Color.blue;
             }
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(5);
 
-            foreach (var item in totalMatches)
+            foreach (var item in totalMatches.MatchedCandy)
             {
+                SoundManager.PlayCrincle();
                 Shapes.Remove(item);
                 RemoveFromScene(item,withEffects);
             }
 
             //get the columns that we had a collapse
-            var columns = totalMatches.Select(go => go.GetComponent<Shape>().Column).Distinct();
+            var columns = totalMatches.MatchedCandy.Select(go => go.GetComponent<Shape>().Column).Distinct();
 
             //the order the 2 methods below get called is important!!!
             //collapse the ones gone
@@ -331,16 +340,18 @@ public class ShapesManager : MonoBehaviour
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
             //search if there are matches with the new/collapsed items
-            totalMatches = Shapes.GetMatches(collapsedCandyInfo.AlteredCandy,_seriesDelta).
-                Union(Shapes.GetMatches(newCandyInfo.AlteredCandy,_seriesDelta)).Distinct();
+            totalMatches = Shapes.GetMatches(MaxNumber, _seriesDelta,new List<GameObject>());
+            
+            //search if there are empty mathes
+            totalMatches.AddObjectRange(Shapes.GetMatches(MaxNumber,0,totalMatches.MatchedCandy,false).MatchedCandy);       
         }
         if (_score >= _nextLevelScore)
             LevelUp();
     }
 
     private void LevelUp()
-    {
-        _nextLevelScore += 1000;
+    { 
+        _nextLevelScore += Constants.NextLevelScore;
         _seriesDelta += 1;
     }
 

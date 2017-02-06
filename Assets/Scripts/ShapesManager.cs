@@ -21,9 +21,11 @@ public class ShapesManager : MonoBehaviour
     private int _seriesDelta = 1;
     private int _nextLevelScore = Constants.NextLevelScore;
     public float gameTimer = Constants.StartingGameTimer;
+    public bool ShowingMatches = false;
 
 
-    public readonly Vector2 BottomRight = new Vector2(-2.37f, -4.27f);
+
+    public readonly Vector2 BottomRight = new Vector2(0f, -4f);
     public readonly Vector2 CandySize = new Vector2(0.85f, 0.85f);
 
     private GameState _state = GameState.None;
@@ -48,7 +50,6 @@ public class ShapesManager : MonoBehaviour
     public SoundManager SoundManager;
     void Awake()
     {
-        DebugText.enabled = ShowDebugInfo;
         ProgressBarTexture = new Texture2D(1, 1);
         ProgressBarStyle = new GUIStyle();
     }
@@ -61,6 +62,14 @@ public class ShapesManager : MonoBehaviour
         InitializeCandyAndSpawnPositions();
 
         //StartCheckForPotentialMatches();
+    }
+
+    void OnGUI()
+    {
+        var color = Color.white;
+        if (gameTimer < 10)
+            color = Color.red;
+        GuiDrawRect(new Rect(60,30,Math.Max(gameTimer,0),10), color);
     }
 
 	public void InitializeBoardConstants(){
@@ -119,6 +128,7 @@ public class ShapesManager : MonoBehaviour
 				var newCandy = NumberSquarePrefab;
 				var newCandyShape = newCandy.GetComponent<Shape>();
                 newCandyShape.Value = Shapes.GenerateNumber(MaxNumber);
+                newCandy.tag = newCandyShape.Value.ToString();
                 InstantiateAndPlaceNewCandy(row, column, newCandy);
 
                 //           //check if two previous horizontal are of the same type
@@ -184,16 +194,12 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
-    void OnGUI()
-    {
-        
-    }
-
     public static void GuiDrawRect(Rect position, Color color)
     {
         ProgressBarTexture.SetPixel(0, 0, color);
         ProgressBarTexture.Apply();
         ProgressBarStyle.normal.background = ProgressBarTexture;
+        ProgressBarStyle.alignment=TextAnchor.UpperLeft;
         GUI.Box(position, GUIContent.none, ProgressBarStyle);
     }
 
@@ -203,13 +209,11 @@ public class ShapesManager : MonoBehaviour
         if (ShowDebugInfo)
             DebugText.text = DebugUtilities.GetArrayContents(Shapes);
 
-        if (_state == GameState.None)
+        if (_state == GameState.None && !ShowingMatches)
         {
             //update timer
             gameTimer -= Time.deltaTime;
-            TimerText.text = "Timer: " + Mathf.FloorToInt(gameTimer).ToString();
-
-            SeriesDelta.text = "Delta: " + _seriesDelta.ToString();
+            TimerText.text = "Timer: ";
 
             //user has clicked or touched
             if (Input.GetMouseButtonDown(0))
@@ -305,6 +309,8 @@ public class ShapesManager : MonoBehaviour
     {
         while (totalMatches.MatchedCandy.Count() >= Constants.MinimumMatches)
         {
+            ShowingMatches = true;
+            Debug.logger.LogWarning("Match_Score{02061724}",totalMatches.PrintMatches());
             if (withScore)
             {                
                 IncreaseScore(totalMatches.AddedScore);
@@ -313,7 +319,7 @@ public class ShapesManager : MonoBehaviour
             {
                 item.GetComponent<SpriteRenderer>().color = Color.blue;
             }
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(2);
 
             foreach (var item in totalMatches.MatchedCandy)
             {
@@ -343,10 +349,11 @@ public class ShapesManager : MonoBehaviour
             totalMatches = Shapes.GetMatches(MaxNumber, _seriesDelta,new List<GameObject>());
             
             //search if there are empty mathes
-            totalMatches.AddObjectRange(Shapes.GetMatches(MaxNumber,0,totalMatches.MatchedCandy,false).MatchedCandy);       
+            totalMatches.AddObjectRange(Shapes.GetMatches(MaxNumber,0,totalMatches.MatchedCandy,false).MatchedCandy);   
         }
         if (_score >= _nextLevelScore)
             LevelUp();
+        ShowingMatches = false;
     }
 
     private void LevelUp()

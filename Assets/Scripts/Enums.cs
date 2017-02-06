@@ -16,5 +16,6 @@ public enum GameState
     None,
     SelectionStarted,
     Animating,
-    Lost
+    Lost,
+    HandlingMatches
 }

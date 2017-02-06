@@ -12,7 +12,7 @@ public class MatchesInfo
     public int AddedScore;
 
     /// <summary>
-    /// Returns distinct list of matched candy
+    /// Returns list of matched candy
     /// </summary>
     public IEnumerable<GameObject> MatchedCandy
     {
@@ -24,8 +24,7 @@ public class MatchesInfo
 
     public void AddObject(GameObject go)
     {
-        if (!_matchedCandies.Contains(go))
-            _matchedCandies.Add(go);
+        _matchedCandies.Add(go);
     }
 
     public void AddObjectRange(IEnumerable<GameObject> gos)
@@ -42,6 +41,17 @@ public class MatchesInfo
     {
         _matchedCandies = new List<GameObject>();
         NumberOfMatches = 0;
+    }
+
+    public string PrintMatches()
+    {
+        string numbers = "";
+        foreach (var candy in _matchedCandies)
+        {
+            numbers += "," + candy.GetComponent<Shape>().Value;
+        }
+        string totalScore = this.AddedScore.ToString();
+        return String.Format("numbers - {0} Score - {1}",numbers,totalScore);
     }
 }
 

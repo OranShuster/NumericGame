@@ -31,6 +31,8 @@ public class ShapesArray
         {
             if (value != null)
             {
+                if (this[row,column]!=null)
+                    this._numberCounts[this[row, column].GetComponent<Shape>().Value]--;
                 this._numberCounts[value.GetComponent<Shape>().Value]++;
                 _shapes[row, column] = value;
                 _shapes_val[row, column] = value.GetComponent<Shape>().Value;
@@ -55,14 +57,13 @@ public class ShapesArray
         var g2Row = g2Shape.Row;
         var g2Column = g2Shape.Column;
 
+        //swap their respective properties
+        Shape.SwapFields(g1Shape, g2Shape);
+
         //swap them in the array
         var temp = _shapes[g1Row, g1Column];
         _shapes[g1Row, g1Column] = _shapes[g2Row, g2Column];
         _shapes[g2Row, g2Column] = temp;
-
-        //swap their respective properties
-        Shape.SwapFields(g1Shape, g2Shape);
-
     }
 
     /// <summary>
@@ -106,45 +107,51 @@ public class ShapesArray
         //go left to right
         for (int col = 0; col < rowLength-1; col++)
         {
-            if (!matchedGameObjects.Contains(_shapes[rowToCheck, col]))
+            curDiff = _shapes[rowToCheck, col + 1].GetComponent<Shape>().Value -
+                        _shapes[rowToCheck, col].GetComponent<Shape>().Value ;
+            if (curDiff == delta)
             {
-                curDiff = _shapes[rowToCheck, col].GetComponent<Shape>().Value -
-                          _shapes[rowToCheck, col +1].GetComponent<Shape>().Value;
-                if (curDiff == delta)
-                {
+                if (curMatches.Count==0)
                     curMatches.Add(_shapes[rowToCheck, col]);
-                    curMatches.Add(_shapes[rowToCheck, col + 1]);
-                    curMatches = new List<GameObject>(curMatches.Distinct());
-                }
+                curMatches.Add(_shapes[rowToCheck, col + 1]);
+            }
 
-                else
+            else
+            {
+                if (curMatches.Count >= 3)
                 {
-                    if (curMatches.Count >= 3)
+                    allMatches.AddObjectRange(curMatches);
+                    allMatches.NumberOfMatches++;
+                    foreach (var item in curMatches)
                     {
-                        allMatches.AddObjectRange(curMatches);
-                        allMatches.NumberOfMatches++;
-                        foreach (var item in curMatches)
-                        {
-                            allMatches.AddedScore += item.GetComponent<Shape>().Value;
-                        }
+                        allMatches.AddedScore += item.GetComponent<Shape>().Value;
                     }
-                    curMatches.Clear();
                 }
+                curMatches.Clear();
+            }
+        }
+        if (curMatches.Count >= 3)
+        {
+            allMatches.AddObjectRange(curMatches);
+            allMatches.NumberOfMatches++;
+            foreach (var item in curMatches)
+            {
+                allMatches.AddedScore += item.GetComponent<Shape>().Value;
             }
         }
         curMatches.Clear();
         //right to left
         for (int col = rowLength-1; col >0; col--)
         {
-            if (!matchedGameObjects.Contains(_shapes[rowToCheck, col]))
-            {
-                curDiff = _shapes[rowToCheck, col].GetComponent<Shape>().Value -
-                          _shapes[rowToCheck, col - 1].GetComponent<Shape>().Value;
+            //if (!matchedGameObjects.Contains(_shapes[rowToCheck, col]))
+            //{
+                curDiff = _shapes[rowToCheck, col - 1].GetComponent<Shape>().Value -
+                          _shapes[rowToCheck, col].GetComponent<Shape>().Value;
                 if (curDiff == delta)
                 {
-                    curMatches.Add(_shapes[rowToCheck, col]);
+                    if(curMatches.Count==0)
+                        curMatches.Add(_shapes[rowToCheck, col]);
                     curMatches.Add(_shapes[rowToCheck, col - 1]);
-                    curMatches = new List<GameObject>(curMatches.Distinct());
                 }
 
                 else
@@ -160,6 +167,15 @@ public class ShapesArray
                     }
                     curMatches.Clear();
                 }
+            //}
+        }
+        if (curMatches.Count >= 3)
+        {
+            allMatches.AddObjectRange(curMatches);
+            allMatches.NumberOfMatches++;
+            foreach (var item in curMatches)
+            {
+                allMatches.AddedScore += item.GetComponent<Shape>().Value;
             }
         }
         return allMatches;
@@ -180,15 +196,15 @@ public class ShapesArray
         //bottom to top
         for (int row = 0; row < colLength-1; row++)
         {
-            if (!matchedGameObjects.Contains(_shapes[row, colToCheck]))
-            {
-                curDiff = _shapes[row, colToCheck].GetComponent<Shape>().Value -
-                 _shapes[row + 1, colToCheck].GetComponent<Shape>().Value;
+            //if (!matchedGameObjects.Contains(_shapes[row, colToCheck]))
+            //{
+                curDiff = _shapes[row + 1, colToCheck].GetComponent<Shape>().Value -
+                 _shapes[row, colToCheck].GetComponent<Shape>().Value;
                 if (curDiff == delta)
                 {
-                    curMatches.Add(_shapes[row, colToCheck]);
+                    if (curMatches.Count==0)
+                        curMatches.Add(_shapes[row, colToCheck]);
                     curMatches.Add(_shapes[row + 1, colToCheck]);
-                    curMatches = new List<GameObject>(curMatches.Distinct());
                 }
 
                 else
@@ -204,7 +220,7 @@ public class ShapesArray
                     }
                     curMatches.Clear();
                 }
-            }
+            //}
         }
         curMatches.Clear();
         //top to bottom
@@ -212,13 +228,13 @@ public class ShapesArray
         {
             if (!matchedGameObjects.Contains(_shapes[row, colToCheck]))
             {
-                curDiff = _shapes[row, colToCheck].GetComponent<Shape>().Value -
-                  _shapes[row - 1, colToCheck].GetComponent<Shape>().Value;
+                curDiff = _shapes[row - 1, colToCheck].GetComponent<Shape>().Value -
+                  _shapes[row, colToCheck].GetComponent<Shape>().Value;
                 if (curDiff == delta)
                 {
-                    curMatches.Add(_shapes[row, colToCheck]);
+                    if (curMatches.Count==0)
+                        curMatches.Add(_shapes[row, colToCheck]);
                     curMatches.Add(_shapes[row - 1, colToCheck]);
-                    curMatches = new List<GameObject>(curMatches.Distinct());
                 }
                 else
                 {
@@ -304,7 +320,7 @@ public class ShapesArray
 		for (var row = 0; row < ShapesManager.Rows; row++)
         {
             if (_shapes[row, column] == null)
-                emptyItems.Add(new ShapeInfo() { Row = row, Column = column });
+                emptyItems.Add(new ShapeInfo() { Row = row, Column = column});
         }
         return emptyItems;
     }

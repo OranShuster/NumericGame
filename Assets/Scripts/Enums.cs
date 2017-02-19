@@ -13,9 +13,8 @@ using System.Text;
 /// </summary>
 public enum GameState
 {
-    None,
+    Playing,
     SelectionStarted,
     Animating,
-    Lost,
-    HandlingMatches
+    Lost
 }

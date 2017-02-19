@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEditor;
 using UnityEngine;
 
 public class Shape : MonoBehaviour
@@ -59,7 +60,12 @@ public class Shape : MonoBehaviour
         b.Column = temp;
 
 	}
-		
+    void OnDrawGizmos()
+    {
+        Handles.Label(transform.position, String.Format("({0},{1}",Row,Column));
+        Handles.color = Color.black;
+    }
+
 }
 
 

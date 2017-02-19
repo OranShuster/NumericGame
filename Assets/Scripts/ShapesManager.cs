@@ -1,83 +1,112 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.UI;
-using System.IO;
 using System;
-using System.Xml.Schema;
-using UnityEditor;
+using System.Linq;
+using Prime31.ZestKit;
+using UnityEngine.EventSystems;
 
 public class ShapesManager : MonoBehaviour
 {
-    public Text DebugText, ScoreText, TimerText,SeriesDelta,LostText;
-    public bool ShowDebugInfo = false;
-    //candy graphics taken from http://opengameart.org/content/candy-pack-1
-
-    public ShapesArray Shapes;
-
+    //private int _numberStyle = 0;
+    //private Texture2D EmptyProgressBar;
+    //private Texture2D FullProgressBar;
     private int _score;
-	private int _numberStyle = 0;
     private int _seriesDelta = 1;
     private int _nextLevelScore = Constants.NextLevelScore;
-    public float gameTimer = Constants.StartingGameTimer;
-    public bool ShowingMatches = false;
-
-
-
-    public readonly Vector2 BottomRight = new Vector2(0f, -4f);
-    public readonly Vector2 CandySize = new Vector2(0.85f, 0.85f);
-
-    private GameState _state = GameState.None;
+    private float _gameTimer = Constants.StartingGameTimer;
+    private Vector2 _candySize;
     private GameObject _hitGo = null;
     private Vector2[] _spawnPositions;
+    private static Texture2D _progressBarTexture;
+    private static GUIStyle _progressBarStyle;
+
+    public GameState State;
+    public Text ScoreText, TimerText;
+    public Image GameField;
+    public ShapesArray Shapes;
     public GameObject NumberSquarePrefab;
     public GameObject[] ExplosionPrefabs;
-    public Texture2D EmptyProgressBar;
-    public Texture2D FullProgressBar;
+    public SoundManager SoundManager;
 
-    public static Texture2D ProgressBarTexture;
-    public static GUIStyle ProgressBarStyle;
 
     public static int MaxNumber;
 	public static int Rows;
 	public static int Columns;
 	public Sprite[] NumberSquareSprites;
 
-    //private IEnumerator CheckPotentialMatchesCoroutine;
-    //IEnumerable<GameObject> potentialMatches;
-
-    public SoundManager SoundManager;
     void Awake()
     {
-        ProgressBarTexture = new Texture2D(1, 1);
-        ProgressBarStyle = new GUIStyle();
+
     }
 
     // Use this for initialization
     void Start()
     {
-        //InitializeTypesOnPrefabShapesAndBonuses();
-		InitializeBoardConstants();
+        _progressBarTexture = new Texture2D(1, 1);
+        _progressBarStyle = new GUIStyle();
+        InitializeBoardConstants();
         InitializeCandyAndSpawnPositions();
-
-        //StartCheckForPotentialMatches();
     }
 
-    void OnGUI()
+    // Update is called once per frame
+    void Update()
     {
-        var color = Color.white;
-        if (gameTimer < 10)
-            color = Color.red;
-        GuiDrawRect(new Rect(60,30,Math.Max(gameTimer,0),10), color);
+        if (State == GameState.Playing || State == GameState.SelectionStarted)
+        {
+            //update timer
+            _gameTimer -= Time.deltaTime;
+            TimerText.text = Math.Ceiling(_gameTimer).ToString();
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                var cursor = new PointerEventData(EventSystem.current);
+                cursor.position = Input.mousePosition;
+                List<RaycastResult> objectsHit = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(cursor, objectsHit);
+                var hit = objectsHit.Find(x => x.gameObject.name == "NumberTile(Clone)").gameObject;
+                if (hit!=null)
+                {
+                    if (State == GameState.Playing)
+                    {
+                        _hitGo = hit;
+                        _hitGo.GetComponent<Image>().color = Constants.ColorSelected;
+                        State = GameState.SelectionStarted;
+                    }
+                    else if (State == GameState.SelectionStarted)
+                    {
+                        if (hit != _hitGo)
+                        {
+                            //if the two shapes are diagonally aligned (different row and column), just return
+                            if (!Utilities.AreNeighbors(_hitGo.GetComponent<Shape>(), hit.GetComponent<Shape>()))
+                            {
+                                _hitGo.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+                                State = GameState.Playing;
+                            }
+                            else
+                            {
+                                State = GameState.Animating;
+                                FixSortingLayer(_hitGo, hit);
+                                StartCoroutine(FindMatchesAndCollapse(hit));
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
-	public void InitializeBoardConstants(){
+    public void InitializeBoardConstants(){
         NumberSquareSprites = Resources.LoadAll<Sprite>("Images/Numbers");
         NumberSquareSprites = NumberSquareSprites.OrderBy(t =>Convert.ToInt32(t.name)).ToArray();
         MaxNumber = NumberSquareSprites.Count();
         Rows = MaxNumber;
 		Columns = MaxNumber;
+        int spacingSize = 5 * (MaxNumber+1);
+        int playWidth = (int)GameField.rectTransform.rect.width - spacingSize;
+        int playHeight = (int)GameField.rectTransform.rect.height - spacingSize;
+        _candySize = new Vector2(playWidth / (float)MaxNumber, playHeight / (float)MaxNumber);
 	}
 
     public void InitializeCandyAndSpawnPositionsFromPremadeLevel()
@@ -109,7 +138,6 @@ public class ShapesManager : MonoBehaviour
         SetupSpawnPositions();
     }
 
-
     public void InitializeCandyAndSpawnPositions()
     {
         InitializeVariables();
@@ -124,26 +152,7 @@ public class ShapesManager : MonoBehaviour
         {
             for (var column = 0; column < Columns; column++)
             {
-
-				var newCandy = NumberSquarePrefab;
-				var newCandyShape = newCandy.GetComponent<Shape>();
-                newCandyShape.Value = Shapes.GenerateNumber(MaxNumber);
-                newCandy.tag = newCandyShape.Value.ToString();
-                InstantiateAndPlaceNewCandy(row, column, newCandy);
-
-                //           //check if two previous horizontal are of the same type
-                //           while (column >= 2 && shapes[row, column - 1].GetComponent<Shape>().IsPartOfSeries(newCandyShape,seriesDelta)
-                //               && shapes[row, column - 2].GetComponent<Shape>().IsPartOfSeries(newCandyShape,seriesDelta))
-                //           {
-                //newCandyShape.Value = generateNumber();
-                //           }
-
-                //           //check if two previous vertical are of the same type
-                //           while (row >= 2 && shapes[row - 1, column].GetComponent<Shape>().IsPartOfSeries(newCandy.GetComponent<Shape>(),seriesDelta)
-                //               && shapes[row - 2, column].GetComponent<Shape>().IsPartOfSeries(newCandyShape,seriesDelta))
-                //           {
-                //newCandyShape.Value = generateNumber();
-                //           }
+                InstantiateAndPlaceNewCandy(row, column, NumberSquarePrefab);
             }
         }
         SetupSpawnPositions();
@@ -156,21 +165,26 @@ public class ShapesManager : MonoBehaviour
         var sameMatches = Shapes.GetMatches(MaxNumber, 0,totalMatches.MatchedCandy,false);
         totalMatches.AddObjectRange(sameMatches.MatchedCandy);
         StartCoroutine(HandleMatches(totalMatches,false, false));
-        gameTimer = Constants.StartingGameTimer;
+        _gameTimer = Constants.StartingGameTimer;
     }
 
 
     private void InstantiateAndPlaceNewCandy(int row, int column, GameObject newCandy)
     {
-        var go = Instantiate(newCandy,
-            BottomRight + new Vector2(column * CandySize.x, row * CandySize.y), Quaternion.identity)
-            as GameObject;
+        var location = calculate_cell_location(row, column);
+        var go = Instantiate(newCandy, new Vector2(location[0], -(location[1])), Quaternion.identity) as GameObject;
+        go.transform.SetParent(GameField.transform,false);
+        go.layer = 5; //5=UI Layer
+        var goTransform = go.transform as RectTransform;
+        goTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,_candySize.x);
+        goTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, _candySize.y);
 
-		var numberValue = newCandy.GetComponent<Shape> ().Value;
+
+        var numberValue = Shapes.GenerateNumber(MaxNumber);
         //assign the specific properties
 		go.GetComponent<Shape>().Assign(numberValue, row, column);
-		go.GetComponent<SpriteRenderer> ().sprite =NumberSquareSprites[numberValue-1];
-        Shapes[row, column] = go;
+        go.GetComponentInChildren<Text>().text = numberValue.ToString();
+        Shapes.Add(go);
     }
 
     private void SetupSpawnPositions()
@@ -178,8 +192,8 @@ public class ShapesManager : MonoBehaviour
         //create the spawn positions for the new shapes (will pop from the 'ceiling')
         for (var column = 0; column < Columns; column++)
         {
-            _spawnPositions[column] = BottomRight
-                + new Vector2(column * CandySize.x, Rows * CandySize.y);
+            var location = calculate_cell_location(0, column);
+            _spawnPositions[column] = new Vector2(location[0], +_candySize.y/2);
         }
     }
 
@@ -196,93 +210,42 @@ public class ShapesManager : MonoBehaviour
 
     public static void GuiDrawRect(Rect position, Color color)
     {
-        ProgressBarTexture.SetPixel(0, 0, color);
-        ProgressBarTexture.Apply();
-        ProgressBarStyle.normal.background = ProgressBarTexture;
-        ProgressBarStyle.alignment=TextAnchor.UpperLeft;
-        GUI.Box(position, GUIContent.none, ProgressBarStyle);
+        _progressBarTexture.SetPixel(0, 0, color);
+        _progressBarTexture.Apply();
+        _progressBarStyle.normal.background = _progressBarTexture;
+        _progressBarStyle.alignment=TextAnchor.UpperLeft;
+        GUI.Box(position, GUIContent.none, _progressBarStyle);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (ShowDebugInfo)
-            DebugText.text = DebugUtilities.GetArrayContents(Shapes);
 
-        if (_state == GameState.None && !ShowingMatches)
-        {
-            //update timer
-            gameTimer -= Time.deltaTime;
-            TimerText.text = "Timer: ";
-
-            //user has clicked or touched
-            if (Input.GetMouseButtonDown(0))
-            {
-                //get the hit position
-                var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-                if (hit.collider != null) //we have a hit!!!
-                {
-                    _hitGo = hit.collider.gameObject;
-                    _hitGo.GetComponent<SpriteRenderer>().color = Color.red;
-                    _state = GameState.SelectionStarted;
-                }
-                
-            }
-        }
-        else if (_state == GameState.SelectionStarted)
-        {
-            //user dragged
-            if (Input.GetMouseButton(0))
-            {
-                var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-                //we have a hit
-                if (hit.collider != null && _hitGo != hit.collider.gameObject)
-                {
-                    //if the two shapes are diagonally aligned (different row and column), just return
-                    if (!Utilities.AreVerticalOrHorizontalNeighbors(_hitGo.GetComponent<Shape>(),
-                        hit.collider.gameObject.GetComponent<Shape>()))
-                    {
-                        _hitGo.GetComponent<SpriteRenderer>().color = new Color(1,1,1,1);
-                        _state = GameState.None;
-                    }
-                    else
-                    {
-                        _state = GameState.Animating;
-                        FixSortingLayer(_hitGo, hit.collider.gameObject);
-                        StartCoroutine(FindMatchesAndCollapse(hit));
-                    }
-                }
-            }
-        }
-    }
 
     private void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
     {
-        var sp1 = hitGo.GetComponent<SpriteRenderer>();
-        var sp2 = hitGo2.GetComponent<SpriteRenderer>();
-        if (sp1.sortingOrder <= sp2.sortingOrder)
+        var sp1 = hitGo.GetComponent<CanvasRenderer>();
+        var sp2 = hitGo2.GetComponent<CanvasRenderer>();
+        if (sp1.transform.GetSiblingIndex() <= sp2.transform.GetSiblingIndex())
         {
-            sp1.sortingOrder = 1;
-            sp2.sortingOrder = 0;
+            sp1.transform.SetSiblingIndex(1);
+            sp2.transform.SetSiblingIndex(0);
         }
     }
 
-    private IEnumerator FindMatchesAndCollapse(RaycastHit2D hit2)
+    private IEnumerator FindMatchesAndCollapse(GameObject hit2)
     {
         MatchesInfo sameMatches=new MatchesInfo();
         //get the second item that was part of the swipe
-        var _hitGo2 = hit2.collider.gameObject;
-        _hitGo2.GetComponent<SpriteRenderer>().color=Color.red;
+        var _hitGo2 = hit2;
+        _hitGo2.GetComponent<Image>().color=Constants.ColorSelected;
         Shapes.Swap(_hitGo, _hitGo2);
 
         //move the swapped ones
-        _hitGo.transform.positionTo(Constants.AnimationDuration, _hitGo2.transform.position);
-        _hitGo2.transform.positionTo(Constants.AnimationDuration, _hitGo.transform.position);
+        _hitGo.transform.ZKlocalPositionTo(_hitGo2.transform.localPosition, Constants.AnimationDuration).start();
+        _hitGo2.transform.ZKlocalPositionTo(_hitGo.transform.localPosition, Constants.AnimationDuration).start();
         yield return new WaitForSeconds(Constants.AnimationDuration);
 
         //remove selection color from squares
-        _hitGo2.GetComponent<SpriteRenderer>().color = new Color(1,1,1,1);
-        _hitGo.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+        _hitGo2.GetComponent<Image>().color = Constants.ColorBase;
+        _hitGo.GetComponent<Image>().color = Constants.ColorBase;
 
         //get the matches via the helper methods
         var totalMatches = Shapes.GetMatches(MaxNumber, _seriesDelta,new List<GameObject>());
@@ -290,7 +253,7 @@ public class ShapesManager : MonoBehaviour
         {
             sameMatches = Shapes.GetMatches(MaxNumber, 0,totalMatches.MatchedCandy, false);
         }
-        gameTimer += 5 * totalMatches.NumberOfMatches;
+        _gameTimer += 5 * totalMatches.NumberOfMatches;
         totalMatches.AddObjectRange(sameMatches.MatchedCandy);
         StartCoroutine(HandleMatches(totalMatches));
         if(totalMatches.NumberOfMatches==0)
@@ -298,30 +261,29 @@ public class ShapesManager : MonoBehaviour
             IncreaseScore(-5);
             if (_score < 0)
             {
-                LostText.enabled = true;
+                //LostText.enabled = true;
                 //_state = GameState.Lost;
             }
         }
-        _state = GameState.None;
+        State = GameState.Playing;
     }
 
     public IEnumerator HandleMatches(MatchesInfo totalMatches,bool withScore=true, bool withEffects = true)
     {
         while (totalMatches.MatchedCandy.Count() >= Constants.MinimumMatches)
         {
-            ShowingMatches = true;
             Debug.logger.LogWarning("Match_Score{02061724}",totalMatches.PrintMatches());
             if (withScore)
             {                
                 IncreaseScore(totalMatches.AddedScore);
             }
-            foreach (var item in totalMatches.MatchedCandy)
+            foreach (var item in totalMatches.MatchedCandy.Distinct())
             {
-                item.GetComponent<SpriteRenderer>().color = Color.blue;
+                item.GetComponent<Image>().color = Constants.ColorMatched;
             }
             yield return new WaitForSeconds(2);
 
-            foreach (var item in totalMatches.MatchedCandy)
+            foreach (var item in totalMatches.MatchedCandy.Distinct())
             {
                 SoundManager.PlayCrincle();
                 Shapes.Remove(item);
@@ -353,7 +315,7 @@ public class ShapesManager : MonoBehaviour
         }
         if (_score >= _nextLevelScore)
             LevelUp();
-        ShowingMatches = false;
+        State = GameState.Playing;
     }
 
     private void LevelUp()
@@ -377,21 +339,19 @@ public class ShapesManager : MonoBehaviour
             var emptyItems = Shapes.GetEmptyItemsOnColumn(column);
             foreach (var item in emptyItems)
             {
-				var go = NumberSquarePrefab;
-				var newCandyShape = go.GetComponent<Shape> ();
-                newCandyShape.Value = Shapes.GenerateNumber(MaxNumber);
-
-                var newCandy = Instantiate(go, _spawnPositions[column], Quaternion.identity)
-                    as GameObject;
-
-                newCandy.GetComponent<SpriteRenderer>().sprite = NumberSquareSprites[newCandyShape.Value-1];
-				
-				newCandy.GetComponent<Shape>().Assign(go.GetComponent<Shape>().Value, item.Row, item.Column);
-
-				if (ShapesManager.MaxNumber - item.Row > newCandyInfo.MaxDistance)
+                var newCandy = Instantiate(NumberSquarePrefab, _spawnPositions[column], Quaternion.identity) as GameObject;
+                var numberValue = Shapes.GenerateNumber(MaxNumber);
+                newCandy.layer = 5; //5=UI Layer
+                newCandy.transform.SetParent(GameField.transform,false);
+                newCandy.GetComponent<Shape>().Assign(numberValue, item.Row, item.Column);
+                newCandy.GetComponentInChildren<Text>().text = numberValue.ToString();
+                var newCandyRectTransform = newCandy.GetComponent<RectTransform>() as RectTransform;
+                newCandyRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _candySize.x);
+                newCandyRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, _candySize.y);
+                //assign the specific properties
+                if (ShapesManager.MaxNumber - item.Row > newCandyInfo.MaxDistance)
 					newCandyInfo.MaxDistance = ShapesManager.MaxNumber - item.Row;
-
-                Shapes[item.Row, item.Column] = newCandy;
+                Shapes.Add(newCandy);
                 newCandyInfo.AddCandy(newCandy);
             }
         }
@@ -402,13 +362,25 @@ public class ShapesManager : MonoBehaviour
     /// Animates gameobjects to their new position
     /// </summary>
     /// <param name="movedGameObjects"></param>
+    /// <param name="distance"></param>
     private void MoveAndAnimate(IEnumerable<GameObject> movedGameObjects, int distance)
     {
         foreach (var item in movedGameObjects)
         {
-            item.transform.positionTo(Constants.MoveAnimationMinDuration * distance, BottomRight +
-                new Vector2(item.GetComponent<Shape>().Column * CandySize.x, item.GetComponent<Shape>().Row * CandySize.y));
+            var location = calculate_cell_location(item.GetComponent<Shape>().Row, item.GetComponent<Shape>().Column);
+            var itemRectTransform = item.GetComponent<RectTransform>() as RectTransform;
+            itemRectTransform.ZKanchoredPositionTo(new Vector2(location[0], -location[1]), Constants.MoveAnimationMinDuration * distance).start();
+            Debug.logger.LogWarning("{180217|2143", String.Format("Moved object to x={0} y={1}",location[0],-location[1]));
         }
+    }
+
+    private float[] calculate_cell_location(int row, int col)
+    {
+        var spacingX = 5 * (col + 1);
+        var spacingY = 5 * (row + 1);
+        var locationX = col * _candySize.x + _candySize.x / 2;
+        var locationY = row * _candySize.y + _candySize.y / 2;
+        return new [] { locationX + spacingX, locationY + spacingY };
     }
 
     /// <summary>
@@ -417,7 +389,7 @@ public class ShapesManager : MonoBehaviour
     /// <param name="item"></param>
     private void RemoveFromScene(GameObject item,bool withEffects=true)
     {
-        item.GetComponent<SpriteRenderer>().color = Color.blue;
+        item.GetComponent<Image>().color = Constants.ColorMatched;
         if (withEffects)
         {
             var explosion = GetRandomExplosion();
@@ -441,7 +413,7 @@ public class ShapesManager : MonoBehaviour
 
     private void ShowScore()
     {
-        ScoreText.text = "Score: " + _score.ToString();
+        ScoreText.text = _score.ToString();
     }
 
     /// <summary>

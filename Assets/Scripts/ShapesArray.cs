@@ -10,33 +10,17 @@ using UnityEngine;
 /// </summary>
 public class ShapesArray
 {
-	private GameObject[,] _shapes = new GameObject[ShapesManager.Rows, ShapesManager.Columns];
-    private int[,] _shapes_val = new int[ShapesManager.Rows, ShapesManager.Columns];
-    private int[] _numberCounts = new int[ShapesManager.MaxNumber+1];
+	private readonly GameObject[,] _shapes = new GameObject[ShapesManager.Rows, ShapesManager.Columns];
+    private readonly int[] _numberCounts = new int[ShapesManager.MaxNumber+1];
 
-    public GameObject this[int row, int column]
-    {
-        get
-        {
-            try
-            {
-                return _shapes[row, column];
-            }
-            catch
-            {
-                return null;
-            }
+    public GameObject this[int row, int column]{
+        get{
+            try { return _shapes[row, column]; }
+            catch { return null; }
         }
-        set
-        {
+        set {
             if (value != null)
-            {
-                if (this[row,column]!=null)
-                    this._numberCounts[this[row, column].GetComponent<Shape>().Value]--;
-                this._numberCounts[value.GetComponent<Shape>().Value]++;
                 _shapes[row, column] = value;
-                _shapes_val[row, column] = value.GetComponent<Shape>().Value;
-            }
         }
     }
 
@@ -102,7 +86,6 @@ public class ShapesArray
     {
         var allMatches = new MatchesInfo();
         var curMatches = new List<GameObject>();
-        int[] diffArray = new int[rowLength];
         int curDiff=0;
         //go left to right
         for (int col = 0; col < rowLength-1; col++)
@@ -254,14 +237,20 @@ public class ShapesArray
         return allMatches;
     }
 
-    /// <summary>
-    /// Removes (sets as null) an item from the array
-    /// </summary>
-    /// <param name="item"></param>
     public void Remove(GameObject item)
     {
         _numberCounts[item.GetComponent<Shape>().Value]--;
         _shapes[item.GetComponent<Shape>().Row, item.GetComponent<Shape>().Column] = null;
+        Debug.logger.LogWarning("190217|0104", String.Format("values - {0} total - {1} Removed {2}",
+        Utilities.PrintArray(_numberCounts), _numberCounts.Sum(), item.GetComponent<Shape>().Value));
+    }
+
+    public void Add(GameObject item)
+    {
+        _numberCounts[item.GetComponent<Shape>().Value]++;
+        _shapes[item.GetComponent<Shape>().Row, item.GetComponent<Shape>().Column] = item;
+        Debug.logger.LogWarning("180217|2224", String.Format("values - {0} total - {1} Added - {2}",
+        Utilities.PrintArray(_numberCounts), _numberCounts.Sum(), item.GetComponent<Shape>().Value));
     }
 
     /// <summary>
@@ -276,13 +265,13 @@ public class ShapesArray
         foreach (var column in columns)
         {
             //begin from bottom row
-			for (var row = 0; row < ShapesManager.Rows - 1; row++)
+			for (var row = 9; row >= 0 ; row--)
             {
                 //if you find a null item
                 if (_shapes[row, column] == null)
                 {
                     //start searching for the first non-null
-					for (var row2 = row + 1; row2 < ShapesManager.Rows; row2++)
+					for (var row2 = row - 1; row2 >= 0; row2--)
                     {
                         //if you find one, bring it down (i.e. replace it with the null you found)
                         if (_shapes[row2, column] != null)

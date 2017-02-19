@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2017
+# Visual Studio 2015
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CandyCrushPsycho.Plugins", "CandyCrushPsycho.Plugins.csproj", "{10F6BE51-68B9-3BC8-B80D-336EB6434C0A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CandyCrushPsycho", "CandyCrushPsycho.csproj", "{8F7A0CEB-4E4D-737C-AEEB-52892106C2DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CandyCrushPsycho.Editor.Plugins", "CandyCrushPsycho.Editor.Plugins.csproj", "{47015FC9-A63B-3690-B16D-4D4A970D7CD2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CandyCrushPsycho.Editor", "CandyCrushPsycho.Editor.csproj", "{180E2857-DEE7-026C-1D4C-D8582A112E51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +23,14 @@ Global
 		{8F7A0CEB-4E4D-737C-AEEB-52892106C2DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F7A0CEB-4E4D-737C-AEEB-52892106C2DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F7A0CEB-4E4D-737C-AEEB-52892106C2DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47015FC9-A63B-3690-B16D-4D4A970D7CD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47015FC9-A63B-3690-B16D-4D4A970D7CD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47015FC9-A63B-3690-B16D-4D4A970D7CD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47015FC9-A63B-3690-B16D-4D4A970D7CD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{180E2857-DEE7-026C-1D4C-D8582A112E51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{180E2857-DEE7-026C-1D4C-D8582A112E51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{180E2857-DEE7-026C-1D4C-D8582A112E51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{180E2857-DEE7-026C-1D4C-D8582A112E51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,8 +10,6 @@ using UnityEngine.EventSystems;
 public class ShapesManager : MonoBehaviour
 {
     //private int _numberStyle = 0;
-    //private Texture2D EmptyProgressBar;
-    //private Texture2D FullProgressBar;
     private int _score;
     private int _seriesDelta = 1;
     private int _nextLevelScore = Constants.NextLevelScore;
@@ -19,8 +17,8 @@ public class ShapesManager : MonoBehaviour
     private Vector2 _candySize;
     private GameObject _hitGo = null;
     private Vector2[] _spawnPositions;
+    private GameState State;
 
-    public GameState State;
     public Text ScoreText, TimerText;
     public Image GameField;
     public ShapesArray Shapes;
@@ -52,52 +50,56 @@ public class ShapesManager : MonoBehaviour
     {
         if (State == GameState.Playing || State == GameState.SelectionStarted)
         {
-            //update timer
-            _gameTimer -= Time.deltaTime;
-            TimerText.text = Math.Ceiling(_gameTimer).ToString();
-
-            var gameTimerColor = _gameTimer.Remap(0, Constants.TimerMax, 0, 510);
-            var gameTimerColorBlue = Math.Max(0, gameTimerColor - 255);
-            var gameTimerColorGreen = gameTimerColor - gameTimerColorBlue;
-            GameTimerBar.color = new Color(1, gameTimerColorGreen / 255f, gameTimerColorBlue / 255f);
-            GameTimerBar.rectTransform.localScale = (new Vector3(Math.Min(_gameTimer / Constants.TimerMax,1), 1, 1));
+            UpdateTimer();
 
             if (Input.GetMouseButtonDown(0))
             {
-                var cursor = new PointerEventData(EventSystem.current);
-                cursor.position = Input.mousePosition;
-                List<RaycastResult> objectsHit = new List<RaycastResult>();
+                var cursor = new PointerEventData(EventSystem.current) {position = Input.mousePosition};
+                var objectsHit = new List<RaycastResult>();
                 EventSystem.current.RaycastAll(cursor, objectsHit);
                 var hit = objectsHit.Find(x => x.gameObject.name == "NumberTile(Clone)").gameObject;
                 if (hit!=null)
                 {
-                    if (State == GameState.Playing)
+                    switch (State)
                     {
-                        _hitGo = hit;
-                        _hitGo.GetComponent<Image>().color = Constants.ColorSelected;
-                        State = GameState.SelectionStarted;
-                    }
-                    else if (State == GameState.SelectionStarted)
-                    {
-                        if (hit != _hitGo)
-                        {
-                            //if the two shapes are diagonally aligned (different row and column), just return
-                            if (!Utilities.AreNeighbors(_hitGo.GetComponent<Shape>(), hit.GetComponent<Shape>()))
+                        case GameState.Playing:
+                            _hitGo = hit;
+                            _hitGo.GetComponent<Image>().color = Constants.ColorSelected;
+                            State = GameState.SelectionStarted;
+                            break;
+                        case GameState.SelectionStarted:
+                            if (hit != _hitGo)
                             {
-                                _hitGo.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
-                                State = GameState.Playing;
+                                //if the two shapes are diagonally aligned (different row and column), just return
+                                if (!Utilities.AreNeighbors(_hitGo.GetComponent<Shape>(), hit.GetComponent<Shape>()))
+                                {
+                                    _hitGo.GetComponent<Image>().color = Constants.ColorBase;
+                                    State = GameState.Playing;
+                                }
+                                else
+                                {
+                                    State = GameState.Animating;
+                                    FixSortingLayer(_hitGo, hit);
+                                    StartCoroutine(FindMatchesAndCollapse(hit));
+                                }
                             }
-                            else
-                            {
-                                State = GameState.Animating;
-                                FixSortingLayer(_hitGo, hit);
-                                StartCoroutine(FindMatchesAndCollapse(hit));
-                            }
-                        }
+                            break;
                     }
                 }
             }
         }
+    }
+
+    private void UpdateTimer()
+    {
+        _gameTimer -= Time.deltaTime;
+        TimerText.text = Math.Ceiling(_gameTimer).ToString();
+
+        var gameTimerColor = _gameTimer.Remap(0, Constants.TimerMax, 0, 510);
+        var gameTimerColorBlue = Math.Max(0, gameTimerColor - 255);
+        var gameTimerColorGreen = gameTimerColor - gameTimerColorBlue;
+        GameTimerBar.color = new Color(1, gameTimerColorGreen / 255f, gameTimerColorBlue / 255f);
+        GameTimerBar.rectTransform.localScale = (new Vector3(Math.Min(_gameTimer / Constants.TimerMax, 1), 1, 1));
     }
 
     public void InitializeBoardConstants(){
@@ -135,6 +137,7 @@ public class ShapesManager : MonoBehaviour
 
     private void ClearBoardMatches()
     {
+        State = GameState.Animating;
         var totalMatches = Shapes.GetMatches(MaxNumber, _seriesDelta,new List<GameObject>(),false);
         var sameMatches = Shapes.GetMatches(MaxNumber, 0,totalMatches.MatchedCandy,false);
         totalMatches.AddObjectRange(sameMatches.MatchedCandy);

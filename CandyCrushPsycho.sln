@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CandyCrushPsycho", "CandyCr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CandyCrushPsycho.Editor.Plugins", "CandyCrushPsycho.Editor.Plugins.csproj", "{47015FC9-A63B-3690-B16D-4D4A970D7CD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CandyCrushPsycho.Editor", "CandyCrushPsycho.Editor.csproj", "{180E2857-DEE7-026C-1D4C-D8582A112E51}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,10 +25,6 @@ Global
 		{47015FC9-A63B-3690-B16D-4D4A970D7CD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47015FC9-A63B-3690-B16D-4D4A970D7CD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47015FC9-A63B-3690-B16D-4D4A970D7CD2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{180E2857-DEE7-026C-1D4C-D8582A112E51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{180E2857-DEE7-026C-1D4C-D8582A112E51}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{180E2857-DEE7-026C-1D4C-D8582A112E51}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{180E2857-DEE7-026C-1D4C-D8582A112E51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

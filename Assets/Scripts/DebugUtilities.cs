@@ -9,37 +9,6 @@ using UnityEngine;
 public static class DebugUtilities
 {
 
-    public static string[,] FillShapesArrayFromResourcesData()
-    {
-		var shapes = new string[ShapesManager.Rows,ShapesManager.Columns];
-
-        var txt = Resources.Load("level") as TextAsset;
-        var level = txt.text;
-
-        var lines = level.Split(new string[] { System.Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-		for (var row = ShapesManager.Rows - 1; row >= 0; row--)
-        {
-            var items = lines[row].Split('|');
-			for (var column = 0; column < ShapesManager.Columns; column++)
-            {
-                shapes[row, column] = items[column];
-            }
-        }
-        return shapes;
-
-    }
-
-    public static void DebugRotate(GameObject go)
-    {
-        go.transform.Rotate(0, 0, 80f);
-    }
-
-    public static void DebugAlpha(GameObject go)
-    {
-        var c = go.GetComponent<SpriteRenderer>().color;
-        c.a = 0.6f;
-        go.GetComponent<SpriteRenderer>().color = c;
-    }
 
     public static void DebugPositions(GameObject hitGo, GameObject hitGo2)
     {

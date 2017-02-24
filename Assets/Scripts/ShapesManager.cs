@@ -19,8 +19,6 @@ public class ShapesManager : MonoBehaviour
     private Vector2 _candySize;
     private GameObject _hitGo = null;
     private Vector2[] _spawnPositions;
-    private static Texture2D _progressBarTexture;
-    private static GUIStyle _progressBarStyle;
 
     public GameState State;
     public Text ScoreText, TimerText;
@@ -29,6 +27,7 @@ public class ShapesManager : MonoBehaviour
     public GameObject NumberSquarePrefab;
     public GameObject[] ExplosionPrefabs;
     public SoundManager SoundManager;
+    public Image GameTimerBar;
 
 
     public static int MaxNumber;
@@ -44,8 +43,6 @@ public class ShapesManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        _progressBarTexture = new Texture2D(1, 1);
-        _progressBarStyle = new GUIStyle();
         InitializeBoardConstants();
         InitializeCandyAndSpawnPositions();
     }
@@ -58,6 +55,12 @@ public class ShapesManager : MonoBehaviour
             //update timer
             _gameTimer -= Time.deltaTime;
             TimerText.text = Math.Ceiling(_gameTimer).ToString();
+
+            var gameTimerColor = _gameTimer.Remap(0, Constants.TimerMax, 0, 510);
+            var gameTimerColorBlue = Math.Max(0, gameTimerColor - 255);
+            var gameTimerColorGreen = gameTimerColor - gameTimerColorBlue;
+            GameTimerBar.color = new Color(1, gameTimerColorGreen / 255f, gameTimerColorBlue / 255f);
+            GameTimerBar.rectTransform.localScale = (new Vector3(Math.Min(_gameTimer / Constants.TimerMax,1), 1, 1));
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -207,17 +210,6 @@ public class ShapesManager : MonoBehaviour
             }
         }
     }
-
-    public static void GuiDrawRect(Rect position, Color color)
-    {
-        _progressBarTexture.SetPixel(0, 0, color);
-        _progressBarTexture.Apply();
-        _progressBarStyle.normal.background = _progressBarTexture;
-        _progressBarStyle.alignment=TextAnchor.UpperLeft;
-        GUI.Box(position, GUIContent.none, _progressBarStyle);
-    }
-
-
 
     private void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
     {

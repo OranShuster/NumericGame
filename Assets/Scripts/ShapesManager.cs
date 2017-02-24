@@ -112,35 +112,6 @@ public class ShapesManager : MonoBehaviour
         _candySize = new Vector2(playWidth / (float)MaxNumber, playHeight / (float)MaxNumber);
 	}
 
-    public void InitializeCandyAndSpawnPositionsFromPremadeLevel()
-    {
-        InitializeVariables();
-
-        var premadeLevel = DebugUtilities.FillShapesArrayFromResourcesData();
-
-        if (Shapes != null)
-            DestroyAllCandy();
-
-        Shapes = new ShapesArray();
-        _spawnPositions = new Vector2[Columns];
-
-        for (var row = 0; row < Rows; row++)
-        {
-            for (var column = 0; column < Columns; column++)
-            {
-
-                GameObject newCandy = null;
-
-                newCandy = GetSpecificCandyForPremadeLevel(premadeLevel[row, column]);
-
-                InstantiateAndPlaceNewCandy(row, column, newCandy);
-
-            }
-        }
-
-        SetupSpawnPositions();
-    }
-
     public void InitializeCandyAndSpawnPositions()
     {
         InitializeVariables();

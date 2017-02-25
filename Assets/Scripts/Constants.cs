@@ -23,6 +23,8 @@ public static class Constants
     public static float TimerMax = 100;
     public static float TimerLow = 10;
 
+    public static float IdleTimerCount = 10;
+
 }
 
    

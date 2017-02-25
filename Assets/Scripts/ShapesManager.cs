@@ -17,7 +17,8 @@ public class ShapesManager : MonoBehaviour
     private Vector2 _candySize;
     private GameObject _hitGo = null;
     private Vector2[] _spawnPositions;
-    private GameState State;
+    private GameState _state;
+    private float _idleTimer=Constants.IdleTimerCount;
 
     public Text ScoreText, TimerText;
     public Image GameField;
@@ -48,52 +49,61 @@ public class ShapesManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (State == GameState.Playing || State == GameState.SelectionStarted)
+        if (_state == GameState.Playing || _state == GameState.SelectionStarted)
         {
             UpdateTimer();
+            HandleMouseClicks();
+        }
+    }
 
-            if (Input.GetMouseButtonDown(0))
+    private void HandleMouseClicks()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            var cursor = new PointerEventData(EventSystem.current) {position = Input.mousePosition};
+            var objectsHit = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(cursor, objectsHit);
+            var hit = objectsHit.Find(x => x.gameObject.name == "NumberTile(Clone)").gameObject;
+            if (hit!=null)
             {
-                var cursor = new PointerEventData(EventSystem.current) {position = Input.mousePosition};
-                var objectsHit = new List<RaycastResult>();
-                EventSystem.current.RaycastAll(cursor, objectsHit);
-                var hit = objectsHit.Find(x => x.gameObject.name == "NumberTile(Clone)").gameObject;
-                if (hit!=null)
+                switch (_state)
                 {
-                    switch (State)
-                    {
-                        case GameState.Playing:
-                            _hitGo = hit;
-                            _hitGo.GetComponent<Image>().color = Constants.ColorSelected;
-                            State = GameState.SelectionStarted;
-                            break;
-                        case GameState.SelectionStarted:
-                            if (hit != _hitGo)
+                    case GameState.Playing:
+                        _hitGo = hit;
+                        _hitGo.GetComponent<Image>().color = Constants.ColorSelected;
+                        _state = GameState.SelectionStarted;
+                        break;
+                    case GameState.SelectionStarted:
+                        if (hit != _hitGo)
+                        {
+                            //if the two shapes are diagonally aligned (different row and column), just return
+                            if (!Utilities.AreNeighbors(_hitGo.GetComponent<Shape>(), hit.GetComponent<Shape>()))
                             {
-                                //if the two shapes are diagonally aligned (different row and column), just return
-                                if (!Utilities.AreNeighbors(_hitGo.GetComponent<Shape>(), hit.GetComponent<Shape>()))
-                                {
-                                    _hitGo.GetComponent<Image>().color = Constants.ColorBase;
-                                    State = GameState.Playing;
-                                }
-                                else
-                                {
-                                    State = GameState.Animating;
-                                    FixSortingLayer(_hitGo, hit);
-                                    StartCoroutine(FindMatchesAndCollapse(hit));
-                                }
+                                _hitGo.GetComponent<Image>().color = Constants.ColorBase;
+                                this._state = GameState.Playing;
                             }
-                            break;
-                    }
+                            else
+                            {
+                                _idleTimer = Constants.IdleTimerCount;
+                                _state = GameState.Animating;
+                                FixSortingLayer(_hitGo, hit);
+                                base.StartCoroutine(FindMatchesAndCollapse(hit));
+                            }
+                        }
+                        break;
                 }
             }
-        }
+        }    
     }
 
     private void UpdateTimer()
     {
         _gameTimer -= Time.deltaTime;
         TimerText.text = Math.Ceiling(_gameTimer).ToString();
+
+        _idleTimer -= Time.deltaTime;
+        if (_idleTimer <= 0)
+            LoseGame();
 
         var gameTimerColor = _gameTimer.Remap(0, Constants.TimerMax, 0, 510);
         var gameTimerColorBlue = Math.Max(0, gameTimerColor - 255);
@@ -121,7 +131,7 @@ public class ShapesManager : MonoBehaviour
         if (Shapes != null)
             DestroyAllCandy();
 
-        Shapes = new ShapesArray();
+        Shapes = new ShapesArray(Rows,Columns,MaxNumber);
         _spawnPositions = new Vector2[Columns];
 
         for (var row = 0; row < Rows; row++)
@@ -137,11 +147,11 @@ public class ShapesManager : MonoBehaviour
 
     private void ClearBoardMatches()
     {
-        State = GameState.Animating;
+        _state = GameState.Animating;
         var totalMatches = Shapes.GetMatches(MaxNumber, _seriesDelta,new List<GameObject>(),false);
         var sameMatches = Shapes.GetMatches(MaxNumber, 0,totalMatches.MatchedCandy,false);
         totalMatches.AddObjectRange(sameMatches.MatchedCandy);
-        StartCoroutine(HandleMatches(totalMatches,false, false));
+        StartCoroutine(HandleMatches(totalMatches,false, false,true));
         _gameTimer = Constants.StartingGameTimer;
     }
 
@@ -185,7 +195,7 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
-    private void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
+    public static void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
     {
         var sp1 = hitGo.GetComponent<CanvasRenderer>();
         var sp2 = hitGo2.GetComponent<CanvasRenderer>();
@@ -227,14 +237,18 @@ public class ShapesManager : MonoBehaviour
             IncreaseScore(-5);
             if (_score < 0)
             {
-                //LostText.enabled = true;
-                //_state = GameState.Lost;
+                LoseGame();
             }
         }
-        State = GameState.Playing;
+        _state = GameState.Playing;
     }
 
-    public IEnumerator HandleMatches(MatchesInfo totalMatches,bool withScore=true, bool withEffects = true)
+    private void LoseGame()
+    {
+        Debug.Log("Game lost");
+    }
+
+    public IEnumerator HandleMatches(MatchesInfo totalMatches,bool withScore=true, bool withEffects = true,bool quickMode=false)
     {
         while (totalMatches.MatchedCandy.Count() >= Constants.MinimumMatches)
         {
@@ -247,13 +261,14 @@ public class ShapesManager : MonoBehaviour
             {
                 item.GetComponent<Image>().color = Constants.ColorMatched;
             }
-            yield return new WaitForSeconds(2);
+            if (!quickMode)
+                yield return new WaitForSeconds(1.5f);
 
             foreach (var item in totalMatches.MatchedCandy.Distinct())
             {
                 SoundManager.PlayCrincle();
                 Shapes.Remove(item);
-                RemoveFromScene(item,withEffects);
+                RemoveFromScene(item);
             }
 
             //get the columns that we had a collapse
@@ -267,8 +282,8 @@ public class ShapesManager : MonoBehaviour
 
             var maxDistance = Mathf.Max(collapsedCandyInfo.MaxDistance, newCandyInfo.MaxDistance);
 
-            MoveAndAnimate(newCandyInfo.AlteredCandy, maxDistance);
-            MoveAndAnimate(collapsedCandyInfo.AlteredCandy, maxDistance);
+            MoveAndAnimate(newCandyInfo.AlteredCandy, maxDistance,quickMode);
+            MoveAndAnimate(collapsedCandyInfo.AlteredCandy, maxDistance,quickMode);
 
             //will wait for both of the above animations
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
@@ -281,7 +296,7 @@ public class ShapesManager : MonoBehaviour
         }
         if (_score >= _nextLevelScore)
             LevelUp();
-        State = GameState.Playing;
+        _state = GameState.Playing;
     }
 
     private void LevelUp()
@@ -329,13 +344,18 @@ public class ShapesManager : MonoBehaviour
     /// </summary>
     /// <param name="movedGameObjects"></param>
     /// <param name="distance"></param>
-    private void MoveAndAnimate(IEnumerable<GameObject> movedGameObjects, int distance)
+    /// <param name="quickmode"></param>
+    private void MoveAndAnimate(IEnumerable<GameObject> movedGameObjects, int distance,bool quickmode=false)
     {
+        var duration = Constants.MoveAnimationMinDuration;
+        if (quickmode)
+            duration = 0.000001f;
+            
         foreach (var item in movedGameObjects)
         {
             var location = calculate_cell_location(item.GetComponent<Shape>().Row, item.GetComponent<Shape>().Column);
             var itemRectTransform = item.GetComponent<RectTransform>() as RectTransform;
-            itemRectTransform.ZKanchoredPositionTo(new Vector2(location[0], -location[1]), Constants.MoveAnimationMinDuration * distance).start();
+            itemRectTransform.ZKanchoredPositionTo(new Vector2(location[0], -location[1]), duration * distance).start();
             Debug.logger.LogWarning("{180217|2143", String.Format("Moved object to x={0} y={1}",location[0],-location[1]));
         }
     }
@@ -353,15 +373,9 @@ public class ShapesManager : MonoBehaviour
     /// Destroys the item from the scene and instantiates a new explosion gameobject
     /// </summary>
     /// <param name="item"></param>
-    private void RemoveFromScene(GameObject item,bool withEffects=true)
+    private void RemoveFromScene(GameObject item)
     {
         item.GetComponent<Image>().color = Constants.ColorMatched;
-        if (withEffects)
-        {
-            var explosion = GetRandomExplosion();
-            var newExplosion = Instantiate(explosion, item.transform.position, Quaternion.identity) as GameObject;
-            Destroy(newExplosion, Constants.ExplosionDuration);
-        }
         Destroy(item);
     }
 

@@ -10,8 +10,14 @@ using UnityEngine;
 /// </summary>
 public class ShapesArray
 {
-	private readonly GameObject[,] _shapes = new GameObject[ShapesManager.Rows, ShapesManager.Columns];
-    private readonly int[] _numberCounts = new int[ShapesManager.MaxNumber+1];
+    private GameObject[,] _shapes;
+    private int[] _numberCounts;
+
+    public ShapesArray(int rows, int columns, int maxNumber)
+    {
+        _shapes = new GameObject[rows, columns];
+        _numberCounts = new int[maxNumber + 1];
+    }
 
     public GameObject this[int row, int column]{
         get{

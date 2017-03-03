@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-
 
 public static class Utilities
 {
@@ -29,6 +24,16 @@ public static class Utilities
     public static float Remap(this float value, float from1, float to1, float from2, float to2)
     {
         return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
+    }
+
+    public static void CreateMockUserData()
+    {
+        PlayDate[] mockDates = new PlayDate[3];
+        mockDates[0] =new PlayDate() {SessionPlayTime = 10,NumOfSessions = 3,SessionDate = DateTime.Today.ToString(Constants.DateFormat)};
+        mockDates[1] = new PlayDate() { SessionPlayTime = 10, NumOfSessions = 3, SessionDate = DateTime.Today.AddDays(1).ToString(Constants.DateFormat) };
+        mockDates[2] = new PlayDate() { SessionPlayTime = 10, NumOfSessions = 3, SessionDate = DateTime.Today.AddDays(2).ToString(Constants.DateFormat) };
+        UserInformation userInfo = new UserInformation {UserPlayDates = mockDates};
+        userInfo.Save();
     }
 }
 

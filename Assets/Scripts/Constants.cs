@@ -25,6 +25,8 @@ public static class Constants
 
     public static float IdleTimerCount = 10;
 
+    public static string DateFormat = "dd-MM-yy";
+
 }
 
    

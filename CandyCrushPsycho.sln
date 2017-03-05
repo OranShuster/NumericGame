@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2015
+# Visual Studio 2017
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CandyCrushPsycho.Plugins", "CandyCrushPsycho.Plugins.csproj", "{10F6BE51-68B9-3BC8-B80D-336EB6434C0A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CandyCrushPsycho", "CandyCrushPsycho.csproj", "{8F7A0CEB-4E4D-737C-AEEB-52892106C2DD}"

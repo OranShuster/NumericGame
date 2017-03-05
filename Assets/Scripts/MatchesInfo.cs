@@ -7,27 +7,27 @@ using UnityEngine;
 
 public class MatchesInfo
 {
-    private List<GameObject> _matchedCandies;
+    private List<GameObject> _matchedCells;
     public int NumberOfMatches;
     public int AddedScore;
 
-    /// <summary>
-    /// Returns list of matched candy
-    /// </summary>
-    public IEnumerable<GameObject> MatchedCandy
+    public IEnumerable<GameObject> MatchedCells
     {
         get
         {
-            return _matchedCandies;
+            return _matchedCells;
         }
     }
 
-    public void AddObject(GameObject go)
+    public void AddObject(GameObject go,bool withScore=true)
     {
-        _matchedCandies.Add(go);
+        _matchedCells.Add(go);
+        if (withScore)
+            AddedScore += go.GetComponent<NumberCell>().Value;
+
     }
 
-    public void AddObjectRange(IEnumerable<GameObject> gos)
+    public void AddObjectRange(IEnumerable<GameObject> gos,bool withScore=true)
     {
         foreach (var item in gos)
         {
@@ -39,19 +39,27 @@ public class MatchesInfo
 
     public MatchesInfo()
     {
-        _matchedCandies = new List<GameObject>();
+        _matchedCells = new List<GameObject>();
         NumberOfMatches = 0;
     }
 
     public string PrintMatches()
     {
         string numbers = "";
-        foreach (var candy in _matchedCandies)
+        foreach (var cell in _matchedCells)
         {
-            numbers += "," + candy.GetComponent<Shape>().Value;
+            numbers += "," + cell.GetComponent<NumberCell>().Value;
         }
         string totalScore = this.AddedScore.ToString();
         return String.Format("numbers - {0} Score - {1}",numbers,totalScore);
+    }
+
+    public void CombineMatchesInfo(MatchesInfo other,bool withScore=false)
+    {
+        if (withScore)
+            AddedScore += other.AddedScore;
+        NumberOfMatches += other.NumberOfMatches;
+        AddObjectRange(other.MatchedCells);
     }
 }
 

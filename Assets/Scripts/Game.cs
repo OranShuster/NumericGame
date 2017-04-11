@@ -14,15 +14,13 @@ public class Game : MonoBehaviour
     private Vector2 _cellSize;
     private GameObject _hitGo = null;
     //\private SoundManager SoundManager;
-    Sprite[] numberSquareSprites;
+    Sprite[] _numberSquareSprites;
     private GameState _state;
     private int _maxNumber;
     private int _rows;
     private int _columns;
-    private GameControllerInterface _controllerScript;
+    private IControllerInterface _controllerScript;
     private ShapesMatrix _shapes;
-    private Image _gameMessagesImage;
-    private Text _gameMessagesText;
 
     public GameObject NumberSquarePrefab;
     public GameObject Manager;
@@ -39,16 +37,14 @@ public class Game : MonoBehaviour
     void Start()
     {
         _state = GameState.Animating;
-        _controllerScript = Manager.GetComponent<GameControllerInterface>();
-        _gameMessagesImage = GameField.transform.FindChild("GameMessages").gameObject.GetComponent<Image>();
-        _gameMessagesText = _gameMessagesImage.transform.FindChild("GameMessagesText").gameObject.GetComponent<Text>();
-        numberSquareSprites = Resources.LoadAll<Sprite>("Images/Numbers").OrderBy(t => Convert.ToInt32(t.name)).ToArray();
-        _maxNumber = numberSquareSprites.Length;
+        _controllerScript = Manager.GetComponent<IControllerInterface>();
+        _numberSquareSprites = Resources.LoadAll<Sprite>("Images/Numbers").OrderBy(t => Convert.ToInt32(t.name)).ToArray();
+        _maxNumber = _numberSquareSprites.Length;
         _rows = _maxNumber;
         _columns = _maxNumber;
-        int spacingSize = 5 * (_maxNumber + 1);
-        int playWidth = (int)GameField.rectTransform.rect.width - spacingSize;
-        int playHeight = (int)GameField.rectTransform.rect.height - spacingSize;
+        var spacingSize = 5 * (_maxNumber + 1);
+        var playWidth = (int)GameField.rectTransform.rect.width - spacingSize;
+        var playHeight = (int)GameField.rectTransform.rect.height - spacingSize;
         _cellSize = new Vector2(playWidth / (float)_maxNumber, playHeight / (float)_maxNumber);
         StartCoroutine(InitializeCellAndSpawnPositions());
     }
@@ -238,10 +234,10 @@ public class Game : MonoBehaviour
         
     }
 
-    private void InstantiateAndPlaceNewCell(int row, int column, GameObject CellPrefab)
+    private void InstantiateAndPlaceNewCell(int row, int column, GameObject cellPrefab)
     {
         var location = calculate_cell_location(row, column);
-        var go = Instantiate(CellPrefab, new Vector2(location[0], -(location[1])), Quaternion.identity) as GameObject;
+        var go = Instantiate(cellPrefab, new Vector2(location[0], -(location[1])), Quaternion.identity) as GameObject;
         go.transform.SetParent(GameField.transform, false);
         go.layer = 5; //5=UI Layer
         var goTransform = go.transform as RectTransform;
@@ -251,7 +247,7 @@ public class Game : MonoBehaviour
         var numberValue = _shapes.GenerateNumber(_maxNumber);
         //assign the specific properties
         go.GetComponent<NumberCell>().Assign(numberValue, row, column);
-        go.GetComponent<Image>().overrideSprite = numberSquareSprites[numberValue - 1];
+        go.GetComponent<Image>().overrideSprite = _numberSquareSprites[numberValue - 1];
         _shapes.Add(go);
     }
 
@@ -300,7 +296,7 @@ public class Game : MonoBehaviour
             var location = calculate_cell_location(item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column);
             var itemRectTransform = item.GetComponent<RectTransform>() as RectTransform;
             itemRectTransform.ZKanchoredPositionTo(new Vector2(location[0], -location[1]), duration * distance).start();
-            Debug.logger.LogWarning("{180217|2143",
+            Debug.logger.Log("{180217|2143",
                 String.Format("Moved object to x={0} y={1}", location[0], -location[1]));
         }
     }
@@ -337,7 +333,7 @@ public class Game : MonoBehaviour
                 newCell.transform.SetParent(GameField.transform, false);
                 newCell.transform.SetAsFirstSibling();
                 newCell.GetComponent<NumberCell>().Assign(numberValue, item.Row, item.Column);
-                newCell.GetComponent<Image>().overrideSprite = numberSquareSprites[numberValue-1];
+                newCell.GetComponent<Image>().overrideSprite = _numberSquareSprites[numberValue-1];
                 var newCellRectTransform = newCell.GetComponent<RectTransform>() as RectTransform;
                 newCellRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _cellSize.x);
                 newCellRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, _cellSize.y);

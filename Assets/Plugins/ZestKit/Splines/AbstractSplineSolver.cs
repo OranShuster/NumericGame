@@ -31,7 +31,7 @@ namespace Prime31.ZestKit
 		{
 			var totalSudivisions = _nodes.Count * totalSubdivisionsPerNodeForLookupTable;
 			_pathLength = 0;
-			float timePerSlice = 1f / totalSudivisions;
+			var timePerSlice = 1f / totalSudivisions;
 
 			// we dont care about the first node for distances because they are always t:0 and len:0
 			_segmentTimeForDistance = new Dictionary<float, float>( totalSudivisions );
@@ -43,7 +43,7 @@ namespace Prime31.ZestKit
 			for( var i = 1; i < totalSudivisions + 1; i++ )
 			{
 				// what is the current time along the path?
-				float currentTime = timePerSlice * i;
+				var currentTime = timePerSlice * i;
 
 				var currentPoint = getPoint( currentTime );
 				_pathLength += Vector3.Distance( currentPoint, lastPoint );
@@ -74,14 +74,14 @@ namespace Prime31.ZestKit
 			var nextNodeTime = 0f;
 			var nextNodeLength = 0f;
 
-			float[] keysSegmentTimeForDistance = new float[_segmentTimeForDistance.Keys.Count];
+			var keysSegmentTimeForDistance = new float[_segmentTimeForDistance.Keys.Count];
 			_segmentTimeForDistance.Keys.CopyTo ( keysSegmentTimeForDistance, 0 );
 
 			// loop through all the values in our lookup table and find the two nodes our targetDistance falls between
-			for( int k = 0; k < keysSegmentTimeForDistance.Length; ++k )
+			for( var k = 0; k < keysSegmentTimeForDistance.Length; ++k )
 			{
-				float key = keysSegmentTimeForDistance[k];
-				float value = _segmentTimeForDistance[key];
+				var key = keysSegmentTimeForDistance[k];
+				var value = _segmentTimeForDistance[key];
 
 				// have we passed our targetDistance yet?
 				if( value >= targetDistance )
@@ -120,7 +120,7 @@ namespace Prime31.ZestKit
 
 
         public virtual int getTotalPointsBetweenPoints(float t, float t2) {
-            int totalPoints = 0;
+            var totalPoints = 0;
 
             // we know exactly how far along the path we want to be from the passed in t
             var targetDistance = _pathLength * t;
@@ -129,13 +129,13 @@ namespace Prime31.ZestKit
             // store the previous and next nodes in our lookup table
             var nextNodeLength = 0f;
 
-            float[] keysSegmentTimeForDistance = new float[_segmentTimeForDistance.Keys.Count];
+            var keysSegmentTimeForDistance = new float[_segmentTimeForDistance.Keys.Count];
             _segmentTimeForDistance.Keys.CopyTo(keysSegmentTimeForDistance, 0);
 
             // loop through all the values in our lookup table and find the two nodes our targetDistance falls between
-            for (int k = 0; k < keysSegmentTimeForDistance.Length; ++k) {
-                float key = keysSegmentTimeForDistance[k];
-                float value = _segmentTimeForDistance[key];
+            for (var k = 0; k < keysSegmentTimeForDistance.Length; ++k) {
+                var key = keysSegmentTimeForDistance[k];
+                var value = _segmentTimeForDistance[key];
 
                 // have we passed our targetDistance yet?
                 if (value >= targetDistance) {
@@ -150,9 +150,9 @@ namespace Prime31.ZestKit
             var previousNodeLength = 0f;
 
             // loop through all the values in our lookup table and find the two nodes our targetDistance falls between
-            for (int k = 0; k < keysSegmentTimeForDistance.Length; ++k) {
-                float key = keysSegmentTimeForDistance[k];
-                float value = _segmentTimeForDistance[key];
+            for (var k = 0; k < keysSegmentTimeForDistance.Length; ++k) {
+                var key = keysSegmentTimeForDistance[k];
+                var value = _segmentTimeForDistance[key];
 
                 // have we passed our targetDistance yet?
                 if (value >= targetDistance2) {

@@ -38,7 +38,7 @@ public class JsonNetSample : MonoBehaviour
         {
             if (obj is Product)
             {
-                Product p = (Product)obj;
+                var p = (Product)obj;
 
                 return (p.Name == Name && p.ExpiryDate == ExpiryDate && p.Price == Price);
             }
@@ -74,12 +74,12 @@ public class JsonNetSample : MonoBehaviour
     {
         WriteLine("* SerailizeJson");
 
-        Product product = new Product();
+        var product = new Product();
         product.Name = "Apple";
         product.ExpiryDate = new DateTime(2008, 12, 28);
         product.Sizes = new string[] { "Small" };
 
-        string json = JsonConvert.SerializeObject(product);
+        var json = JsonConvert.SerializeObject(product);
         WriteLine(json);
     }
 
@@ -97,7 +97,7 @@ public class JsonNetSample : MonoBehaviour
     {
         WriteLine("* DeserializeJson");
 
-        string json = @"{
+        var json = @"{
           'Name': 'Bad Boys',
           'ReleaseDate': '1995-4-7T00:00:00',
           'Genres': [
@@ -106,9 +106,9 @@ public class JsonNetSample : MonoBehaviour
           ]
         }";
 
-        Movie m = JsonConvert.DeserializeObject<Movie>(json);
+        var m = JsonConvert.DeserializeObject<Movie>(json);
 
-        string name = m.Name;
+        var name = m.Name;
         WriteLine(name);
     }
 
@@ -116,14 +116,14 @@ public class JsonNetSample : MonoBehaviour
     {
         WriteLine("* LinqToJson");
 
-        JArray array = new JArray();
+        var array = new JArray();
         array.Add("Manual text");
         array.Add(new DateTime(2000, 5, 23));
 
-        JObject o = new JObject();
+        var o = new JObject();
         o["MyArray"] = array;
 
-        string json = o.ToString();
+        var json = o.ToString();
         WriteLine(json);
     }
 
@@ -162,10 +162,10 @@ public class JsonNetSample : MonoBehaviour
             ]
         }");
 
-        JToken acme = o.SelectToken("$.Manufacturers[?(@.Name == 'Acme Co')]");
+        var acme = o.SelectToken("$.Manufacturers[?(@.Name == 'Acme Co')]");
         WriteLine(acme.ToString());
 
-        IEnumerable<JToken> pricyProducts = o.SelectTokens("$..Products[?(@.Price >= 50)].Name");
+        var pricyProducts = o.SelectTokens("$..Products[?(@.Price >= 50)].Name");
         foreach (var item in pricyProducts)
         {
             WriteLine(item.ToString());

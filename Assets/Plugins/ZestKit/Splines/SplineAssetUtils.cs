@@ -30,7 +30,7 @@ namespace Prime31.ZestKit
 			{
 				path = Path.Combine( "jar:file://" + Application.dataPath + "!/assets/", pathAssetName );
 
-				WWW loadAsset = new WWW( path );
+				var loadAsset = new WWW( path );
 				while( !loadAsset.isDone ) { } // maybe make a safety check here
 
 				return bytesToVector3List( loadAsset.bytes );

@@ -4,56 +4,82 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
-using System.Xml.Serialization;
 using System.Collections;
+using System.Text;
 
 [Serializable]
 public class PlayDate
 {
-    public string SessionDate { get; set; }
-    public int NumOfSessions { get; set; }
-    public float SessionPlayTime { get; set; }
+    public string code { get; set; }
+    public int session_id { get; set; }
+    public string date { get; set; }
+    public int sessions { get; set; }
+    public float session_length { get; set; }
+    public int session_interval { get; set; }
     public int CurrentSession = 1;
     public float CurrentSessionTime = 0;
+    public int LastSessionsEndTime = 0;
     public List<Runs> GameRuns = new List<Runs>();
 }
 
+[Serializable]
+public class UserLocalData
+{
+    public PlayDate[] PlayDates { get; set; }
+    public string UserCode;
+}
+
+[Serializable]
 public class Runs
 {
     public int RunLength;
     public int RunScore;
     public string RunTime;
-    public Runs(int length,int score,string Time)
+    public Runs(int length,int score,string time)
     {
         RunLength = length;
         RunScore = score;
-        RunTime = Time;
+        RunTime = time;
     }
     public Runs() { }
 }
 
+public class ScoreReports
+{
+    public int score;
+    public int timestamp;
+    public int session_id;
+}
+
 public class UserInformation : IEnumerable
 {
-    public PlayDate[] UserPlayDates;
-    static string userDataPath = Application.persistentDataPath + "/userData.cjd";
+    public UserLocalData UserLocalData;
+    static string _userDataPath = Application.persistentDataPath + "/userData.cjd";
     public bool UserLoaded = false;
+    public Queue<ScoreReports> ScoreReportsToBeSent = new Queue<ScoreReports>();
+    public string UserCode;
+    private System.Timers.Timer _sendUserScoresTimer;
     public UserInformation(string userCode)
     {
-        #if UNITY_EDITOR
-        Utilities.CreateMockUserData();
-        #endif
+        UserLocalData = new UserLocalData() { UserCode = userCode };
         if (userCode == "")
         {
-            UserPlayDates = Load();
-            if (UserPlayDates!=null)
+            UserLocalData = Load();
+            if (UserLocalData != null)
                 UserLoaded = true;
         }
         else
         {
-            string json = GetJsonFromServer(userCode);
+            var json = GetJsonFromServer(userCode);
             if (json != "")
             {
-                UserPlayDates = JsonConvert.DeserializeObject<PlayDate[]>(json);
+                UserLocalData.PlayDates = JsonConvert.DeserializeObject<PlayDate[]>(json);
+                foreach (var date in UserLocalData.PlayDates)
+                {
+                    date.session_interval *= 60;
+                    date.session_length *= 60;
+                }
+                
                 Save();
                 UserLoaded = true;
             }
@@ -65,7 +91,7 @@ public class UserInformation : IEnumerable
 
     public string GetJsonFromServer(string userCode)
     {
-        UnityWebRequest getReq = UnityWebRequest.Get(Constants.BaseURL + String.Format("?code={0}", userCode));
+        var getReq = UnityWebRequest.Get(Constants.BaseUrl + String.Format("{0}", userCode));
         getReq.Send();
         while (!getReq.isDone) { }
         if (getReq.isError)
@@ -73,16 +99,28 @@ public class UserInformation : IEnumerable
             Debug.Log(getReq.error);
             return "";
         }
-        DownloadHandler dl = getReq.downloadHandler;
-        return dl.data.ToString();
+        var dl = getReq.downloadHandler;
+        return Encoding.ASCII.GetString(dl.data);
     }
 
     public float CanPlay()
     {
-        PlayDate todayDateEntry = GetToday();
-        if (todayDateEntry != null)
-            if (todayDateEntry.CurrentSession <= todayDateEntry.NumOfSessions)
-                return todayDateEntry.SessionPlayTime-todayDateEntry.CurrentSessionTime;
+        var todayDateEntry = GetToday();
+        if (todayDateEntry != null && todayDateEntry.CurrentSession <= todayDateEntry.sessions)
+        {
+            var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
+            var finishedSession = todayDateEntry.CurrentSessionTime == 0;
+            if (finishedSession)
+            {
+                if (timeSinceLastCompleteSession >= todayDateEntry.session_interval)
+                    return todayDateEntry.session_length - todayDateEntry.CurrentSessionTime;
+            }
+            else
+                return todayDateEntry.session_length - todayDateEntry.CurrentSessionTime;
+
+        }
+
+
         return 0;
     }
 
@@ -92,22 +130,23 @@ public class UserInformation : IEnumerable
         var thisTime = DateTime.Now.ToShortTimeString();
         today.GameRuns.Add(new Runs(length, score,thisTime));
         today.CurrentSessionTime += length;
-        if (today.CurrentSessionTime>today.SessionPlayTime)
+        if (today.CurrentSessionTime>today.session_length)
         {
             today.CurrentSessionTime = 0;
+            today.LastSessionsEndTime = GetEpochTime();
             today.CurrentSession++;
         }
+        Save();
     }
 
     public void Save()
     {
-        Debug.Log(string.Format("Saving user data from {0}", userDataPath));
-        TextWriter writer = null;
+        Debug.Log(string.Format("Saving user data from {0}", _userDataPath));
+        StreamWriter writer = null;
         try
         {
-            var serializer = new XmlSerializer(typeof(PlayDate[]));
-            writer = new StreamWriter(userDataPath);
-            serializer.Serialize(writer, UserPlayDates);
+            writer = new StreamWriter(_userDataPath);
+            writer.Write(JsonConvert.SerializeObject(UserLocalData,Formatting.Indented)); 
         }
         finally
         {
@@ -117,17 +156,16 @@ public class UserInformation : IEnumerable
 
     }
 
-    public PlayDate[] Load()
+    public UserLocalData Load()
     {
         if (PlayerDataExists())
         {
-            Debug.Log(string.Format("Loading user data from {0}", userDataPath));
-            TextReader reader = null;
+            Debug.Log(string.Format("Loading user data from {0}", _userDataPath));
+            StreamReader reader = null;
             try
             {
-                var serializer = new XmlSerializer(typeof(PlayDate[]));
-                reader = new StreamReader(userDataPath);
-                return (PlayDate[])serializer.Deserialize(reader);
+                reader = new StreamReader(_userDataPath);
+                return JsonConvert.DeserializeObject<UserLocalData>(reader.ReadToEnd());
             }
             finally
             {
@@ -140,17 +178,17 @@ public class UserInformation : IEnumerable
 
     public static bool PlayerDataExists()
     {
-        return File.Exists(userDataPath);
+        return File.Exists(_userDataPath);
     }
 
     public IEnumerator GetEnumerator()
     {
-        return UserPlayDates.GetEnumerator();
+        return UserLocalData.PlayDates.GetEnumerator();
     }
     public PlayDate GetToday()
     {
         var todayDate = DateTime.Today.ToString(Constants.DateFormat);
-        return Array.Find(UserPlayDates, x => x.SessionDate == todayDate);
+        return Array.Find(UserLocalData.PlayDates, x => x.date == todayDate);
     }
     public float GetCurrentSessionTime()
     {
@@ -158,5 +196,25 @@ public class UserInformation : IEnumerable
         if (today != null)
             return today.CurrentSessionTime;
         return -1;
+    }
+    public static int GetEpochTime()
+    {
+        return (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+    }
+    public void SendUserInfoToServer(object source = null, System.Timers.ElapsedEventArgs e = null)
+    {
+        if (ScoreReportsToBeSent.Count > 0)
+        {
+            var scoreReportsArr = ScoreReportsToBeSent.ToArray();
+            ScoreReportsToBeSent.Clear();
+            var jsonString = JsonConvert.SerializeObject(scoreReportsArr);
+            var request = UnityWebRequest.Post(Constants.BaseUrl + string.Format("/{0}/{1}", UserLocalData.UserCode, GetToday().session_id), jsonString);
+            request.Send();
+            while (!request.isDone) { }
+            if (request.isError)
+            {
+                Debug.LogError(request.error);
+            }
+        }
     }
 }

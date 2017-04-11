@@ -2,3 +2,7 @@
 /Library/
 /bin/
 /.vs/
+/Assets/Extra/
+*.meta
+*.csproj
+*.DotSettings.user

@@ -22,14 +22,14 @@ public static class Utilities
 
     public static void CreateMockUserData()
     {
-        PlayDate[] mockDates = new PlayDate[3];
-        mockDates[0] =new PlayDate() {SessionPlayTime = 10000,NumOfSessions = 3,SessionDate = DateTime.Today.ToString(Constants.DateFormat)};
+        var mockDates = new PlayDate[3];
+        mockDates[0] =new PlayDate() {session_length = 10000,sessions = 3,date = DateTime.Today.ToString(Constants.DateFormat)};
         mockDates[0].GameRuns.Add(new Runs(20, 55, "18:30:00"));
-        mockDates[1] = new PlayDate() { SessionPlayTime = 10000, NumOfSessions = 3, SessionDate = DateTime.Today.AddDays(1).ToString(Constants.DateFormat) };
+        mockDates[1] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.AddDays(1).ToString(Constants.DateFormat) };
         mockDates[1].GameRuns.Add(new Runs(40, 55, "22:12:00"));
         mockDates[1].GameRuns.Add(new Runs(150, 200,"09:05:55"));
-        mockDates[2] = new PlayDate() { SessionPlayTime = 10000, NumOfSessions = 3, SessionDate = DateTime.Today.AddDays(2).ToString(Constants.DateFormat) };
-        UserInformation userInfo = new UserInformation {UserPlayDates = mockDates};
+        mockDates[2] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.AddDays(2).ToString(Constants.DateFormat) };
+        var userInfo = new UserInformation() { UserLocalData =  new UserLocalData(){PlayDates = mockDates,UserCode = "TESTTEST"}};
         userInfo.Save();
     }
 }

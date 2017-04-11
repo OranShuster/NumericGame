@@ -5,8 +5,10 @@ using Prime31.ZestKit;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Linq;
+using Newtonsoft.Json;
+using System.Net;
 
-public class MainGameController : MonoBehaviour,GameControllerInterface
+public class ControllerGame : MonoBehaviour,IControllerInterface
 {
     //private int _numberStyle = 0;
     private float _gameTimer = Constants.StartingGameTimer;
@@ -17,7 +19,7 @@ public class MainGameController : MonoBehaviour,GameControllerInterface
     private bool GamePaused = false;
     Sprite[] numberSquareSprites;
 
-    public UserInformation _userInfo { get; set; }
+    public UserInformation UserInfo { get; set; }
     public Text ScoreText;
     public GameObject NumberSquarePrefab;
     public Image GameTimerBar;
@@ -33,11 +35,12 @@ public class MainGameController : MonoBehaviour,GameControllerInterface
     void Awake()
     {
         _mainGame = GameField.GetComponent<Game>();
-        _userInfo = new UserInformation("");
+        UserInfo = new UserInformation("");
         var overlayCanvasGroup = MessagesOverlay.GetComponent<CanvasGroup>();
         overlayCanvasGroup.alpha = 0;
         overlayCanvasGroup.interactable = false;
         WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1,0.5f).setFrom(0).setLoops(LoopType.PingPong,1000).setRecycleTween(false);
+        InvokeRepeating("SendUserInfoToServer",10,10);
     }
 
     // Use this for initialization
@@ -78,6 +81,7 @@ public class MainGameController : MonoBehaviour,GameControllerInterface
     {
         var targetGameObject = GameField.transform.parent.FindChild(target).gameObject;
         Destroy(targetGameObject);
+        ZestKit.instance.stopAllTweens();
         GamePaused = false;
     }
 
@@ -86,7 +90,7 @@ public class MainGameController : MonoBehaviour,GameControllerInterface
         _gameTimer -= Time.deltaTime;
         TimerText.text = Math.Ceiling(_gameTimer).ToString();
         _totalTimePlayed += Time.deltaTime;
-        var SessionTimeLeft = _userInfo.GetToday().SessionPlayTime - _userInfo.GetToday().CurrentSessionTime;
+        var SessionTimeLeft = UserInfo.GetToday().session_length - UserInfo.GetToday().CurrentSessionTime;
         if (_totalTimePlayed > SessionTimeLeft)
         {
             LoseGame(true);
@@ -135,21 +139,22 @@ public class MainGameController : MonoBehaviour,GameControllerInterface
     public void IncreaseScore(int amount)
     {
         Score += amount;
+        var unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+        UserInfo.ScoreReportsToBeSent.Enqueue(new ScoreReports() { score = amount, timestamp = unixTimestamp, session_id = UserInfo.GetToday().CurrentSession });
         ShowScore();
     }
 
     public void LoseGame(bool SessionTimeUp=false)
     {
         _mainGame.StopGame();
-        _userInfo.AddPlayTime((int)_totalTimePlayed,Score);
-        _userInfo.Save();
-        SendUserInfoToServer();
-        ShowMessage("Game Over",Score,(int)_totalTimePlayed,true);
+        var headerMsg = "Game Over";
+        if (SessionTimeUp)
+            headerMsg = "Session Ended";
+        UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
+        ShowMessage(headerMsg, Score,(int)_totalTimePlayed,true);
     }
 
-    private void SendUserInfoToServer()
-    {
-    }
+
 
     public void LevelUp(int level)
     {
@@ -162,26 +167,22 @@ public class MainGameController : MonoBehaviour,GameControllerInterface
     {
         if (SaveData)
         {
-            _userInfo.AddPlayTime((int)_totalTimePlayed, Score);
-            _userInfo.Save();
-            SendUserInfoToServer();
+            UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
         }
         SceneManager.LoadScene("MainMenu");
     }
     public void QuitGame()
     {
-        _userInfo.AddPlayTime((int)_totalTimePlayed, Score);
-        _userInfo.Save();
-        SendUserInfoToServer();
+        UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
         Application.Quit();
     }
     public void ShowMessage(string header, int Score=0, int Time=0, bool ShowScoreTime = false)
     {
         MessagesOverlay = Instantiate(MessagesOverlay, GameField.transform.parent);
         MessagesOverlay.transform.name = "MessageOverlay";
-        Button buttonCtrl = MessagesOverlay.transform.Find("OverlayBackground/Menu").gameObject.GetComponent<Button>();
+        var buttonCtrl = MessagesOverlay.transform.Find("OverlayBackground/Menu").gameObject.GetComponent<Button>();
         buttonCtrl.onClick.AddListener(() => BackToMenu());
-        CanvasGroup canvasGroup = MessagesOverlay.GetComponent<CanvasGroup>();
+        var canvasGroup = MessagesOverlay.GetComponent<CanvasGroup>();
         canvasGroup.ZKalphaTo(0.75f).setFrom(0).start();
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
@@ -204,9 +205,9 @@ public class MainGameController : MonoBehaviour,GameControllerInterface
     {
         var TutorialOverlay = Instantiate(LevelupTurorial, GameField.transform.parent);
         TutorialOverlay.transform.name = "TutorialOverlay";
-        Button buttonCtrl = TutorialOverlay.transform.Find("OverlayBackground/Continue").gameObject.GetComponent<Button>();
+        var buttonCtrl = TutorialOverlay.transform.Find("OverlayBackground/Continue").gameObject.GetComponent<Button>();
         buttonCtrl.onClick.AddListener(() => HideMessage("TutorialOverlay"));
-        CanvasGroup canvasGroup = TutorialOverlay.GetComponent<CanvasGroup>();
+        var canvasGroup = TutorialOverlay.GetComponent<CanvasGroup>();
         canvasGroup.ZKalphaTo(0.75f).setFrom(0).start();
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
@@ -240,7 +241,7 @@ public class MainGameController : MonoBehaviour,GameControllerInterface
         tiles[1].color = Constants.ColorMatched;
         tiles[2].color = Constants.ColorMatched;
         yield return new WaitForSeconds(1f);
-        foreach (Image tile in tiles)
+        foreach (var tile in tiles)
         {
             tile.color = Constants.ColorBase;
         }
@@ -254,5 +255,10 @@ public class MainGameController : MonoBehaviour,GameControllerInterface
     public bool IsPaused()
     {
         return GamePaused;
+    }
+
+    void SendUserInfoToServer()
+    {
+        UserInfo.SendUserInfoToServer();
     }
 }

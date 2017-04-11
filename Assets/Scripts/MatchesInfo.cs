@@ -45,12 +45,12 @@ public class MatchesInfo
 
     public string PrintMatches()
     {
-        string numbers = "";
+        var numbers = "";
         foreach (var cell in _matchedCells)
         {
             numbers += "," + cell.GetComponent<NumberCell>().Value;
         }
-        string totalScore = this.AddedScore.ToString();
+        var totalScore = this.AddedScore.ToString();
         return String.Format("numbers - {0} Score - {1}",numbers,totalScore);
     }
 

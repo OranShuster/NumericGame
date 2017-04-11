@@ -4,19 +4,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class TutorialController : MonoBehaviour,GameControllerInterface
+public class ControllerTutorial : MonoBehaviour,IControllerInterface
 {
     public int Score { get; set; }
     public Text TutorialText;
-    public Text TutorialHeader;
     public Button SkipButton;
     public Image GameField;
 
-    private Game _tutorialGame;
-
     void Awake()
     {
-        _tutorialGame = GameField.GetComponent<Game>();
     }
 
     // Use this for initialization
@@ -24,7 +20,6 @@ public class TutorialController : MonoBehaviour,GameControllerInterface
 	{
 	    SkipButton.image.ZKalphaTo(1,0.5f).start();
 	    SkipButton.GetComponentInChildren<Text>().ZKalphaTo(1,0.5f).start();
-	    TutorialHeader.ZKalphaTo(1,0.5f).start();
 	    TutorialText.ZKalphaTo(1,0.5f).start();
     }
 

@@ -21,12 +21,10 @@
     public static float TimerLow = 10;
     public static float IdleTimerCount = 30;
 
-    public static string DateFormat = "dd-MM-yyyy";
+    public static string DateFormat = "yyyy-MM-dd";
 
-    public static string BaseURL = "";
+    public static string BaseUrl = "http://192.168.1.203:8888/game/";
 
-    public static string TutorialPhase1Msg = "Swap tiles by clicking on one and then the other";
-    public static string TutorialPhase2Msg = "Create matches by moving 3 identical numbers next to eachother";
 
 }
 [System.Flags]

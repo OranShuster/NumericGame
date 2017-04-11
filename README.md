@@ -84,7 +84,19 @@ The game can end in a number of different ways
 2. The player did not make a move for 10 seconds
 3. Having a negative amount of points (by making a move that does not make series as the first move, for example)
 
-## User Information
+## Technical Information
+
+### ControllerInterface
+
+Acts as a base class for all the scene controllers. This givs the Game object the ability to exist in any scene easily. The different controllers handle all the button callbacks and in charge of UI animations and text
+
+###Game
+This class is attached to the game board object in the game. it handles all the game logic,mouse input and animations.
+
+###ShapeMatrix
+Contains a matrx used to store the number cells for the game. Contains all the search and matching algorithms 
+
+### User Information
 
 The user information is received as a XML formatted text from the server and has the following structure
 
@@ -104,11 +116,11 @@ The user information is received as a XML formatted text from the server and has
 
 for each PlayDate (there could be any number of them) we have the following parameters:
 
-* **CurrentSession** - What session out of _NumOfSessions_ the player is on right now
-* **CurrentSessionTime** - How many seconds out of _SessionPlayTime_ the player already played 
-* **SessionDate** - The date when the sessions will take place
-* **NumOfSessions** - How many sessions of length _SessionPlayTime_ this date has
-* **SessionPlayTime** - The length (in seconds) of every session  
+- **CurrentSession** - What session out of _NumOfSessions_ the player is on right now
+- **CurrentSessionTime** - How many seconds out of _SessionPlayTime_ the player already played 
+- **SessionDate** - The date when the sessions will take place
+- **NumOfSessions** - How many sessions of length _SessionPlayTime_ this date has
+- **SessionPlayTime** - The length (in seconds) of every session  
 
 Here is an example of a XML containing 3 play dates (15/3/17,16/3/17,17/3/17)
 
@@ -140,8 +152,6 @@ each day has 3 sessions and each sessions is 100 seconds long. We can see this i
   </PlayDate>
 </ArrayOfPlayDate>
 ```
-
-
 
 
 

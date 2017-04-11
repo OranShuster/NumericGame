@@ -59,7 +59,7 @@ public class ShapesMatrix
     public MatchesInfo GetMatches(int boardSize,int seriesDelta,IEnumerable<GameObject> matchedGameObjects, bool countScore = true)
     {
         var matchesInfo = new MatchesInfo();
-        for (int ind = 0; ind < boardSize; ind++)
+        for (var ind = 0; ind < boardSize; ind++)
         {
             var horizontalMatches = GetMatchesOnIndex(ind, boardSize, seriesDelta,true);
             matchesInfo.AddObjectRange(horizontalMatches.MatchedCells,countScore);
@@ -78,10 +78,10 @@ public class ShapesMatrix
         var seriesIndexes = FindSeries(values, delta, out numOfMatches);
         allMatches.NumberOfMatches += numOfMatches;
         if (isRow)
-            foreach (int colIndex in seriesIndexes)
+            foreach (var colIndex in seriesIndexes)
                 allMatches.AddObject(_shapes[ind, colIndex]);
         else
-            foreach (int rowIndex in seriesIndexes)
+            foreach (var rowIndex in seriesIndexes)
                 allMatches.AddObject(_shapes[rowIndex, ind]);
         if (delta == 0)
             return allMatches;
@@ -89,10 +89,10 @@ public class ShapesMatrix
         seriesIndexes = FindSeries(values, -delta, out numOfMatches);
         allMatches.NumberOfMatches += numOfMatches;
         if (isRow)
-            foreach (int colIndex in seriesIndexes)
+            foreach (var colIndex in seriesIndexes)
                 allMatches.AddObject(_shapes[ind, colIndex]);
         else
-            foreach (int rowIndex in seriesIndexes)
+            foreach (var rowIndex in seriesIndexes)
                 allMatches.AddObject(_shapes[rowIndex, ind]);
         return allMatches;
     }
@@ -102,8 +102,8 @@ public class ShapesMatrix
         numOfMatches = 0;
         var allSeriesIndexes = new List<int>();
         var curSeriesIndexes = new List<int>();
-        int curDiff = 0;
-        for (int ind = 0; ind < values.Length - 1; ind++)
+        var curDiff = 0;
+        for (var ind = 0; ind < values.Length - 1; ind++)
         {
             curDiff = values[ind + 1] - values[ind];
             if (curDiff == delta)
@@ -135,7 +135,7 @@ public class ShapesMatrix
         _numberCounts[item.GetComponent<NumberCell>().Value]--;
         _shapes[item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column] = null;
         _values[item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column] = 0;
-        Debug.logger.LogWarning("190217|0104", String.Format("values - {0} total - {1} Removed {2}",
+        Debug.logger.Log("190217|0104", String.Format("values - {0} total - {1} Removed {2}",
         Utilities.PrintArray(_numberCounts), _numberCounts.Sum(), item.GetComponent<NumberCell>().Value));
     }
 
@@ -144,7 +144,7 @@ public class ShapesMatrix
         _numberCounts[item.GetComponent<NumberCell>().Value]++;
         _shapes[item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column] = item;
         _values[item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column] = item.GetComponent<NumberCell>().Value;
-        Debug.logger.LogWarning("180217|2224", String.Format("values - {0} total - {1} Added - {2}",
+        Debug.logger.Log("180217|2224", String.Format("values - {0} total - {1} Added - {2}",
         Utilities.PrintArray(_numberCounts), _numberCounts.Sum(), item.GetComponent<NumberCell>().Value));
     }
 
@@ -213,10 +213,10 @@ public class ShapesMatrix
     {
         var values = new int[_shapes.GetLength(0)];
         if (isRow)
-            for (int col=0;col<_shapes.GetLength(0);col++)
+            for (var col=0;col<_shapes.GetLength(0);col++)
                 values[col] = _shapes[ind, col].GetComponent<NumberCell>().Value;
         else
-            for (int row = 0; row < _shapes.GetLength(0); row++)
+            for (var row = 0; row < _shapes.GetLength(0); row++)
                 values[row] = _shapes[row, ind].GetComponent<NumberCell>().Value;
         return values;
     }

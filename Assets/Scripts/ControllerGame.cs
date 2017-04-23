@@ -12,7 +12,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 {
     //private int _numberStyle = 0;
     private float _gameTimer = Constants.StartingGameTimer;
-    private float _idleTimer=Constants.IdleTimerCount;
     private float _totalTimePlayed = 0;
     private Game _mainGame;
     private ITween<float> WarningOverlayTween;
@@ -98,10 +97,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         if (_gameTimer <= 0)
             LoseGame();
 
-        _idleTimer -= Time.deltaTime;
-        if (_idleTimer <= 0)
-            LoseGame();
-
         var gameTimerColor = _gameTimer.Remap(0, Constants.TimerMax/2, 0, 510);
         var gameTimerColorRed = 255- gameTimerColor.Remap(255,510,0,255);
         var gameTimerColorGreen = gameTimerColor.Remap(0, 255, 0, 255);
@@ -127,10 +122,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         ScoreText.text = Math.Max(0, Score).ToString();
     }
 
-    public void MoveMade()
-    {
-        _idleTimer = Constants.IdleTimerCount;
-    }
+    public void MoveMade(){}
 
     public void IncreaseGameTimer(float inc)
     {

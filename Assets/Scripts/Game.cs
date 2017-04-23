@@ -13,7 +13,7 @@ public class Game : MonoBehaviour
     public int SeriesDelta = 0;
     private Vector2 _cellSize;
     private GameObject _hitGo = null;
-    //\private SoundManager SoundManager;
+    //private SoundManager SoundManager;
     Sprite[] _numberSquareSprites;
     private GameState _state;
     private int _maxNumber;
@@ -147,7 +147,7 @@ public class Game : MonoBehaviour
                 item.GetComponent<Image>().color = Constants.ColorMatched;
             }
             if (!quickMode)
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(0.75f);
 
             foreach (var item in totalMatches.MatchedCells.Distinct())
             {
@@ -171,7 +171,7 @@ public class Game : MonoBehaviour
             MoveAndAnimate(collapsedCellsInfo.AlteredCell, maxDistance, quickMode);
 
             //will wait for both of the above animations
-            yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance + 0.5f);
+            yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
             if (_controllerScript.Score >= NextLevelScore)
                 break;
@@ -280,6 +280,7 @@ public class Game : MonoBehaviour
         //yield return StartCoroutine(ShowGameMessage("Level up!"));
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = false;
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = 0;
+		ZestKit.instance.stopAllTweens();
         DestroyAllCells();
         yield return StartCoroutine(InitializeCellAndSpawnPositions());
         _state = GameState.Playing;

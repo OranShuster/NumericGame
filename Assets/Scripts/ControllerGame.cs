@@ -40,7 +40,9 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 		overlayCanvasGroup.interactable = false;
 		WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 0.5f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
 		InvokeRepeating("SendUserInfoToServer", 10, 10);
-	}
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
+    }
 
     // Use this for initialization
     void Start()

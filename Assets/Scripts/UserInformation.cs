@@ -201,19 +201,24 @@ public class UserInformation : IEnumerable
     {
         return (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
     }
-    public void SendUserInfoToServer(object source = null, System.Timers.ElapsedEventArgs e = null)
+    public IEnumerator SendUserInfoToServer(object source = null, System.Timers.ElapsedEventArgs e = null)
     {
         if (ScoreReportsToBeSent.Count > 0)
         {
             var scoreReportsArr = ScoreReportsToBeSent.ToArray();
-            ScoreReportsToBeSent.Clear();
             var jsonString = JsonConvert.SerializeObject(scoreReportsArr);
             var request = UnityWebRequest.Post(Constants.BaseUrl + string.Format("/{0}/{1}", UserLocalData.UserCode, GetToday().session_id), jsonString);
             request.Send();
-            while (!request.isDone) { }
+            while (!request.isDone) {
+                yield return new WaitForSeconds(1f);
+            }
             if (request.isError)
             {
-                Debug.LogError(request.error);
+                Debug.LogWarning(request.error);
+            }
+            else
+            {
+                ScoreReportsToBeSent.Clear();
             }
         }
     }

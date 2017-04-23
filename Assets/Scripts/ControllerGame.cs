@@ -32,16 +32,16 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     public Image TimerWarningOverlay;
     public GameObject LevelupTurorial;
 
-    void Awake()
-    {
-        _mainGame = GameField.GetComponent<Game>();
-        UserInfo = new UserInformation("");
-        var overlayCanvasGroup = MessagesOverlay.GetComponent<CanvasGroup>();
-        overlayCanvasGroup.alpha = 0;
-        overlayCanvasGroup.interactable = false;
-        WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1,0.5f).setFrom(0).setLoops(LoopType.PingPong,1000).setRecycleTween(false);
-        InvokeRepeating("SendUserInfoToServer",10,10);
-    }
+	void Awake()
+	{
+		_mainGame = GameField.GetComponent<Game>();
+		UserInfo = new UserInformation("");
+		var overlayCanvasGroup = MessagesOverlay.GetComponent<CanvasGroup>();
+		overlayCanvasGroup.alpha = 0;
+		overlayCanvasGroup.interactable = false;
+		WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 0.5f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
+		InvokeRepeating("SendUserInfoToServer", 10, 10);
+	}
 
     // Use this for initialization
     void Start()
@@ -153,9 +153,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
         ShowMessage(headerMsg, Score,(int)_totalTimePlayed,true);
     }
-
-
-
     public void LevelUp(int level)
     {
         var levelString = level.ToString();
@@ -259,6 +256,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 
     void SendUserInfoToServer()
     {
-        UserInfo.SendUserInfoToServer();
+        StartCoroutine(UserInfo.SendUserInfoToServer());
     }
 }

@@ -29,7 +29,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     public Text TimerText;
     public GameObject MessagesOverlay;
     public Image TimerWarningOverlay;
-    public GameObject LevelupTurorial;
+    public GameObject LevelupTutorial;
 
 	void Awake()
 	{
@@ -77,9 +77,9 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 
     private void HideMessage(string target)
     {
+        ZestKit.instance.stopAllTweens();
         var targetGameObject = GameField.transform.parent.FindChild(target).gameObject;
         Destroy(targetGameObject);
-        ZestKit.instance.stopAllTweens();
         GamePaused = false;
     }
 
@@ -191,22 +191,24 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     }
     public void ShowLevelupTutorial(int level)
     {
-        var TutorialOverlay = Instantiate(LevelupTurorial, GameField.transform.parent);
-        TutorialOverlay.transform.name = "TutorialOverlay";
-        var buttonCtrl = TutorialOverlay.transform.Find("OverlayBackground/Continue").gameObject.GetComponent<Button>();
+        var LevelupTutorial_instance = Instantiate(LevelupTutorial, GameField.transform.parent);
+        LevelupTutorial_instance.transform.name = "TutorialOverlay";
+        var buttonCtrl = LevelupTutorial_instance.transform.Find("OverlayBackground/Continue").gameObject.GetComponent<Button>();
         buttonCtrl.onClick.AddListener(() => HideMessage("TutorialOverlay"));
-        var canvasGroup = TutorialOverlay.GetComponent<CanvasGroup>();
+        var canvasGroup = LevelupTutorial_instance.GetComponent<CanvasGroup>();
         canvasGroup.ZKalphaTo(0.75f).setFrom(0).start();
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
-        var Tile1 = TutorialOverlay.transform.Find("OverlayBackground/Tile1").gameObject;
-        var Tile2 = TutorialOverlay.transform.Find("OverlayBackground/Tile2").gameObject;
-        var Tile3 = TutorialOverlay.transform.Find("OverlayBackground/Tile3").gameObject;
-        var TileUp = TutorialOverlay.transform.Find("OverlayBackground/TileUp").gameObject;
+        var Tile1 = LevelupTutorial_instance.transform.Find("OverlayBackground/Tile1").gameObject;
+        var Tile2 = LevelupTutorial_instance.transform.Find("OverlayBackground/Tile2").gameObject;
+        var Tile3 = LevelupTutorial_instance.transform.Find("OverlayBackground/Tile3").gameObject;
+        var TileUp = LevelupTutorial_instance.transform.Find("OverlayBackground/TileUp").gameObject;
+        var header = LevelupTutorial_instance.transform.Find("OverlayBackground/LevelupTutorialHeader").gameObject;
         Tile1.GetComponent<Image>().overrideSprite = numberSquareSprites[0];
-        Tile2.GetComponent<Image>().overrideSprite =numberSquareSprites[1 + level];
-        Tile3.GetComponent<Image>().overrideSprite= numberSquareSprites[1 + level*2];
-        TileUp.GetComponent<Image>().overrideSprite = numberSquareSprites[6];
+        Tile2.GetComponent<Image>().overrideSprite =numberSquareSprites[0 + level];
+        Tile3.GetComponent<Image>().overrideSprite= numberSquareSprites[0 + level*2];
+        TileUp.GetComponent<Image>().overrideSprite = numberSquareSprites[numberSquareSprites.Length-1];
+        header.GetComponent<Text>().text = Flipfont.Reverse(String.Format("עלית לשלב {0}", level.ToString()));
         AnimateTutorial(new GameObject[] { Tile1, Tile2, Tile3, TileUp });
     }
 
@@ -225,15 +227,22 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 
     private IEnumerator MarkTilesAnimation(Image[] tiles)
     {
-        tiles[0].color = Constants.ColorMatched;
-        tiles[1].color = Constants.ColorMatched;
-        tiles[2].color = Constants.ColorMatched;
+
+        for (int index=0;index<3;index++)
+        {
+            if (tiles[index]!=null)
+            {
+                tiles[index].color = Constants.ColorMatched;
+            }
+        }
         yield return new WaitForSeconds(1f);
         foreach (var tile in tiles)
         {
-            tile.color = Constants.ColorBase;
+            if (tile != null)
+            {
+                tile.color = Constants.ColorBase;
+            }
         }
-
     }
 
     void OnApplicationQuit()

@@ -277,7 +277,6 @@ public class Game : MonoBehaviour
         _state = GameState.Animating;
         NextLevelScore += NextLevelScore;
         SeriesDelta += 1;
-        //yield return StartCoroutine(ShowGameMessage("Level up!"));
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = false;
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = 0;
 		ZestKit.instance.stopAllTweens();

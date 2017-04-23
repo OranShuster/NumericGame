@@ -35,9 +35,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 	{
 		_mainGame = GameField.GetComponent<Game>();
 		UserInfo = new UserInformation("");
-		var overlayCanvasGroup = MessagesOverlay.GetComponent<CanvasGroup>();
-		overlayCanvasGroup.alpha = 0;
-		overlayCanvasGroup.interactable = false;
 		WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 0.5f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
 		InvokeRepeating("SendUserInfoToServer", 10, 10);
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -65,7 +62,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
             {
                 if (GamePaused)
                 {
-                    HideMessage("MessageOverlay (clone)");
+                    HideMessage("MessageOverlay");
                     GamePaused = false;
                 }
                 else
@@ -169,16 +166,16 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     }
     public void ShowMessage(string header, int Score=0, int Time=0, bool ShowScoreTime = false)
     {
-        MessagesOverlay = Instantiate(MessagesOverlay, GameField.transform.parent);
-        MessagesOverlay.transform.name = "MessageOverlay";
-        var buttonCtrl = MessagesOverlay.transform.Find("OverlayBackground/Menu").gameObject.GetComponent<Button>();
+        var MessagesOverlay_instance = Instantiate(MessagesOverlay, GameField.transform.parent);
+        MessagesOverlay_instance.transform.name = "MessageOverlay";
+        var buttonCtrl = MessagesOverlay_instance.transform.Find("OverlayBackground/Menu").gameObject.GetComponent<Button>();
         buttonCtrl.onClick.AddListener(() => BackToMenu());
-        var canvasGroup = MessagesOverlay.GetComponent<CanvasGroup>();
+        var canvasGroup = MessagesOverlay_instance.GetComponent<CanvasGroup>();
         canvasGroup.ZKalphaTo(0.75f).setFrom(0).start();
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
-        var ScoreGameObject = MessagesOverlay.transform.Find("OverlayBackground/Score").gameObject;
-        var TimeGameObject = MessagesOverlay.transform.Find("OverlayBackground/TimePlayed").gameObject;
+        var ScoreGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/Score").gameObject;
+        var TimeGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/TimePlayed").gameObject;
         if (ShowScoreTime)
         {
             ScoreGameObject.GetComponent<Text>().text = String.Format("    Score - {0}", Math.Max(Score, 0));
@@ -189,7 +186,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
             ScoreGameObject.SetActive(false);
             TimeGameObject.SetActive(false);
         }
-        var MessageTitleGameObject = MessagesOverlay.transform.Find("OverlayBackground/MessageTitle").gameObject;
+        var MessageTitleGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/MessageTitle").gameObject;
         MessageTitleGameObject.GetComponent<Text>().text = String.Format(header);
     }
     public void ShowLevelupTutorial(int level)

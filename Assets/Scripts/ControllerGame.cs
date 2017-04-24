@@ -36,7 +36,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 		_mainGame = GameField.GetComponent<Game>();
 		UserInfo = new UserInformation("");
 		WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 0.5f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
-		InvokeRepeating("SendUserInfoToServer", 10, 10);
+		InvokeRepeating("SendUserInfoToServer", Constants.ScoreReportingInterval, Constants.ScoreReportingInterval);
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
     }

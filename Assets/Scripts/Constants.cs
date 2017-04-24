@@ -19,11 +19,11 @@
     public static readonly float StartingGameTimer = 60;
     public static float TimerMax = 100;
     public static float TimerLow = 10;
-    public static float IdleTimerCount = 30;
+    public static int ScoreReportingInterval = 10;
 
     public static string DateFormat = "yyyy-MM-dd";
-
     public static string BaseUrl = "http://192.168.1.203:8888/game/";
+
 
 
 }

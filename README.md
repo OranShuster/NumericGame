@@ -64,16 +64,6 @@ for the series [2,4,6] the player will get 2+4+6=12 points *only at level 2 wher
 
 #### Timer
 
-The game has 2 timers
-
-##### Idle Timer
-
-this counts down 10 seconds, if the player made no move (either a move making a series or not) the game will end
-
-after every move the timer resets
-
-##### General Timer
-
 When this timer reaches 0 the game will end.For every match the player makes he gets an additional 5 seconds to the timer. The timer is limited to 100 seconds maximum.
 
 #### Game End
@@ -86,7 +76,7 @@ The game can end in a number of different ways
 
 ## Technical Information
 
-### ControllerInterface
+### IControllerInterface
 
 Acts as a base class for all the scene controllers. This givs the Game object the ability to exist in any scene easily. The different controllers handle all the button callbacks and in charge of UI animations and text
 
@@ -98,64 +88,124 @@ Contains a matrx used to store the number cells for the game. Contains all the s
 
 ### User Information
 
-The user information is received as a XML formatted text from the server and has the following structure
+#### UserLocalData class
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<ArrayOfPlayDate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <PlayDate>
-    <CurrentSession>int</CurrentSession>
-    <CurrentSessionTime>0</CurrentSessionTime>
-    <SessionDate>string(dd-mm-yy)</SessionDate>
-    <NumOfSessions>int</NumOfSessions>
-    <SessionPlayTime>int</SessionPlayTime>
-  </PlayDate>
-  ...
-</ArrayOfPlayDate>
+This class symbolizes the data saved to the device. an instance of the class is serialized in JSON format and saved locally.
+
+it contains the user code and an array of the PlayDate class
+
+#### PlayDate class
+
+Contains data on each date the player can play in.  
+
+The play dates are received as a JSON formatted text from the server and has the following structure
+
+```json
+[
+  {
+    "session_id": 123,
+    "date": "yyyy-MM-dd",
+    "sessions": 123,
+    "session_length": 123,
+    "session_interval": 123
+  }
+]
 ```
 
-for each PlayDate (there could be any number of them) we have the following parameters:
+for each item in the JSON array (there could be any number of them) we have the following parameters:
 
-- **CurrentSession** - What session out of _NumOfSessions_ the player is on right now
-- **CurrentSessionTime** - How many seconds out of _SessionPlayTime_ the player already played 
-- **SessionDate** - The date when the sessions will take place
-- **NumOfSessions** - How many sessions of length _SessionPlayTime_ this date has
-- **SessionPlayTime** - The length (in seconds) of every session  
+* **session_id** - A unique id related to each date and player
 
-Here is an example of a XML containing 3 play dates (15/3/17,16/3/17,17/3/17)
+- **date** - Date in which the sessions are played
+- **sessions** - The number of sessions this day
+- **session_length** - The length (in minutes) of each session
+- **session_interval** - The time (in minutes) the player has to wait between sessions  
 
-each day has 3 sessions and each sessions is 100 seconds long. We can see this is a new player because for every date, the CurrentSession is 1 and CurrentSessionTime is 0. 
+Here is an example of a JSON containing 3 play dates (15/3/17,16/3/17,17/3/17)
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<ArrayOfPlayDate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <PlayDate>
-    <CurrentSession>1</CurrentSession>
-    <CurrentSessionTime>0</CurrentSessionTime>
-    <SessionDate>15-03-17</SessionDate>
-    <NumOfSessions>3</NumOfSessions>
-    <SessionPlayTime>100</SessionPlayTime>
-  </PlayDate>
-  <PlayDate>
-    <CurrentSession>1</CurrentSession>
-    <CurrentSessionTime>0</CurrentSessionTime>
-    <SessionDate>16-03-17</SessionDate>
-    <NumOfSessions>3</NumOfSessions>
-    <SessionPlayTime>100</SessionPlayTime>
-  </PlayDate>
-  <PlayDate>
-    <CurrentSession>1</CurrentSession>
-    <CurrentSessionTime>0</CurrentSessionTime>
-    <SessionDate>17-03-17</SessionDate>
-    <NumOfSessions>3</NumOfSessions>
-    <SessionPlayTime>100</SessionPlayTime>
-  </PlayDate>
-</ArrayOfPlayDate>
+each day has 3 sessions and each sessions is 20 minutes long with an hour interval between them. 
+
+```json
+[
+  {
+    "session_id": 1,
+    "date": "2017-03-15",
+    "sessions": 3,
+    "session_length": 20,
+    "session_interval": 60
+  },
+    {
+    "session_id": 5,
+    "date": "2017-03-16",
+    "sessions": 3,
+    "session_length": 20,
+    "session_interval": 60
+  },
+    {
+    "session_id": 8,
+    "date": "2017-03-17",
+    "sessions": 3,
+    "session_length": 20,
+    "session_interval": 60
+  }
+]
 ```
 
+In additions to the data from the JSON we have more fields in the class
 
+##### GameRuns
 
+An array of Runs classes symbolizing one continuous game until either the player lost or the session ended 
 
+##### CurrentSession
+
+The number of the session the player is playing on now
+
+##### CurrentSessionTime
+
+Total time played on the CurrentSession
+
+##### LastSessionsEndTime
+
+A timestamp of when the previous session was finished. Used to check the interval between sessions
+
+#### Score reporting
+
+For every move in the game we save the score delta caused by that move (positive for matches or negative for just swaps)
+
+We save those in a list of instances of the ScoreReports class which is identical to the JSON [sent][#POST scores]
+
+We report to the server every 10 seconds 
+
+### API Calls
+
+We have 2 main API calls in the game
+
+#### GET user information
+
+* GET
+
+* /game/:code_id
+
+* Returns an array of [play dates][#PlayDate class]
+
+  ​
+
+#### POST scores
+
+* POST
+
+* /game/:code_id/:session_id
+
+  ```json
+  [
+    {
+      "score": int,
+      "timestamp": string,
+      "session_id": int
+    }
+  ]
+  ```
 
 
 

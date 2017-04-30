@@ -11,20 +11,14 @@ public class ControllerTutorial : MonoBehaviour,IControllerInterface
     public Button SkipButton;
     public Image GameField;
 
-    void Awake()
-    {
-    }
-
     // Use this for initialization
     void Start ()
 	{
 	    SkipButton.image.ZKalphaTo(1,0.5f).start();
 	    SkipButton.GetComponentInChildren<Text>().ZKalphaTo(1,0.5f).start();
 	    TutorialText.ZKalphaTo(1,0.5f).start();
-    }
-
-    // Update is called once per frame
-    void Update () {}
+	    TutorialText.text = Utilities.LoadStringFromFile("TutorialHeader", 25);
+	}
 
     IEnumerator ChangeTutorialMessage(string msg)
     {
@@ -48,4 +42,6 @@ public class ControllerTutorial : MonoBehaviour,IControllerInterface
     public void MoveMade(){}
     public void LevelUp(int level){}
     public void QuitGame(){}
+    void Update() { }
+    void Awake() { }
 }

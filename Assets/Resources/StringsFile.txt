@@ -1,0 +1,23 @@
+﻿[Translation]
+UserRegistrationHeader=הכנס את קוד המשתמש שקיבלת ממנהל הניסוי
+ConfirmText=אשר
+RegistrationCodeInputPlaceholder=הכנס קוד
+StatisticsButton=סטטיסטיקה
+NewGameButton=התחל משחק
+TutorialHeader=החלף מספרים על ידי לחיצה על מספר ואז על האחר. צבור נקודות על ידי יצירת סדרה של 3 מספרים זהים או יותר
+Date=תאריך
+Score=ניקוד
+Hour=שעה
+LengthHeader=אורך סיבוב
+SessionsHeader=סשנים
+SessionTimeHeader=זמן נותר בסשן
+LevelUpMessage=עלית לשלב
+RegistrationErrorMessage=שגיאה בהתחברות לשרת. בדוק תקינות קוד וחיבור אינטרנט
+Game_Over=הפסדת
+Session_Ended=נגמר הזמן בסשן
+Score=ניקוד
+Round_Length=אורך סיבוב
+Time=זמן
+Level=שלב
+Pause=השהייה
+Menu=תפריט

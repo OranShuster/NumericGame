@@ -18,9 +18,12 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     private bool GamePaused = false;
     Sprite[] numberSquareSprites;
 
-    public UserInformation UserInfo { get; set; }
+    public UserStatistics UserInfo { get; set; }
     public Text ScoreText;
-    public GameObject NumberSquarePrefab;
+    public Text TimeHeaderText;
+    public Text ScoreHeaderText;
+    public Text LevelHeaderText;
+    public GameObject NumberTilePrefab;
     public Image GameTimerBar;
     public int Score { get; set; }
 
@@ -34,7 +37,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 	void Awake()
 	{
 		_mainGame = GameField.GetComponent<Game>();
-		UserInfo = new UserInformation("");
+		UserInfo = new UserStatistics();
 		WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 0.5f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
 		InvokeRepeating("SendUserInfoToServer", Constants.ScoreReportingInterval, Constants.ScoreReportingInterval);
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -48,7 +51,9 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         ShowScore();
         _gameTimer = Constants.StartingGameTimer;
         LevelNumText.text = "0";
-
+        TimeHeaderText.text = Utilities.LoadStringFromFile("Time");
+        ScoreHeaderText.text = Utilities.LoadStringFromFile("Score");
+        LevelHeaderText.text = Utilities.LoadStringFromFile("Level");
     }
 
     // Update is called once per frame
@@ -88,7 +93,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         _gameTimer -= Time.deltaTime;
         TimerText.text = Math.Ceiling(_gameTimer).ToString();
         _totalTimePlayed += Time.deltaTime;
-        var SessionTimeLeft = UserInfo.GetToday().session_length - UserInfo.GetToday().CurrentSessionTime;
+        var SessionTimeLeft = UserInfo.GetToday().session_length - UserInfo.GetToday().CurrentSessionTimeSecs;
         if (_totalTimePlayed > SessionTimeLeft)
         {
             LoseGame(true);
@@ -96,11 +101,13 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         if (_gameTimer <= 0)
             LoseGame();
 
-        var gameTimerColor = _gameTimer.Remap(0, Constants.TimerMax/2, 0, 510);
-        var gameTimerColorRed = 255- gameTimerColor.Remap(255,510,0,255);
-        var gameTimerColorGreen = gameTimerColor.Remap(0, 255, 0, 255);
-        GameTimerBar.color = new Color(gameTimerColorRed / 255f, gameTimerColorGreen / 255f, 0);
-        GameTimerBar.rectTransform.localScale = new Vector3(Math.Min(_gameTimer / Constants.TimerMax, 1), 1, 1);
+        var gameTimerRelative = _gameTimer / Constants.TimerMax*100;
+        GameTimerBar.color = Constants.ColorOKGreen;
+        if (gameTimerRelative < 50)
+            GameTimerBar.color = Constants.ColorWarningOrange;
+        if (gameTimerRelative < 25)
+            GameTimerBar.color = Constants.ColorDangerRed;
+        GameTimerBar.rectTransform.localScale = new Vector3(Math.Min(gameTimerRelative, 1), 1, 1);
 
 
         if (_gameTimer<Constants.TimerLow && !WarningOverlayTween.isRunning())
@@ -131,16 +138,21 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     {
         Score += amount;
         var unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-        UserInfo.ScoreReportsToBeSent.Enqueue(new ScoreReports() { score = amount, timestamp = unixTimestamp, session_id = UserInfo.GetToday().CurrentSession });
+        UserInfo.AddScoreReport(new ScoreReports()
+        {
+            score = amount,
+            timestamp = unixTimestamp,
+            session_id = UserInfo.GetToday().CurrentSession
+        });
         ShowScore();
     }
 
     public void LoseGame(bool SessionTimeUp=false)
     {
         _mainGame.StopGame();
-        var headerMsg = "Game Over";
+        var headerMsg = "Game_Over";
         if (SessionTimeUp)
-            headerMsg = "Session Ended";
+            headerMsg = "Session_Ended";
         UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
         ShowMessage(headerMsg, Score,(int)_totalTimePlayed,true);
     }
@@ -169,6 +181,8 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         var MessagesOverlay_instance = Instantiate(MessagesOverlay, GameField.transform.parent);
         MessagesOverlay_instance.transform.name = "MessageOverlay";
         var buttonCtrl = MessagesOverlay_instance.transform.Find("OverlayBackground/Menu").gameObject.GetComponent<Button>();
+        var buttonText = MessagesOverlay_instance.transform.Find("OverlayBackground/Menu/Text").gameObject.GetComponent<Text>();
+        buttonText.text = Utilities.LoadStringFromFile("Menu");
         buttonCtrl.onClick.AddListener(() => BackToMenu());
         var canvasGroup = MessagesOverlay_instance.GetComponent<CanvasGroup>();
         canvasGroup.ZKalphaTo(0.75f).setFrom(0).start();
@@ -178,8 +192,8 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         var TimeGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/TimePlayed").gameObject;
         if (ShowScoreTime)
         {
-            ScoreGameObject.GetComponent<Text>().text = String.Format("    Score - {0}", Math.Max(Score, 0));
-            TimeGameObject.GetComponent<Text>().text = String.Format("  Time Played - {0}", Time);
+            ScoreGameObject.GetComponent<Text>().text = String.Format("{1} - {0}",Utilities.LoadStringFromFile("Score"), Math.Max(Score, 0));
+            TimeGameObject.GetComponent<Text>().text = String.Format("{1} - {0}", Utilities.LoadStringFromFile("Round_Length"), Rounds.GetRoundLengthText(Time));
         }
         else
         {
@@ -187,7 +201,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
             TimeGameObject.SetActive(false);
         }
         var MessageTitleGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/MessageTitle").gameObject;
-        MessageTitleGameObject.GetComponent<Text>().text = String.Format(header);
+        MessageTitleGameObject.GetComponent<Text>().text = String.Format(Utilities.LoadStringFromFile(header));
     }
     public void ShowLevelupTutorial(int level)
     {
@@ -208,7 +222,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         Tile2.GetComponent<Image>().overrideSprite =numberSquareSprites[0 + level];
         Tile3.GetComponent<Image>().overrideSprite= numberSquareSprites[0 + level*2];
         TileUp.GetComponent<Image>().overrideSprite = numberSquareSprites[numberSquareSprites.Length-1];
-        header.GetComponent<Text>().text = Flipfont.Reverse(String.Format("עלית לשלב {0}", level.ToString()));
+        header.GetComponent<Text>().text = Flipfont.ReverseText(String.Format("{0} {1}",Utilities.LoadStringFromFile("LevelUpMessage"), level));
         AnimateTutorial(new GameObject[] { Tile1, Tile2, Tile3, TileUp });
     }
 

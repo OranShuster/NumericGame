@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 
 public static class Utilities
@@ -9,6 +10,14 @@ public static class Utilities
                         s1.Row == s2.Row)
                         && Mathf.Abs(s1.Column - s2.Column) <= 1
                         && Mathf.Abs(s1.Row - s2.Row) <= 1;
+    }
+
+    public static string LoadStringFromFile(string key, int lineLength=15)
+    {
+        INIParser ini = new INIParser();
+        TextAsset asset = Resources.Load("StringsFile") as TextAsset;
+        ini.Open(asset);
+        return Flipfont.ReverseText(ini.ReadValue("Translation", key, key), lineLength);
     }
     public static string PrintArray(int[] arr)
     {
@@ -23,14 +32,26 @@ public static class Utilities
     public static void CreateMockUserData()
     {
         var mockDates = new PlayDate[3];
-        mockDates[0] =new PlayDate() {session_length = 10000,sessions = 3,date = DateTime.Today.ToString(Constants.DateFormat)};
-        mockDates[0].GameRuns.Add(new Runs(20, 55, "18:30:00"));
+        mockDates[0] = new PlayDate() {session_length = 10000,sessions = 3,date = DateTime.Today.ToString(Constants.DateFormat)};
+        mockDates[0].GameRounds.Add(new Rounds(20, 55, "18:30:00"));
         mockDates[1] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.AddDays(1).ToString(Constants.DateFormat) };
-        mockDates[1].GameRuns.Add(new Runs(40, 55, "22:12:00"));
-        mockDates[1].GameRuns.Add(new Runs(150, 200,"09:05:55"));
+        mockDates[1].GameRounds.Add(new Rounds(40, 55, "22:12:00"));
+        mockDates[1].GameRounds.Add(new Rounds(10, 200,"09:05:55"));
+        mockDates[1].GameRounds.Add(new Rounds(20, 200, "10:05:55"));
+        mockDates[1].GameRounds.Add(new Rounds(30, 200, "11:05:55"));
+        mockDates[1].GameRounds.Add(new Rounds(40, 200, "12:05:55"));
+        mockDates[1].GameRounds.Add(new Rounds(50, 200, "13:05:55"));
+        mockDates[1].GameRounds.Add(new Rounds(60, 200, "14:05:55"));
+        mockDates[1].GameRounds.Add(new Rounds(70, 200, "15:05:55"));
+        mockDates[1].GameRounds.Add(new Rounds(80, 200, "16:05:55"));
+        mockDates[1].GameRounds.Add(new Rounds(90, 200, "17:05:55"));
         mockDates[2] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.AddDays(2).ToString(Constants.DateFormat) };
-        var userInfo = new UserInformation() { UserLocalData =  new UserLocalData(){PlayDates = mockDates,UserCode = "TESTTEST"}};
-        userInfo.Save();
+        var userLocalData = new UserLocalData(mockDates, "desiree");
+        UserStatistics.Save(userLocalData);
+    }
+    public static bool IsTestCode(string usercode)
+    {
+        return usercode == Constants.TestCode;
     }
 }
 
@@ -72,6 +93,15 @@ public static class DebugUtilities
             x += Environment.NewLine;
         }
         return x;
+    }
+    public static Color hexToRgb(string hex)
+    {
+        var bigint = Convert.ToUInt32(hex, 16);
+        var r = (bigint >> 16) & 255;
+        var g = (bigint >> 8) & 255;
+        var b = bigint & 255;
+
+        return new Color(r,g,b);
     }
 }
 

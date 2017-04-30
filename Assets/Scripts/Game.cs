@@ -86,6 +86,11 @@ public class Game : MonoBehaviour
                                 StartCoroutine(FindMatchesAndCollapse(hit));
                             }
                         }
+                        else
+                        {
+                            _state = GameState.Playing;
+                            hit.GetComponent<Image>().color = Constants.ColorBase;
+                        }
                         break;
                 }
             }

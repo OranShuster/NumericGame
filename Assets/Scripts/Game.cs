@@ -29,6 +29,8 @@ public class Game : MonoBehaviour
     public Text DebugText;
     public bool DebugMode;
 
+    private SoundManager soundManager;
+
     public GameState GetState()
     {
         return _state;
@@ -47,6 +49,7 @@ public class Game : MonoBehaviour
         var playHeight = (int)GameField.rectTransform.rect.height - spacingSize;
         _cellSize = new Vector2(playWidth / (float)_maxNumber, playHeight / (float)_maxNumber);
         StartCoroutine(InitializeCellAndSpawnPositions());
+        soundManager = GetComponent<SoundManager>();
     }
 
     // Update is called once per frame
@@ -152,6 +155,7 @@ public class Game : MonoBehaviour
                 item.GetComponent<Image>().color = Constants.ColorMatched;
             }
             if (!quickMode)
+                soundManager.PlayCrincle();
                 yield return new WaitForSeconds(0.75f);
 
             foreach (var item in totalMatches.MatchedCells.Distinct())

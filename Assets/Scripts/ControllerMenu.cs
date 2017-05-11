@@ -19,6 +19,9 @@ public class ControllerMenu : MonoBehaviour
     public Sprite DateStatusBadImage; 
     public Sprite DateStatisOkImage;
 
+    public Button StartGameButton;
+    public Text StartGameErrorText;
+
     void Start()
     {
         StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton");
@@ -32,6 +35,12 @@ public class ControllerMenu : MonoBehaviour
             foreach (var run in date.GameRounds)
                 AddRoundToScrollView(run);
             AddEmptyLineToScrollView();
+        }
+        if (_userStatistics.CanPlay() == 0)
+        {
+            StartGameButton.interactable = false;
+            StartGameErrorText.enabled = true;
+            StartGameErrorText.text = Utilities.LoadStringFromFile("NoMoreTimeInSession", 25);
         }
     }
 
@@ -47,7 +56,8 @@ public class ControllerMenu : MonoBehaviour
 
     private void AddEmptyLineToScrollView()
     {
-        var go = Instantiate(new GameObject("EmptyRow"), new Vector2(500, 100), Quaternion.identity);
+        var go = new GameObject("EmptyRow");
+        go.transform.localPosition = new Vector2(500, 100);
         go.layer = 5;
         go.transform.SetParent(PlayStatsViewContent.transform, false);
     }

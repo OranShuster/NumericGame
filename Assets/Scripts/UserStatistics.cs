@@ -14,10 +14,10 @@ public class PlayDate
     public int session_id { get; set; }
     public string date { get; set; }
     public int sessions { get; set; }
-    public float session_length { get; set; }
+    public int session_length { get; set; }
     public int session_interval { get; set; }
     public int CurrentSession = 1;
-    public float CurrentSessionTimeSecs = 0;
+    public int CurrentSessionTimeSecs = 0;
     public int LastSessionsEndTime = 0;
     public List<Rounds> GameRounds = new List<Rounds>();
 
@@ -137,13 +137,13 @@ public class UserStatistics : IEnumerable
         return Encoding.ASCII.GetString(dl.data);
     }
 
-    public float CanPlay()
+    public int CanPlay()
     {
         var todayDateEntry = GetToday();
         if (todayDateEntry != null && todayDateEntry.CurrentSession <= todayDateEntry.sessions)
         {
             var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
-            var finishedSession = Mathf.Ceil(todayDateEntry.CurrentSessionTimeSecs) == 0;
+            var finishedSession = todayDateEntry.CurrentSessionTimeSecs == 0;
             if (finishedSession)
             {
                 if (timeSinceLastCompleteSession >= todayDateEntry.session_interval)

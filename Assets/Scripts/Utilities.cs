@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.IO;
-using Newtonsoft.Json;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -56,15 +54,52 @@ public static class Utilities
     {
         return usercode == Constants.TestCode;
     }
-    public static void SendLogsToServer(string logString, string stackTrace, LogType type)
+    public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
         var MinLogLevel = LogType.Log;
+        if (type == LogType.Exception || type == LogType.Assert)
+            OpenGitHubIssue(logString + "\n" + stackTrace);
         if (MinLogLevel >= type)
         {
             var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
             request.Send();
         }
     }
+
+    public static string OpenGitHubIssue(string exceptionData)
+    {
+        var url = Constants.GitHubIssueBaseUrl;
+        var title = string.Format("Exception occured! {0}", Guid.NewGuid());
+        var body = JsonUtility.ToJson(new GithubIssueRequest(title, exceptionData));
+        var request = new UnityWebRequest(url);
+        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.method = UnityWebRequest.kHttpVerbPOST;
+        request.uploadHandler.contentType = "application/json";
+        request.SetRequestHeader("content-type", "application/json");
+        request.SetRequestHeader("authorization", "token 19207a29da1926f4c2bdbbf1598473186544829f");
+
+        request.Send();
+        while (request.isDone == false)
+        {
+        }
+        var dl = request.downloadHandler;
+        return dl.text;
+    }
+}
+
+public class GithubIssueRequest
+{
+    public string title;
+    public string body;
+    public string assignee = "OranShuster";
+
+    public GithubIssueRequest(string title, string body)
+    {
+        this.title = title;
+        this.body = body;
+    }
+
 }
 
 public static class DebugUtilities

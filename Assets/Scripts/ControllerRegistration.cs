@@ -34,7 +34,7 @@ public class ControllerRegistration : MonoBehaviour
 
     void Start()
     {
-        Application.logMessageReceived += Utilities.SendLogsToServer;
+        Application.logMessageReceived += Utilities.LoggerCallback;
 
         if (UserStatistics.PlayerDataExists())
         {

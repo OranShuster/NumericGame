@@ -16,8 +16,10 @@ public class ControllerRegistration : MonoBehaviour
         RegistrationErrorText.text = "";
         try
         {
-            UserStatistics _userStatistics = new UserStatistics(usercode);
-            SceneManager.LoadScene("MainMenu");
+            UserStatistics userStatistics = new UserStatistics(usercode);
+            if (userStatistics.UserLocalData!=null)
+                SceneManager.LoadScene("MainMenu");
+            ShowRegistrationErrorMessage();
         }
         catch
         {
@@ -30,9 +32,10 @@ public class ControllerRegistration : MonoBehaviour
         RegistrationErrorText.text = Utilities.LoadStringFromFile("RegistrationErrorMessage");
     }
 
-    // Use this for initialization
     void Start()
     {
+        Application.logMessageReceived += Utilities.SendLogsToServer;
+
         if (UserStatistics.PlayerDataExists())
         {
             SceneManager.LoadScene("MainMenu");

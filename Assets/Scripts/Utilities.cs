@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
+using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public static class Utilities
 {
@@ -53,6 +56,15 @@ public static class Utilities
     {
         return usercode == Constants.TestCode;
     }
+    public static void SendLogsToServer(string logString, string stackTrace, LogType type)
+    {
+        var MinLogLevel = LogType.Log;
+        if (MinLogLevel >= type)
+        {
+            var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
+            request.Send();
+        }
+    }
 }
 
 public static class DebugUtilities
@@ -94,7 +106,7 @@ public static class DebugUtilities
         }
         return x;
     }
-    public static Color hexToRgb(string hex)
+    public static Color HexToRgb(string hex)
     {
         var bigint = Convert.ToUInt32(hex, 16);
         var r = (bigint >> 16) & 255;

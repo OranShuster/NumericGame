@@ -153,7 +153,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         var headerMsg = "Game_Over";
         if (SessionTimeUp)
             headerMsg = "Session_Ended";
-        UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
+        UserInfo.AddPlayTime((int)_totalTimePlayed, Mathf.Max(0,Score));
         ShowMessage(headerMsg, Score,(int)_totalTimePlayed,true);
     }
     public void LevelUp(int level)

@@ -21,3 +21,5 @@ Time=זמן
 Level=שלב
 Pause=השהייה
 Menu=תפריט
+NoMoreTimeInSession=הזמן משחק לסשן זה נגמר
+NoPlayerStatisticsLoaded=לא נטענו נתוני שחקן

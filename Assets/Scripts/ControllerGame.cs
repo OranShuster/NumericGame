@@ -23,6 +23,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     public Text TimeHeaderText;
     public Text ScoreHeaderText;
     public Text LevelHeaderText;
+    public Text MenuButtonText;
     public GameObject NumberTilePrefab;
     public Image GameTimerBar;
     public int Score { get; set; }
@@ -54,6 +55,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         TimeHeaderText.text = Utilities.LoadStringFromFile("Time");
         ScoreHeaderText.text = Utilities.LoadStringFromFile("Score");
         LevelHeaderText.text = Utilities.LoadStringFromFile("Level");
+        MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
     }
 
     // Update is called once per frame

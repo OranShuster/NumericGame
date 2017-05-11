@@ -364,4 +364,14 @@ public class Game : MonoBehaviour
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = !GameField.gameObject.GetComponent<CanvasGroup>().interactable;
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = Math.Abs(GameField.gameObject.GetComponent<CanvasGroup>().alpha-1);
     }
+
+    public void SetNextLevelScore(int score)
+    {
+        NextLevelScore = score;
+        if (_controllerScript.Score >= NextLevelScore)
+        {
+            StartCoroutine(LevelUp());
+            _controllerScript.LevelUp(SeriesDelta);
+        }
+    }
 }

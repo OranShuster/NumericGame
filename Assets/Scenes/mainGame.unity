@@ -1608,11 +1608,6 @@ Prefab:
       propertyPath: DebugText
       value: 
       objectReference: {fileID: 1825030267}
-    - target: {fileID: 114590511579031836, guid: d236df4e2b2f20f43b01ca7141bba298,
-        type: 2}
-      propertyPath: NextLevelScore
-      value: 50
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d236df4e2b2f20f43b01ca7141bba298, type: 2}
   m_IsPrefabParent: 0

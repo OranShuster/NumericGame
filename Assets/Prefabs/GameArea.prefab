@@ -24,6 +24,7 @@ GameObject:
   - component: {fileID: 114073863955962134}
   - component: {fileID: 114590511579031836}
   - component: {fileID: 225259869619223558}
+  - component: {fileID: 114354121960823640}
   m_Layer: 5
   m_Name: GameArea
   m_TagString: Untagged
@@ -44,6 +45,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_AspectMode: 1
   m_AspectRatio: 1
+--- !u!114 &114354121960823640
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1223480631134122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc7f14039170f5343babba41587a61c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CrincleAudioClip: {fileID: 0}
 --- !u!114 &114590511579031836
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -111,7 +124,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 550, y: 0}
+  m_AnchoredPosition: {x: 560, y: 0}
   m_SizeDelta: {x: 1000, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &225259869619223558

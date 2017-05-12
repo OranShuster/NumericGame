@@ -166,12 +166,9 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         _gameTimer = Constants.StartingGameTimer;
         ShowLevelupTutorial(level);
     }
-    public void BackToMenu(bool SaveData=false)
+    public void BackToMenu()
     {
-        if (SaveData)
-        {
-            UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
-        }
+        UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
         SceneManager.LoadScene("MainMenu");
     }
     public void QuitGame()

@@ -73,7 +73,7 @@ MonoBehaviour:
     type: 2}
   Manager: {fileID: 0}
   GameField: {fileID: 114951096184592640}
-  NextLevelScore: 200
+  NextLevelScore: f4010000e8030000ffffff7f
   DebugText: {fileID: 0}
   DebugMode: 0
 --- !u!114 &114951096184592640

@@ -56,7 +56,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc7f14039170f5343babba41587a61c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CrincleAudioClip: {fileID: 0}
+  CrincleAudioClip: {fileID: 8300000, guid: 3f138b0e318244443aee9bb88c46891a, type: 3}
 --- !u!114 &114590511579031836
 MonoBehaviour:
   m_ObjectHideFlags: 1

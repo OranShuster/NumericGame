@@ -13,8 +13,7 @@ public class Game : MonoBehaviour
     public int SeriesDelta = 0;
     private Vector2 _cellSize;
     private GameObject _hitGo = null;
-    //private SoundManager SoundManager;
-    Sprite[] _numberSquareSprites;
+    private Sprite[] _numberSquareSprites;
     private GameState _state;
     private int _maxNumber;
     private int _rows;
@@ -32,19 +31,16 @@ public class Game : MonoBehaviour
     private SoundManager _soundManager;
     private string _tileImagesFolder;
 
-    public GameState GetState()
-    {
-        return _state;
-    }
-    // Use this for initialization
-    void Start()
+    void Awake()
     {
         _state = GameState.Animating;
         _controllerScript = Manager.GetComponent<IControllerInterface>();
-        if (_controllerScript.IsControl())
-            _tileImagesFolder = "Images/Control";
-        else
-            _tileImagesFolder = "Imgaes/Numbers";
+        _soundManager = GetComponent<SoundManager>();
+    }
+
+    void Start()
+    {
+        _tileImagesFolder = _controllerScript.IsControl() ? "Images/Control" : "Images/Numbers";
         _numberSquareSprites = Resources.LoadAll<Sprite>(_tileImagesFolder).OrderBy(t => Convert.ToInt32(t.name)).ToArray();
         _maxNumber = _numberSquareSprites.Length;
         _rows = _maxNumber;
@@ -54,7 +50,6 @@ public class Game : MonoBehaviour
         var playHeight = (int)GameField.rectTransform.rect.height - spacingSize;
         _cellSize = new Vector2(playWidth / (float)_maxNumber, playHeight / (float)_maxNumber);
         StartCoroutine(InitializeCellAndSpawnPositions());
-        _soundManager = GetComponent<SoundManager>();
     }
 
     // Update is called once per frame
@@ -74,7 +69,7 @@ public class Game : MonoBehaviour
                 {
                     case GameState.Playing:
                         _hitGo = hit;
-                        _hitGo.GetComponent<Image>().color = Constants.ColorSelected;
+                        SetTileColorSelected(_hitGo);
                         _state = GameState.SelectionStarted;
                         break;
                     case GameState.SelectionStarted:
@@ -82,8 +77,8 @@ public class Game : MonoBehaviour
                         {
                             if (!Utilities.AreNeighbors(_hitGo.GetComponent<NumberCell>(), hit.GetComponent<NumberCell>()))
                             {
-                                _hitGo.GetComponent<Image>().color = Constants.ColorBase;
-                                hit.GetComponent<Image>().color = Constants.ColorSelected;
+                                SetTileColorBase(_hitGo);
+                                SetTileColorSelected(hit);
                                 _hitGo = hit;
                             }
                             else
@@ -97,12 +92,35 @@ public class Game : MonoBehaviour
                         else
                         {
                             _state = GameState.Playing;
-                            hit.GetComponent<Image>().color = Constants.ColorBase;
+                            SetTileColorBase(hit);
                         }
                         break;
                 }
             }
         }
+    }
+
+    public GameState GetState()
+    {
+        return _state;
+    }
+    private void SetTileColorBase(GameObject go)
+    {
+        go.GetComponent<Image>().color = _controllerScript.IsControl()
+            ? Constants.ControlBaseColors[go.GetComponent<NumberCell>().Value - 1]
+            : Constants.ColorBase;
+    }
+    private void SetTileColorSelected(GameObject go)
+    {
+        go.GetComponent<Image>().color = _controllerScript.IsControl()
+            ? Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1]
+            : Constants.ColorSelected;
+    }
+    private void SetTileColorMatched(GameObject go)
+    {
+        go.GetComponent<Image>().color = _controllerScript.IsControl()
+            ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
+            : Constants.ColorMatched;
     }
 
     public IEnumerator InitializeCellAndSpawnPositions()
@@ -157,7 +175,7 @@ public class Game : MonoBehaviour
             }
             foreach (var item in totalMatches.MatchedCells.Distinct())
             {
-                item.GetComponent<Image>().color = Constants.ColorMatched;
+                SetTileColorMatched(item);
             }
             if (!quickMode)
                 _soundManager.PlayCrincle();
@@ -213,17 +231,17 @@ public class Game : MonoBehaviour
         _state = GameState.Animating;
         //get the second item that was part of the swipe
         var hitGo2 = hit2;
-        hitGo2.GetComponent<Image>().color = Constants.ColorSelected;
+        SetTileColorSelected(hitGo2);
         _shapes.Swap(_hitGo, hitGo2);
 
         //move the swapped ones
         _hitGo.transform.ZKlocalPositionTo(hitGo2.transform.localPosition, Constants.AnimationDuration).start();
         hitGo2.transform.ZKlocalPositionTo(_hitGo.transform.localPosition, Constants.AnimationDuration).start();
-        yield return new WaitForSeconds(Constants.AnimationDuration);
+        yield return new WaitForSeconds(Constants.AnimationDuration * 1.1f);
 
         //remove selection color from squares
-        hitGo2.GetComponent<Image>().color = Constants.ColorBase;
-        _hitGo.GetComponent<Image>().color = Constants.ColorBase;
+        SetTileColorBase(hitGo2);
+        SetTileColorBase(_hitGo);
 
         //get the matches via the helper methods
         var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, new List<GameObject>());
@@ -251,7 +269,7 @@ public class Game : MonoBehaviour
     private void InstantiateAndPlaceNewCell(int row, int column, GameObject cellPrefab)
     {
         var location = calculate_cell_location(row, column);
-        var go = Instantiate(cellPrefab, new Vector2(location[0], -(location[1])), Quaternion.identity) as GameObject;
+        var go = Instantiate(cellPrefab, new Vector2(location[0], -location[1]), Quaternion.identity);
         go.transform.SetParent(GameField.transform, false);
         go.layer = 5; //5=UI Layer
         var goTransform = go.transform as RectTransform;
@@ -262,6 +280,7 @@ public class Game : MonoBehaviour
         //assign the specific properties
         go.GetComponent<NumberCell>().Assign(numberValue, row, column);
         go.GetComponent<Image>().overrideSprite = _numberSquareSprites[numberValue - 1];
+        SetTileColorBase(go);
         _shapes.Add(go);
     }
 
@@ -309,8 +328,7 @@ public class Game : MonoBehaviour
             var location = calculate_cell_location(item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column);
             var itemRectTransform = item.GetComponent<RectTransform>() as RectTransform;
             itemRectTransform.ZKanchoredPositionTo(new Vector2(location[0], -location[1]), duration * distance).start();
-            Debug.logger.Log("{180217|2143",
-                String.Format("Moved object to x={0} y={1}", location[0], -location[1]));
+            //Debug.logger.Log("{180217|2143",String.Format("Moved object to x={0} y={1}", location[0], -location[1]));
         }
     }
     public static void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
@@ -326,7 +344,7 @@ public class Game : MonoBehaviour
 
     private void RemoveFromScene(GameObject item)
     {
-        item.GetComponent<Image>().color = Constants.ColorMatched;
+        SetTileColorMatched(item);
         Destroy(item);
     }
 
@@ -347,6 +365,7 @@ public class Game : MonoBehaviour
                 newCell.transform.SetAsFirstSibling();
                 newCell.GetComponent<NumberCell>().Assign(numberValue, item.Row, item.Column);
                 newCell.GetComponent<Image>().overrideSprite = _numberSquareSprites[numberValue-1];
+                SetTileColorBase(newCell);
                 var newCellRectTransform = newCell.GetComponent<RectTransform>() as RectTransform;
                 newCellRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _cellSize.x);
                 newCellRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, _cellSize.y);

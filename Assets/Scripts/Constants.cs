@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UnityEngine;
 
 public static class Constants
 {
@@ -14,13 +15,43 @@ public static class Constants
     public static readonly int MinimumMatches = 3;
 
 
-    public static Color ColorBase = new Color(66 / 255f, 133 / 255f, 244 / 255f);
-    public static Color ColorSelected = new Color(100 / 255f, 181 / 255f, 246 / 255f);
-    public static Color ColorMatched = new Color(21 / 255f, 101 / 255f, 192 / 255f);
-    public static Color ColorDangerRed = new Color(204 / 255f, 0, 0);
-    public static Color ColorWarningOrange = new Color(255 / 255f, 136/255f, 0);
-    public static Color ColorOKGreen = new Color(0, 126 / 255f, 51 / 255f);
+    public static Color32 ColorBase = new Color32(66, 133, 244, 255);
+    public static Color32 ColorSelected = new Color32(100, 181, 246, 255);
+    public static Color32 ColorMatched = new Color32(21, 101, 192, 255);
+    public static Color32 ColorDangerRed = new Color32(204, 0, 0, 255);
+    public static Color32 ColorWarningOrange = new Color32(255, 136, 0, 255);
+    public static Color32 ColorOKGreen = new Color32(0, 126, 51,255);
+    public static Color32[] ControlBaseColors = new[]
+    {
+        new Color32(244,67,54,255),
+        new Color32(255,152,0,255),
+        new Color32(76,175,80,255),
+        new Color32(0,153,204,255),
+        new Color32(96,125,139,255),
+        new Color32(205,220,57,255), 
+        new Color32(156,39,176,255)
 
+    };
+    public static Color32[] ControlSelectedColors = new[]
+    {
+        new Color32(239,83,80,255),
+        new Color32(255,167,38,255),
+        new Color32(102,187,106,255),
+        new Color32(51,181,229,255),
+        new Color32(120,144,156,255),
+        new Color32(212,225,87,255),
+        new Color32(171,71,188,255)
+    };
+    public static Color32[] ControlMatchedColors = new[]
+    {
+        new Color32(229,57,53,255),
+        new Color32(251,140,0,255),
+        new Color32(67,160,71,255),
+        new Color32(0,151,167,255),
+        new Color32(84,110,122,255),
+        new Color32(192,202,51,255),
+        new Color32(142,36,170,255)
+    };
 
 
     public static readonly float StartingGameTimer = 60;
@@ -30,11 +61,12 @@ public static class Constants
 
     public static string DateFormat = "yyyy-MM-dd";
     public static string DateFormatOutput = "dd/MM/yyyy";
-    public static string BaseUrl = "http://192.168.1.203:8888/game/";
+    public static string BaseUrl = "https://cnl.bgu.ac.il/numeric_game/playrpc/";
     public static string GitHubIssueBaseUrl = "https://api.github.com/repos/OranShuster/NumericGameMirror/issues";
 
     public const string TestCode = "desiree";
     public const string TestCode2 = "desiree2";
+
 
 
 }

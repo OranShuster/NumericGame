@@ -284,8 +284,8 @@ public class Game : MonoBehaviour
     public IEnumerator LevelUp()
     {
         _state = GameState.Animating;
-        NextLevelScore += NextLevelScore;
         SeriesDelta += 1;
+        NextLevelScore += NextLevelScore * SeriesDelta;
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = false;
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = 0;
 		ZestKit.instance.stopAllTweens();

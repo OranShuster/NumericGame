@@ -38,12 +38,14 @@ public class ControllerRegistration : MonoBehaviour
     void Start()
     {
         Application.logMessageReceived += Utilities.LoggerCallback;
-        RegistrationHeader.text = Utilities.LoadStringFromFile("UserRegistrationHeader");
-        SubmitButtonText.text = Utilities.LoadStringFromFile("ConfirmText");
-        RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");
         if (UserStatistics.PlayerDataValid())
         {
             SceneManager.LoadScene("MainMenu");
+            return;
         }
+        RegistrationHeader.text = Utilities.LoadStringFromFile("UserRegistrationHeader");
+        SubmitButtonText.text = Utilities.LoadStringFromFile("ConfirmText");
+        RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");
+
     }
 }

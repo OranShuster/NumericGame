@@ -167,7 +167,6 @@ public class Game : MonoBehaviour
     {
         while (totalMatches.MatchedCells.Count() >= Constants.MinimumMatches)
         {
-            Debug.logger.Log("Match_Score{02061724}", totalMatches.PrintMatches());
             if (withScore)
             {
                 _controllerScript.IncreaseScore(totalMatches.AddedScore);
@@ -178,8 +177,11 @@ public class Game : MonoBehaviour
                 SetTileColorMatched(item);
             }
             if (!quickMode)
+            {
+                Debug.logger.Log("Match_Score{02061724}", totalMatches.PrintMatches());
                 _soundManager.PlayCrincle();
                 yield return new WaitForSeconds(0.75f);
+            }
 
             foreach (var item in totalMatches.MatchedCells.Distinct())
             {

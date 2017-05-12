@@ -70,6 +70,8 @@ public class ControllerMenu : MonoBehaviour
         var go = Instantiate(RoundStatsPrefab, new Vector2(500, -yLoc), Quaternion.identity);
         go.layer = 5;
         go.transform.SetParent(PlayStatsViewContent.transform, false);
+        var ContentRect = PlayStatsViewContent.transform as RectTransform;
+        ContentRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, yLoc + dateStatsRect.rect.height);
         return go;
     }
 

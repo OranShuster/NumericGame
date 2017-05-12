@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class ControllerRegistration : MonoBehaviour
 {
     public Text RegistrationHeader;
-    public Text RegistrationCodeInputField;
+    public InputField RegistrationCodeInputField;
     public Text SubmitButtonText;
     public Text RegistrationCodeInputPlaceholderText;
     public Text RegistrationErrorText;
@@ -32,7 +32,7 @@ public class ControllerRegistration : MonoBehaviour
 
     private void ShowRegistrationErrorMessage()
     {
-        RegistrationErrorText.text = Utilities.LoadStringFromFile("RegistrationErrorMessage");
+        RegistrationErrorText.text = Utilities.LoadStringFromFile("RegistrationErrorMessage",50);
     }
 
     void Start()

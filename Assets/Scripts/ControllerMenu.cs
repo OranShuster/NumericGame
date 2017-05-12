@@ -20,6 +20,7 @@ public class ControllerMenu : MonoBehaviour
     public Sprite DateStatisOkImage;
 
     public Button StartGameButton;
+    public GameObject DeleteSaveButton;
     public Text StartGameErrorText;
 
     void Start()
@@ -41,6 +42,10 @@ public class ControllerMenu : MonoBehaviour
             StartGameButton.interactable = false;
             StartGameErrorText.enabled = true;
             StartGameErrorText.text = Utilities.LoadStringFromFile("NoMoreTimeInSession", 25);
+        }
+        if (_userStatistics.IsTestUser())
+        {
+            DeleteSaveButton.SetActive(true);
         }
     }
 
@@ -136,5 +141,11 @@ public class ControllerMenu : MonoBehaviour
             dateStatus.sprite = (date.CurrentSession <= date.sessions) ? DateStatusBadImage : DateStatisOkImage;
         if (DateTime.Today < playDate)
             dateStatus.sprite = null;
+    }
+
+    public void DeleteSavesAndExit()
+    {
+        _userStatistics.DeleteSave();
+        Application.Quit();
     }
 }

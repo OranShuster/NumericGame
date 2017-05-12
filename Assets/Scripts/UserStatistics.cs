@@ -283,4 +283,9 @@ public class UserStatistics : IEnumerable
     {
         return Utilities.IsTestCode(UserLocalData.UserCode);
     }
+
+    public void DeleteSave()
+    {
+        File.Delete(_userDataPath);
+    }
 }

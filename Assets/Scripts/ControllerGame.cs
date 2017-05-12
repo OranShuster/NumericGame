@@ -163,6 +163,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         var levelString = level.ToString();
         LevelNumText.text = levelString;
         GamePaused = true;
+        _gameTimer = Constants.StartingGameTimer;
         ShowLevelupTutorial(level);
     }
     public void BackToMenu(bool SaveData=false)
@@ -224,7 +225,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         Tile2.GetComponent<Image>().overrideSprite =numberSquareSprites[0 + level];
         Tile3.GetComponent<Image>().overrideSprite= numberSquareSprites[0 + level*2];
         TileUp.GetComponent<Image>().overrideSprite = numberSquareSprites[numberSquareSprites.Length-1];
-        header.GetComponent<Text>().text = Flipfont.ReverseText(String.Format("{0} {1}",Utilities.LoadStringFromFile("LevelUpMessage"), level));
+        header.GetComponent<Text>().text = String.Format("{0} {1}",level, Utilities.LoadStringFromFile("LevelUpMessage"));
         AnimateTutorial(new GameObject[] { Tile1, Tile2, Tile3, TileUp });
     }
 

@@ -35,19 +35,8 @@ public static class Utilities
     public static void CreateMockUserData()
     {
         var mockDates = new PlayDate[3];
-        mockDates[0] = new PlayDate() {session_length = 10000,sessions = 3,date = DateTime.Today.ToString(Constants.DateFormat)};
-        mockDates[0].GameRounds.Add(new Rounds(20, 55, "18:30:00"));
+        mockDates[0] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.ToString(Constants.DateFormat)};
         mockDates[1] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.AddDays(1).ToString(Constants.DateFormat) };
-        mockDates[1].GameRounds.Add(new Rounds(40, 55, "22:12:00"));
-        mockDates[1].GameRounds.Add(new Rounds(10, 200,"09:05:55"));
-        mockDates[1].GameRounds.Add(new Rounds(20, 200, "10:05:55"));
-        mockDates[1].GameRounds.Add(new Rounds(30, 200, "11:05:55"));
-        mockDates[1].GameRounds.Add(new Rounds(40, 200, "12:05:55"));
-        mockDates[1].GameRounds.Add(new Rounds(50, 200, "13:05:55"));
-        mockDates[1].GameRounds.Add(new Rounds(60, 200, "14:05:55"));
-        mockDates[1].GameRounds.Add(new Rounds(70, 200, "15:05:55"));
-        mockDates[1].GameRounds.Add(new Rounds(80, 200, "16:05:55"));
-        mockDates[1].GameRounds.Add(new Rounds(90, 200, "17:05:55"));
         mockDates[2] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.AddDays(2).ToString(Constants.DateFormat) };
         var userLocalData = new UserLocalData(mockDates, "desiree");
         UserStatistics.Save(userLocalData);

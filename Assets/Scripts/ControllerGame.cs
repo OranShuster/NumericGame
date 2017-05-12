@@ -178,12 +178,14 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     public void BackToMenu()
     {
         UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
+        SendUserInfoToServer(true);
         ZestKit.instance.stopAllTweens();
         SceneManager.LoadScene("MainMenu");
     }
     public void QuitGame()
     {
         UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
+        SendUserInfoToServer(true);
         Application.Quit();
     }
     public IEnumerator ShowMessage(string header, int Score, int Time, bool CanGoBack = false)
@@ -286,9 +288,9 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         return GamePaused;
     }
 
-    void SendUserInfoToServer()
+    void SendUserInfoToServer(bool blocking)
     {
-        StartCoroutine(UserInfo.SendUserInfoToServer());
+        StartCoroutine(UserInfo.SendUserInfoToServer(blocking));
     }
 
     public bool IsControl()

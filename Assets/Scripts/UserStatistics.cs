@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using System.Collections;
 using System.Text;
 using Newtonsoft.Json.Serialization;
+using UnityEngine.UI;
 
 [Serializable]
 public class PlayDate
@@ -253,7 +254,7 @@ public class UserStatistics : IEnumerable
     {
         return (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
     }
-    public IEnumerator SendUserInfoToServer()
+    public IEnumerator SendUserInfoToServer(bool blocking=false)
     {
         if (ScoreReportsToBeSent.Count > 0)
         {
@@ -261,7 +262,14 @@ public class UserStatistics : IEnumerable
             var reportsCount = scoreReportsArr.GetLength(0);
             var jsonString = JsonConvert.SerializeObject(scoreReportsArr);
             var request = UnityWebRequest.Post(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId), jsonString);
-            yield return request.Send();
+            if (blocking)
+            {
+                request.Send();
+                while (!request.isDone)
+                    System.Threading.Thread.Sleep(250);
+            }
+            else
+                yield return request.Send();
             if (request.isError)
                 Debug.LogWarning(request.error);
             else

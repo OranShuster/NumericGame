@@ -25,7 +25,7 @@ public class Game : MonoBehaviour
     public GameObject NumberSquarePrefab;
     public GameObject Manager;
     public Image GameField;
-    public int NextLevelScore;
+    public int[] NextLevelScore;
     public Text DebugText;
     public bool DebugMode;
 
@@ -182,7 +182,7 @@ public class Game : MonoBehaviour
             //will wait for both of the above animations
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
-            if (_controllerScript.Score >= NextLevelScore)
+            if (_controllerScript.Score >= NextLevelScore[SeriesDelta])
                 break;
 
             //search if there are empty mathes
@@ -194,7 +194,7 @@ public class Game : MonoBehaviour
             }
 
         }
-        if (_controllerScript.Score >= NextLevelScore)
+        if (_controllerScript.Score >= NextLevelScore[SeriesDelta])
         {
             StartCoroutine(LevelUp());
             _controllerScript.LevelUp(SeriesDelta);
@@ -285,7 +285,6 @@ public class Game : MonoBehaviour
     {
         _state = GameState.Animating;
         SeriesDelta += 1;
-        NextLevelScore += NextLevelScore * SeriesDelta;
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = false;
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = 0;
 		ZestKit.instance.stopAllTweens();
@@ -365,10 +364,10 @@ public class Game : MonoBehaviour
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = Math.Abs(GameField.gameObject.GetComponent<CanvasGroup>().alpha-1);
     }
 
-    public void SetNextLevelScore(int score)
+    public void SetNextLevelScore(int score, int level)
     {
-        NextLevelScore = score;
-        if (_controllerScript.Score >= NextLevelScore)
+        NextLevelScore[level] = score;
+        if (_controllerScript.Score >= NextLevelScore[SeriesDelta])
         {
             StartCoroutine(LevelUp());
             _controllerScript.LevelUp(SeriesDelta);

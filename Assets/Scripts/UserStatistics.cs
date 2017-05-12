@@ -11,21 +11,39 @@ using Newtonsoft.Json.Serialization;
 [Serializable]
 public class PlayDate
 {
-    public string code { get; set; }
+    public string Email { get; set; }
+    public string Code { get; set; }
     public int session_id { get; set; }
-    public string date { get; set; }
-    public int sessions { get; set; }
-    public int session_length { get; set; }
-    public int session_interval { get; set; }
-    public int control { get; set; }
+    public string Date { get; set; }
+    public int NumberOfSessions { get; set; }
+    public int SessionLength { get; set; }
+    public int SessionInterval { get; set; }
+    public int Control { get; set; }
     public int CurrentSession = 1;
     public int CurrentSessionTimeSecs = 0;
     public int LastSessionsEndTime = 0;
     public List<Rounds> GameRounds = new List<Rounds>();
 
+    [JsonConstructor]
+    public PlayDate(string code, int session_length, string start_date, int num_of_sessions, int control, string email,
+        int session_interval)
+    {
+        Code = code;
+        SessionLength = session_length;
+        SessionInterval = session_interval;
+        Control = control;
+        Date = start_date;
+        NumberOfSessions = num_of_sessions;
+        Email = email;
+    }
+
+    public PlayDate()
+    {
+    }
+
     public string GetRemainingSessionTimeText()
     {
-        TimeSpan t = TimeSpan.FromSeconds(session_length-CurrentSessionTimeSecs);
+        TimeSpan t = TimeSpan.FromSeconds(SessionLength-CurrentSessionTimeSecs);
 
         return string.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
@@ -84,8 +102,8 @@ public class UserLocalData
         UserCode = userCode;
         foreach (var date in PlayDates)
         {
-            date.session_interval *= 60;
-            date.session_length *= 60;
+            date.SessionInterval *= 60;
+            date.SessionLength *= 60;
         }
     }
 
@@ -108,9 +126,10 @@ public class UserStatistics : IEnumerable
     static string _userDataPath = Application.persistentDataPath + "/userData.cjd";
     public UserStatistics(string userCode)
     {
-        if (Utilities.IsTestCode(userCode))
+        var control = Utilities.IsTestCode(userCode);
+        if (control >= 0)
         {
-            Utilities.CreateMockUserData();
+            Utilities.CreateMockUserData(control);
             UserLocalData = Load();
         }
         else
@@ -128,31 +147,33 @@ public class UserStatistics : IEnumerable
 
     public string GetJsonFromServer(string userCode)
     {
-        var getReq = UnityWebRequest.Get(Constants.BaseUrl + String.Format("{0}", userCode));
+        var getReq = UnityWebRequest.Get(Constants.BaseUrl + userCode + "/");
         getReq.Send();
-        while (!getReq.isDone) { }
+        while (!getReq.isDone) { System.Threading.Thread.Sleep(500); }
         if (getReq.isError)
         {
             Debug.LogError(getReq.error);
         }
         var dl = getReq.downloadHandler;
-        return Encoding.ASCII.GetString(dl.data);
+        var jsonString = Encoding.ASCII.GetString(dl.data);
+        Debug.Log("Got user json " + jsonString);
+        return jsonString;
     }
 
     public int CanPlay()
     {
         var todayDateEntry = GetToday();
-        if (todayDateEntry != null && todayDateEntry.CurrentSession <= todayDateEntry.sessions)
+        if (todayDateEntry != null && todayDateEntry.CurrentSession <= todayDateEntry.NumberOfSessions)
         {
             var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
             var finishedSession = todayDateEntry.CurrentSessionTimeSecs == 0;
             if (finishedSession)
             {
-                if (timeSinceLastCompleteSession >= todayDateEntry.session_interval)
-                    return todayDateEntry.session_length - todayDateEntry.CurrentSessionTimeSecs;
+                if (timeSinceLastCompleteSession >= todayDateEntry.SessionInterval)
+                    return todayDateEntry.SessionLength - todayDateEntry.CurrentSessionTimeSecs;
                 return 0;
             }
-            return todayDateEntry.session_length - todayDateEntry.CurrentSessionTimeSecs;
+            return todayDateEntry.SessionLength - todayDateEntry.CurrentSessionTimeSecs;
         }
         return 0;
     }
@@ -163,7 +184,7 @@ public class UserStatistics : IEnumerable
         var thisTime = DateTime.Now.ToShortTimeString();
         today.GameRounds.Add(new Rounds(length, score,thisTime));
         today.CurrentSessionTimeSecs += length;
-        if (today.CurrentSessionTimeSecs>today.session_length)
+        if (today.CurrentSessionTimeSecs>today.SessionLength)
         {
             today.CurrentSessionTimeSecs = 0;
             today.LastSessionsEndTime = GetEpochTime();
@@ -218,7 +239,7 @@ public class UserStatistics : IEnumerable
     public PlayDate GetToday()
     {
         var todayDate = DateTime.Today.ToString(Constants.DateFormat);
-        return Array.Find(UserLocalData.PlayDates, x => x.date == todayDate);
+        return Array.Find(UserLocalData.PlayDates, x => x.Date == todayDate);
     }
     public float GetCurrentSessionTime()
     {
@@ -238,18 +259,11 @@ public class UserStatistics : IEnumerable
             var scoreReportsArr = ScoreReportsToBeSent.ToArray();
             var jsonString = JsonConvert.SerializeObject(scoreReportsArr);
             var request = UnityWebRequest.Post(Constants.BaseUrl + string.Format("/{0}/{1}", UserLocalData.UserCode, GetToday().session_id), jsonString);
-            request.Send();
-            while (!request.isDone) {
-                yield return new WaitForSeconds(1f);
-            }
+            yield return request.Send();
             if (request.isError)
-            {
                 Debug.LogWarning(request.error);
-            }
             else
-            {
                 ScoreReportsToBeSent.Clear();
-            }
         }
     }
 
@@ -281,7 +295,8 @@ public class UserStatistics : IEnumerable
 
     public bool IsTestUser()
     {
-        return Utilities.IsTestCode(UserLocalData.UserCode);
+        var control = Utilities.IsTestCode(UserLocalData.UserCode);
+        return  control>=0;
     }
 
     public void DeleteSave()

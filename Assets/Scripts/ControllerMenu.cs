@@ -131,14 +131,14 @@ public class ControllerMenu : MonoBehaviour
         var curSessionTime = go.transform.Find("CurrentSessionTime").gameObject.GetComponent<Text>();
         var dateStatus = go.transform.Find("DateStatus").gameObject.GetComponent<Image>();
         var provider = CultureInfo.InvariantCulture;
-        dateString.text = DateTime.ParseExact(date.date, Constants.DateFormat, provider).ToShortDateString();
-        sessionsString.text = String.Format("{0}/{1}", Math.Min(date.CurrentSession, date.sessions), date.sessions);
+        dateString.text = DateTime.ParseExact(date.Date, Constants.DateFormat, provider).ToShortDateString();
+        sessionsString.text = String.Format("{0}/{1}", Math.Min(date.CurrentSession, date.NumberOfSessions), date.NumberOfSessions);
         curSessionTime.text = String.Format("{0}", date.GetRemainingSessionTimeText());
-        var playDate = DateTime.ParseExact(date.date, Constants.DateFormat, provider);
+        var playDate = DateTime.ParseExact(date.Date, Constants.DateFormat, provider);
         if (DateTime.Today == playDate)
-            dateStatus.sprite = (date.CurrentSession <= date.sessions) ? null : DateStatisOkImage;
+            dateStatus.sprite = (date.CurrentSession <= date.NumberOfSessions) ? null : DateStatisOkImage;
         if (DateTime.Today > playDate)
-            dateStatus.sprite = (date.CurrentSession <= date.sessions) ? DateStatusBadImage : DateStatisOkImage;
+            dateStatus.sprite = (date.CurrentSession <= date.NumberOfSessions) ? DateStatusBadImage : DateStatisOkImage;
         if (DateTime.Today < playDate)
             dateStatus.sprite = null;
     }

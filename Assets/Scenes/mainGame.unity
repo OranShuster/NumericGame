@@ -540,8 +540,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1066478622}
-        m_MethodName: BackToMenu
-        m_Mode: 6
+        m_MethodName: PauseGame
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -1163,6 +1163,7 @@ MonoBehaviour:
   TimerWarningOverlay: {fileID: 913971967}
   LevelupTutorial: {fileID: 1209852540431198, guid: 374724f58fa1a8d43a5666d45046da85,
     type: 2}
+  MenuButton: {fileID: 411954594}
 --- !u!1 &1138240365
 GameObject:
   m_ObjectHideFlags: 0

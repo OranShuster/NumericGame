@@ -32,19 +32,24 @@ public static class Utilities
         return Mathf.Clamp(ret,from2,to2);
     }
 
-    public static void CreateMockUserData()
+    public static void CreateMockUserData(int control)
     {
         var mockDates = new PlayDate[3];
-        mockDates[0] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.ToString(Constants.DateFormat)};
-        mockDates[1] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.AddDays(1).ToString(Constants.DateFormat) };
-        mockDates[2] = new PlayDate() { session_length = 10000, sessions = 3, date = DateTime.Today.AddDays(2).ToString(Constants.DateFormat) };
+        mockDates[0] = new PlayDate() { SessionLength = 10000, NumberOfSessions = 3, Date = DateTime.Today.ToString(Constants.DateFormat), Control = control ,Code= control==1? "desiree2" : "desiree"};
+        mockDates[1] = new PlayDate() { SessionLength = 10000, NumberOfSessions = 3, Date = DateTime.Today.AddDays(1).ToString(Constants.DateFormat), Control = control, Code = control == 1 ? "desiree2" : "desiree" };
+        mockDates[2] = new PlayDate() { SessionLength = 10000, NumberOfSessions = 3, Date = DateTime.Today.AddDays(2).ToString(Constants.DateFormat), Control = control, Code = control == 1 ? "desiree2" : "desiree" };
         var userLocalData = new UserLocalData(mockDates, "desiree");
         UserStatistics.Save(userLocalData);
     }
-    public static bool IsTestCode(string usercode)
+    public static int IsTestCode(string usercode)
     {
-        return (usercode == Constants.TestCode || usercode == Constants.TestCode2);
+        if (usercode == Constants.TestCode)
+            return 0;
+        if (usercode == Constants.TestCode2)
+            return 1;
+        return -1;
     }
+
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
         var MinLogLevel = LogType.Log;
@@ -83,13 +88,33 @@ public static class Utilities
         var request = UnityWebRequest.Get(Constants.GitHubIssueBaseUrl);
         request.Send();
         while (!request.isDone)
-        {
-        }
+            System.Threading.Thread.Sleep(5000);
         var issuesArray = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(request.downloadHandler.text);
         foreach (var issue in issuesArray)
             if (issue["body"] == body)
                 return true;
         return false;
+    }
+}
+
+public class CoroutineWithData
+{
+    public Coroutine coroutine { get; private set; }
+    public object result;
+    private IEnumerator target;
+    public CoroutineWithData(MonoBehaviour owner, IEnumerator target)
+    {
+        this.target = target;
+        this.coroutine = owner.StartCoroutine(Run());
+    }
+
+    private IEnumerator Run()
+    {
+        while (target.MoveNext())
+        {
+            result = target.Current;
+            yield return result;
+        }
     }
 }
 
@@ -104,7 +129,6 @@ public class GithubIssueRequest
         this.title = title;
         this.body = body;
     }
-
 }
 
 public static class DebugUtilities

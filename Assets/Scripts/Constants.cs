@@ -55,7 +55,7 @@ public static class Constants
 
 
     public static readonly float StartingGameTimer = 60;
-    public static float TimerMax = 100;
+    public static float TimerMax = 90;
     public static float TimerLow = 10;
     public static int ScoreReportingInterval = 10;
 

@@ -17,8 +17,11 @@ public class ControllerRegistration : MonoBehaviour
         try
         {
             UserStatistics userStatistics = new UserStatistics(usercode);
-            if (userStatistics.UserLocalData!=null)
+            if (userStatistics.UserLocalData != null)
+            {
                 SceneManager.LoadScene("MainMenu");
+                return;
+            }
             ShowRegistrationErrorMessage();
         }
         catch
@@ -35,13 +38,12 @@ public class ControllerRegistration : MonoBehaviour
     void Start()
     {
         Application.logMessageReceived += Utilities.LoggerCallback;
-
+        RegistrationHeader.text = Utilities.LoadStringFromFile("UserRegistrationHeader");
+        SubmitButtonText.text = Utilities.LoadStringFromFile("ConfirmText");
+        RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");
         if (UserStatistics.PlayerDataValid())
         {
             SceneManager.LoadScene("MainMenu");
         }
-        RegistrationHeader.text = Utilities.LoadStringFromFile("UserRegistrationHeader");
-        SubmitButtonText.text = Utilities.LoadStringFromFile("ConfirmText");
-        RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");
     }
 }

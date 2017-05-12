@@ -222,22 +222,12 @@ Prefab:
     - target: {fileID: 224589376089950934, guid: d236df4e2b2f20f43b01ca7141bba298,
         type: 2}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 224589376089950934, guid: d236df4e2b2f20f43b01ca7141bba298,
         type: 2}
       propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 224589376089950934, guid: d236df4e2b2f20f43b01ca7141bba298,
-        type: 2}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114590511579031836, guid: d236df4e2b2f20f43b01ca7141bba298,
-        type: 2}
-      propertyPath: NextLevelScore
-      value: 999999999
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 114590511579031836, guid: d236df4e2b2f20f43b01ca7141bba298,
         type: 2}

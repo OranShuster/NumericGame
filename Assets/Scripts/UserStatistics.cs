@@ -261,7 +261,12 @@ public class UserStatistics : IEnumerable
             var scoreReportsArr = ScoreReportsToBeSent.ToArray();
             var reportsCount = scoreReportsArr.GetLength(0);
             var jsonString = JsonConvert.SerializeObject(scoreReportsArr);
-            var request = UnityWebRequest.Post(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId), jsonString);
+            var request = new UnityWebRequest(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId));
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonString));
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.method = UnityWebRequest.kHttpVerbPOST;
+            request.uploadHandler.contentType = "application/json";
+            request.SetRequestHeader("content-type", "application/json");
             if (blocking)
             {
                 request.Send();

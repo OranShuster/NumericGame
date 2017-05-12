@@ -42,10 +42,11 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 		WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 0.5f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
 		InvokeRepeating("SendUserInfoToServer", Constants.ScoreReportingInterval, Constants.ScoreReportingInterval);
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
+	    if (UserInfo.GetToday().control == 1)
+	        _mainGame.SetNextLevelScore(int.MaxValue,0);
 
     }
 
-    // Use this for initialization
     void Start()
     {
         numberSquareSprites = Resources.LoadAll<Sprite>("Images/Numbers").OrderBy(t => Convert.ToInt32(t.name)).ToArray();

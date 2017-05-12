@@ -14,12 +14,12 @@ public static class Constants
     public static readonly int MinimumMatches = 3;
 
 
-    public static UnityEngine.Color ColorBase = new UnityEngine.Color(66 / 255f, 133 / 255f, 244 / 255f);
-    public static UnityEngine.Color ColorSelected = new UnityEngine.Color(100 / 255f, 181 / 255f, 246 / 255f);
-    public static UnityEngine.Color ColorMatched = new UnityEngine.Color(21 / 255f, 101 / 255f, 192 / 255f);
-    public static UnityEngine.Color32 ColorDangerRed = new UnityEngine.Color(204 / 255f, 0, 0);
-    public static UnityEngine.Color32 ColorWarningOrange = new UnityEngine.Color(255 / 255f, 136/255f, 0);
-    public static UnityEngine.Color32 ColorOKGreen = new UnityEngine.Color(0, 126 / 255f, 51 / 255f);
+    public static Color ColorBase = new Color(66 / 255f, 133 / 255f, 244 / 255f);
+    public static Color ColorSelected = new Color(100 / 255f, 181 / 255f, 246 / 255f);
+    public static Color ColorMatched = new Color(21 / 255f, 101 / 255f, 192 / 255f);
+    public static Color ColorDangerRed = new Color(204 / 255f, 0, 0);
+    public static Color ColorWarningOrange = new Color(255 / 255f, 136/255f, 0);
+    public static Color ColorOKGreen = new Color(0, 126 / 255f, 51 / 255f);
 
 
 

@@ -39,7 +39,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 	{
 		_mainGame = GameField.GetComponent<Game>();
 		UserInfo = new UserStatistics();
-		WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 0.5f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
+		WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
 		InvokeRepeating("SendUserInfoToServer", Constants.ScoreReportingInterval, Constants.ScoreReportingInterval);
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 	    if (UserInfo.GetToday().control == 1)
@@ -120,8 +120,8 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         if (_gameTimer > Constants.TimerLow && WarningOverlayTween.isRunning())
         {
             WarningOverlayTween.stop();
-            WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 0.5f).setFrom(0).setLoops(LoopType.PingPong, 1000);
-            TimerWarningOverlay.color = new Color(1, 0, 0, 0);
+            WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000);
+            TimerWarningOverlay.color = new Color(255/ 255f, 68/ 255f, 68 / 255f, 0);
         }
     }
 

@@ -13,7 +13,7 @@ public class PlayDate
 {
     public string Email { get; set; }
     public string Code { get; set; }
-    public int session_id { get; set; }
+    public int SessionId { get; set; }
     public string Date { get; set; }
     public int NumberOfSessions { get; set; }
     public int SessionLength { get; set; }
@@ -26,7 +26,7 @@ public class PlayDate
 
     [JsonConstructor]
     public PlayDate(string code, int session_length, string start_date, int num_of_sessions, int control, string email,
-        int session_interval)
+        int session_interval, int id)
     {
         Code = code;
         SessionLength = session_length;
@@ -35,6 +35,7 @@ public class PlayDate
         Date = start_date;
         NumberOfSessions = num_of_sessions;
         Email = email;
+        SessionId = id;
     }
 
     public PlayDate()
@@ -257,13 +258,18 @@ public class UserStatistics : IEnumerable
         if (ScoreReportsToBeSent.Count > 0)
         {
             var scoreReportsArr = ScoreReportsToBeSent.ToArray();
+            var reportsCount = scoreReportsArr.GetLength(0);
             var jsonString = JsonConvert.SerializeObject(scoreReportsArr);
-            var request = UnityWebRequest.Post(Constants.BaseUrl + string.Format("/{0}/{1}", UserLocalData.UserCode, GetToday().session_id), jsonString);
+            var request = UnityWebRequest.Post(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId), jsonString);
             yield return request.Send();
             if (request.isError)
                 Debug.LogWarning(request.error);
             else
-                ScoreReportsToBeSent.Clear();
+            {
+                Debug.Log(string.Format("Sent {0} score reports to server", reportsCount));
+                for (var msgIdx = 1; msgIdx < reportsCount; msgIdx++)
+                    ScoreReportsToBeSent.Dequeue();
+            }
         }
     }
 

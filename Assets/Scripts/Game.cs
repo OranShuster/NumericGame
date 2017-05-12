@@ -30,6 +30,7 @@ public class Game : MonoBehaviour
     public bool DebugMode;
 
     private SoundManager _soundManager;
+    private string _tileImagesFolder;
 
     public GameState GetState()
     {
@@ -40,7 +41,11 @@ public class Game : MonoBehaviour
     {
         _state = GameState.Animating;
         _controllerScript = Manager.GetComponent<IControllerInterface>();
-        _numberSquareSprites = Resources.LoadAll<Sprite>("Images/Numbers").OrderBy(t => Convert.ToInt32(t.name)).ToArray();
+        if (_controllerScript.IsControl())
+            _tileImagesFolder = "Images/Control";
+        else
+            _tileImagesFolder = "Imgaes/Numbers";
+        _numberSquareSprites = Resources.LoadAll<Sprite>(_tileImagesFolder).OrderBy(t => Convert.ToInt32(t.name)).ToArray();
         _maxNumber = _numberSquareSprites.Length;
         _rows = _maxNumber;
         _columns = _maxNumber;

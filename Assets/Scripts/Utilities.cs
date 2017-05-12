@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -66,25 +68,39 @@ public static class Utilities
         }
     }
 
-    public static string OpenGitHubIssue(string exceptionData)
+    public static void OpenGitHubIssue(string exceptionData)
     {
-        var url = Constants.GitHubIssueBaseUrl;
         var title = string.Format("Exception occured! {0}", Guid.NewGuid());
         var body = JsonUtility.ToJson(new GithubIssueRequest(title, exceptionData));
-        var request = new UnityWebRequest(url);
+        var request = NewIssueRequest(body);
+        if (!ListIssuesRequest(body))
+            request.Send();
+    }
+
+    public static UnityWebRequest NewIssueRequest(string body)
+    {
+        var request = new UnityWebRequest(Constants.GitHubIssueBaseUrl);
         request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
         request.downloadHandler = new DownloadHandlerBuffer();
         request.method = UnityWebRequest.kHttpVerbPOST;
         request.uploadHandler.contentType = "application/json";
         request.SetRequestHeader("content-type", "application/json");
         request.SetRequestHeader("authorization", "token 19207a29da1926f4c2bdbbf1598473186544829f");
+        return request;
+    }
 
+    public static bool ListIssuesRequest(string body)
+    {
+        var request = UnityWebRequest.Get(Constants.GitHubIssueBaseUrl);
         request.Send();
-        while (request.isDone == false)
+        while (!request.isDone)
         {
         }
-        var dl = request.downloadHandler;
-        return dl.text;
+        var issuesArray = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(request.downloadHandler.text);
+        foreach (var issue in issuesArray)
+            if (issue["body"] == body)
+                return true;
+        return false;
     }
 }
 

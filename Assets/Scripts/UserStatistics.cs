@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Text;
+using Newtonsoft.Json.Serialization;
 
 [Serializable]
 public class PlayDate
@@ -16,6 +17,7 @@ public class PlayDate
     public int sessions { get; set; }
     public int session_length { get; set; }
     public int session_interval { get; set; }
+    public int control { get; set; }
     public int CurrentSession = 1;
     public int CurrentSessionTimeSecs = 0;
     public int LastSessionsEndTime = 0;
@@ -177,7 +179,10 @@ public class UserStatistics : IEnumerable
         try
         {
             writer = new StreamWriter(_userDataPath);
-            writer.Write(JsonConvert.SerializeObject(userLocalData, Formatting.Indented)); 
+            var jsonString = JsonConvert.SerializeObject(userLocalData, Formatting.Indented);
+            byte[] toEncodeAsBytes = Encoding.ASCII.GetBytes(jsonString);
+            string encodedJson = Convert.ToBase64String(toEncodeAsBytes);
+            writer.Write(encodedJson); 
         }
         finally
         {
@@ -196,7 +201,9 @@ public class UserStatistics : IEnumerable
             try
             {
                 reader = new StreamReader(_userDataPath);
-                return JsonConvert.DeserializeObject<UserLocalData>(reader.ReadToEnd());
+                byte[] encodedDataAsBytes = Convert.FromBase64String(reader.ReadToEnd());
+                string decodedString = Encoding.ASCII.GetString(encodedDataAsBytes);
+                return JsonConvert.DeserializeObject<UserLocalData>(decodedString);
             }
             finally
             {

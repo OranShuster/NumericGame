@@ -61,7 +61,7 @@ namespace Prime31.ZestKit
 
 			public static float EaseInOut( float t, float d )
 			{
-				var s = 1.70158f;
+				float s = 1.70158f;
 				if( ( t /= d / 2 ) < 1 )
 				{
 					return 0.5f * ( t * t * ( ( ( s *= ( 1.525f ) ) + 1 ) * t - s ) );
@@ -168,8 +168,8 @@ namespace Prime31.ZestKit
 				if( ( t /= d ) == 1 )
 					return 1;
 
-				var p = d * .3f;
-				var s = p / 4;
+				float p = d * .3f;
+				float s = p / 4;
 				return -( 1 * Mathf.Pow( 2, 10 * ( t -= 1 ) ) * Mathf.Sin( ( t * d - s ) * ( 2 * Mathf.PI ) / p ) );
 			}
 
@@ -182,8 +182,8 @@ namespace Prime31.ZestKit
 				if( ( t /= d ) == 1 )
 					return 1;
 
-				var p = d * .3f;
-				var s = p / 4;
+				float p = d * .3f;
+				float s = p / 4;
 				return ( 1 * Mathf.Pow( 2, -10 * t ) * Mathf.Sin( ( t * d - s ) * ( 2 * Mathf.PI ) / p ) + 1 );
 			}
 
@@ -196,8 +196,8 @@ namespace Prime31.ZestKit
 				if( ( t /= d / 2 ) == 2 )
 					return 1;
 
-				var p = d * ( .3f * 1.5f );
-				var s = p / 4;
+				float p = d * ( .3f * 1.5f );
+				float s = p / 4;
 
 				if( t < 1 )
 					return -.5f * ( Mathf.Pow( 2, 10 * ( t -= 1 ) ) * Mathf.Sin( ( t * d - s ) * ( 2 * Mathf.PI ) / p ) );

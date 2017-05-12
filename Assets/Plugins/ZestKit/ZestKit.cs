@@ -48,11 +48,12 @@ namespace Prime31.ZestKit
 		/// internal list of all the currently active tweens
 		/// </summary>
 		List<ITweenable> _activeTweens = new List<ITweenable>();
+		List<ITweenable> _tempTweens = new List<ITweenable>();
 
 		/// <summary>
 		/// stores tweens marked for removal
 		/// </summary>
-		List<ITweenable> _tempTweens = new List<ITweenable>();
+		List<ITweenable> _removedTweens = new List<ITweenable>();
 
 		/// <summary>
 		/// guard to stop instances being created while the application is quitting
@@ -134,22 +135,25 @@ namespace Prime31.ZestKit
 		{
 			_isUpdating = true;
 
-			for( var i = 0; i < _activeTweens.Count; i++ )
-			{
-				var tween = _activeTweens[i];
-				if( tween.tick() )
-					_tempTweens.Add( tween );
-			}
-
-			_isUpdating = false;
-
-			// kill the dead Tweens
+			_tempTweens.Clear();
+			_tempTweens.AddRange( _activeTweens );
 			for( var i = 0; i < _tempTweens.Count; i++ )
 			{
-				_tempTweens[i].recycleSelf();
-				_activeTweens.Remove( _tempTweens[i] );
+				var tween = _tempTweens[i];
+				if( _removedTweens.Contains( tween ) )
+					continue; // was already recycled
+
+				// update tween
+				if( tween.tick() )
+				{
+					// tween completed
+					tween.recycleSelf();
+					_activeTweens.Remove( tween );
+				}
 			}
-			_tempTweens.Clear();
+
+			_removedTweens.Clear();
+			_isUpdating = false;
 		}
 
 		#endregion
@@ -173,16 +177,12 @@ namespace Prime31.ZestKit
 		/// <param name="tween">Tween.</param>
 		public void removeTween( ITweenable tween )
 		{
+			tween.recycleSelf();
+			_activeTweens.Remove( tween );
+
+			// make sure it doesn't get updated if we are in the update loop
 			if( _isUpdating )
-			{
-				_tempTweens.Add( tween );
-			
-			}
-			else
-			{
-				tween.recycleSelf();
-				_activeTweens.Remove( tween );
-			}
+				_removedTweens.Add( tween );
 		}
 
 

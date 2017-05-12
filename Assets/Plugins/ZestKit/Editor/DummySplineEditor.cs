@@ -306,7 +306,7 @@ namespace Prime31.ZestKit
 			if( _showNodeDetails )
 			{
 				EditorGUI.indentLevel++;
-				for( var i = 0; i < _target.nodes.Count; i++ )
+				for( int i = 0; i < _target.nodes.Count; i++ )
 					_target.nodes[i] = EditorGUILayout.Vector3Field( "Node " + ( i + 1 ), _target.nodes[i] );
 				EditorGUI.indentLevel--;
 			}
@@ -826,9 +826,9 @@ namespace Prime31.ZestKit
 		{
 			var bytes = new List<byte>();
 			
-			for( var k = 0; k < _target.nodes.Count; ++k )
+			for( int k = 0; k < _target.nodes.Count; ++k )
 			{
-				var vec = _target.nodes[k];
+				Vector3 vec = _target.nodes[k];
 				bytes.AddRange( System.BitConverter.GetBytes( vec.x ) );
 				bytes.AddRange( System.BitConverter.GetBytes( vec.y ) );
 				bytes.AddRange( System.BitConverter.GetBytes( vec.z ) );

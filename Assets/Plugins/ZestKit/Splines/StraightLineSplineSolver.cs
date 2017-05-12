@@ -70,15 +70,15 @@ namespace Prime31.ZestKit
 			if( _nodes.Count < 3 )
 				return Vector3.Lerp( _nodes[0], _nodes[1], t );
 
-			var keysSegmentStartLocations = new int[_segmentStartLocations.Keys.Count];
+			int[] keysSegmentStartLocations = new int[_segmentStartLocations.Keys.Count];
 			_segmentStartLocations.Keys.CopyTo ( keysSegmentStartLocations, 0 );
 
 			// which segment are we on?
 			_currentSegment = 0;
-			for( var k = 0; k < keysSegmentStartLocations.Length; ++k )
+			for( int k = 0; k < keysSegmentStartLocations.Length; ++k )
 			{
-				var key = keysSegmentStartLocations[k];
-				var value = _segmentStartLocations[key];
+				int key = keysSegmentStartLocations[k];
+				float value = _segmentStartLocations[key];
 
 				if( value < t )
 				{

@@ -29,15 +29,15 @@ namespace Prime31.ZestKit
 			if( A[1] != Vector3.zero )
 			{
 				// Coefficients of f(t) = c*t^2 + b*t + a.
-				var c = 4.0f * Vector3.Dot( A[1], A[1] ); // A[1].Dot(A[1]);  // c > 0 to be in this block of code
-				var b = 8.0f * Vector3.Dot( A[0], A[1] ); // A[0].Dot(A[1]);
-				var a = 4.0f * Vector3.Dot( A[0], A[0] ); // A[0].Dot(A[0]);  // a > 0 by assumption
-				var q = 4.0f * a * c - b * b;  // = 16*|Cross(A0,A1)| >= 0
+				float c = 4.0f * Vector3.Dot( A[1], A[1] ); // A[1].Dot(A[1]);  // c > 0 to be in this block of code
+				float b = 8.0f * Vector3.Dot( A[0], A[1] ); // A[0].Dot(A[1]);
+				float a = 4.0f * Vector3.Dot( A[0], A[0] ); // A[0].Dot(A[0]);  // a > 0 by assumption
+				float q = 4.0f * a * c - b * b;  // = 16*|Cross(A0,A1)| >= 0
 
-				var twoCpB = 2.0f * c + b;
-				var sumCBA = c + b + a;
-				var mult0 = 0.25f / c;
-				var mult1 = q / ( 8.0f * Mathf.Pow( c, 1.5f ) );
+				float twoCpB = 2.0f * c + b;
+				float sumCBA = c + b + a;
+				float mult0 = 0.25f / c;
+				float mult1 = q / ( 8.0f * Mathf.Pow( c, 1.5f ) );
 				length = mult0 * ( twoCpB * Mathf.Sqrt( sumCBA ) - b * Mathf.Sqrt( a ) ) +
 					mult1 * ( Mathf.Log( 2.0f * Mathf.Sqrt( c * sumCBA ) + twoCpB ) - Mathf.Log( 2.0f * Mathf.Sqrt( c * a ) + b ) );
 			}

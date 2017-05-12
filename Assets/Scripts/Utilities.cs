@@ -54,7 +54,7 @@ public static class Utilities
     }
     public static bool IsTestCode(string usercode)
     {
-        return usercode == Constants.TestCode;
+        return (usercode == Constants.TestCode || usercode == Constants.TestCode2);
     }
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {

@@ -278,4 +278,9 @@ public class UserStatistics : IEnumerable
         }
         return true;
     }
+
+    public bool IsTestUser()
+    {
+        return Utilities.IsTestCode(UserLocalData.UserCode);
+    }
 }

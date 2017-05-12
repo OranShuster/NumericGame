@@ -34,7 +34,8 @@ public static class Constants
     public static string GitHubIssueBaseUrl = "https://api.github.com/repos/OranShuster/NumericGameMirror/issues";
 
     public const string TestCode = "desiree";
-    
+    public const string TestCode2 = "desiree2";
+
 
 }
 [System.Flags]

@@ -13,34 +13,29 @@ public class ControllerTutorial : MonoBehaviour,IControllerInterface
 
     private UserStatistics _userStatistics;
 
-    // Use this for initialization
+    void Awake()
+    {
+        _userStatistics = new UserStatistics();
+    }
+
     void Start ()
 	{
 	    SkipButton.image.ZKalphaTo(1,0.5f).start();
 	    SkipButton.GetComponentInChildren<Text>().ZKalphaTo(1,0.5f).start();
 	    TutorialText.ZKalphaTo(1,0.5f).start();
 	    TutorialText.text = Utilities.LoadStringFromFile("TutorialHeader", 25);
-	    _userStatistics = new UserStatistics();
-    }
-
-    IEnumerator ChangeTutorialMessage(string msg)
-    {
-        TutorialText.ZKalphaTo(0).start();
-        yield return new WaitForSeconds(0.5f);
-        TutorialText.text = msg;
-        TutorialText.ZKalphaTo(1).start();
-        yield return new WaitForSeconds(0.5f);
     }
 
     public void StartGame()
     {
+        ZestKit.instance.stopAllTweens();
         SceneManager.LoadScene("MainGame");
     }
     public bool IsPaused() { return false; }
 
     public bool IsControl()
     {
-        return _userStatistics.GetToday().control == 1;
+        return _userStatistics.GetToday().Control == 1;
     }
     //Empty methods to comply with interface
     public void IncreaseScore(int amount){}
@@ -50,5 +45,4 @@ public class ControllerTutorial : MonoBehaviour,IControllerInterface
     public void LevelUp(int level){}
     public void QuitGame(){}
     void Update() { }
-    void Awake() { }
 }

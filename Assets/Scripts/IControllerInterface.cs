@@ -9,4 +9,5 @@
     void LevelUp(int level);
     void QuitGame();
     bool IsPaused();
+    bool IsControl();
 }

@@ -273,4 +273,9 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     {
         StartCoroutine(UserInfo.SendUserInfoToServer());
     }
+
+    public bool IsControl()
+    {
+        return UserInfo.GetToday().control == 1;
+    }
 }

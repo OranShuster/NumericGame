@@ -53,47 +53,11 @@ public static class Utilities
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
         var MinLogLevel = LogType.Log;
-        if (type == LogType.Exception || type == LogType.Assert)
-            OpenGitHubIssue(logString + "\n" + stackTrace);
         if (MinLogLevel >= type)
         {
             var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
             request.Send();
         }
-    }
-
-    public static void OpenGitHubIssue(string exceptionData)
-    {
-        var title = string.Format("Exception occured! {0}", Guid.NewGuid());
-        var body = JsonUtility.ToJson(new GithubIssueRequest(title, exceptionData));
-        var request = NewIssueRequest(body);
-        if (!ListIssuesRequest(body))
-            request.Send();
-    }
-
-    public static UnityWebRequest NewIssueRequest(string body)
-    {
-        var request = new UnityWebRequest(Constants.GitHubIssueBaseUrl);
-        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.method = UnityWebRequest.kHttpVerbPOST;
-        request.uploadHandler.contentType = "application/json";
-        request.SetRequestHeader("content-type", "application/json");
-        request.SetRequestHeader("authorization", "token 19207a29da1926f4c2bdbbf1598473186544829f");
-        return request;
-    }
-
-    public static bool ListIssuesRequest(string body)
-    {
-        var request = UnityWebRequest.Get(Constants.GitHubIssueBaseUrl);
-        request.Send();
-        while (!request.isDone)
-            System.Threading.Thread.Sleep(5000);
-        var issuesArray = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(request.downloadHandler.text);
-        foreach (var issue in issuesArray)
-            if (issue["body"] == body)
-                return true;
-        return false;
     }
 }
 

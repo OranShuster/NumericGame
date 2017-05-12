@@ -62,7 +62,6 @@ public static class Constants
     public static string DateFormat = "yyyy-MM-dd";
     public static string DateFormatOutput = "dd/MM/yyyy";
     public static string BaseUrl = "https://cnl.bgu.ac.il/numeric_game/playrpc/";
-    public static string GitHubIssueBaseUrl = "https://api.github.com/repos/OranShuster/NumericGameMirror/issues";
 
     public const string TestCode = "desiree";
     public const string TestCode2 = "desiree2";

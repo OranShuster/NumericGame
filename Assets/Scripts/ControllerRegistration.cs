@@ -36,7 +36,7 @@ public class ControllerRegistration : MonoBehaviour
     {
         Application.logMessageReceived += Utilities.LoggerCallback;
 
-        if (UserStatistics.PlayerDataExists())
+        if (UserStatistics.PlayerDataValid())
         {
             SceneManager.LoadScene("MainMenu");
         }

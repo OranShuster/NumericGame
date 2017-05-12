@@ -194,7 +194,7 @@ public class UserStatistics : IEnumerable
 
     public static UserLocalData Load()
     {
-        if (PlayerDataExists())
+        if (PlayerDataValid())
         {
             Debug.Log(string.Format("Loading user data from {0}", _userDataPath));
             StreamReader reader = null;
@@ -261,8 +261,21 @@ public class UserStatistics : IEnumerable
         ScoreReportsToBeSent.Enqueue(scoreReport);
     }
 
-    public static bool PlayerDataExists()
+    public static bool PlayerDataValid()
     {
-        return File.Exists(_userDataPath);
+        if (!File.Exists(_userDataPath))
+            return false;
+        try
+        {
+            var userStats = new UserStatistics();
+            if (userStats.UserLocalData == null)
+                return false;
+        }
+        catch
+        {
+            File.Delete(_userDataPath);
+            return false;
+        }
+        return true;
     }
 }

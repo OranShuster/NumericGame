@@ -194,22 +194,19 @@ public class UserStatistics : IEnumerable
 
     public static UserLocalData Load()
     {
-        if (PlayerDataValid())
+        Debug.Log(string.Format("Loading user data from {0}", _userDataPath));
+        StreamReader reader = null;
+        try
         {
-            Debug.Log(string.Format("Loading user data from {0}", _userDataPath));
-            StreamReader reader = null;
-            try
-            {
-                reader = new StreamReader(_userDataPath);
-                byte[] encodedDataAsBytes = Convert.FromBase64String(reader.ReadToEnd());
-                string decodedString = Encoding.ASCII.GetString(encodedDataAsBytes);
-                return JsonConvert.DeserializeObject<UserLocalData>(decodedString);
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.Close();
-            }
+            reader = new StreamReader(_userDataPath);
+            byte[] encodedDataAsBytes = Convert.FromBase64String(reader.ReadToEnd());
+            string decodedString = Encoding.ASCII.GetString(encodedDataAsBytes);
+            return JsonConvert.DeserializeObject<UserLocalData>(decodedString);
+        }
+        finally
+        {
+            if (reader != null)
+                reader.Close();
         }
         return null;
     }
@@ -269,7 +266,10 @@ public class UserStatistics : IEnumerable
         {
             var userStats = new UserStatistics();
             if (userStats.UserLocalData == null)
+            {
+                File.Delete(_userDataPath);
                 return false;
+            }
         }
         catch
         {

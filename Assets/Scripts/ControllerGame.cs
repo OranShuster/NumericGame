@@ -225,7 +225,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     {
         UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
         StartCoroutine(UserInfo.SendUserInfoToServer(true));
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("UserRegistration");
     }
     public IEnumerator ShowMessage(string header, int Score, int Time, bool CanGoBack = false)
     {

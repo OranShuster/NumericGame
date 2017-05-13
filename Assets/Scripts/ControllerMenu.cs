@@ -14,7 +14,11 @@ public class ControllerMenu : MonoBehaviour
     public GameObject PlayStatsViewContent;
     public GameObject DayStatsPrefab;         //Information line per day 
     public GameObject RoundStatsPrefab;       //Information line per round
-    private UserStatistics _userStatistics;
+
+    private UserStatistics _userStatistics
+    {
+        get { return ApplicationState.UserStatistics; }
+    }
 
     public Sprite DateStatusBadImage; 
     public Sprite DateStatisOkImage;
@@ -25,12 +29,12 @@ public class ControllerMenu : MonoBehaviour
 
     private string TimeToNextSession="00:00:00";
 
-    void Start()
+    void Awake()
     {
         StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton");
         ShowStatisticsButtonText.text = Utilities.LoadStringFromFile("StatisticsButton");
 
-        _userStatistics = new UserStatistics();
+        ApplicationState.UserStatistics = new UserStatistics();
         foreach (PlayDate date in _userStatistics)
         {
             AddDateHeaderToScrollView();
@@ -147,11 +151,10 @@ public class ControllerMenu : MonoBehaviour
         var sessionsString = go.transform.Find("Sessions").gameObject.GetComponent<Text>();
         var curSessionTime = go.transform.Find("CurrentSessionTime").gameObject.GetComponent<Text>();
         var dateStatus = go.transform.Find("DateStatus").gameObject.GetComponent<Image>();
-        var provider = CultureInfo.InvariantCulture;
-        dateString.text = DateTime.ParseExact(date.Date, Constants.DateFormat, provider).ToShortDateString();
+        dateString.text = DateTime.ParseExact(date.Date, Constants.DateFormat, CultureInfo.InvariantCulture).ToShortDateString();
         sessionsString.text = String.Format("{0}/{1}", Math.Min(date.CurrentSession, date.NumberOfSessions), date.NumberOfSessions);
         curSessionTime.text = String.Format("{0}", date.GetRemainingSessionTimeText());
-        var playDate = DateTime.ParseExact(date.Date, Constants.DateFormat, provider);
+        var playDate = DateTime.ParseExact(date.Date, Constants.DateFormat, CultureInfo.InvariantCulture);
         if (DateTime.Today == playDate)
             dateStatus.sprite = (date.CurrentSession <= date.NumberOfSessions) ? null : DateStatisOkImage;
         if (DateTime.Today > playDate)

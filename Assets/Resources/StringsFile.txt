@@ -30,7 +30,7 @@ Cancel=ביטול
 Idle=לא ביצעת מהלך במשך 03 שניות
 //game end messages
 Game_Over=המשחק הסתיים
-Session_Time=נגמר הזמן בחלון הזמן
+Session_Time=חלון הזמן נגמר
 Game_Time=זמן המשחק נגמר
 Negative_Points=הגעת לניקוד שלילי עקב איבוד נקודות
 Instructions=הוראות

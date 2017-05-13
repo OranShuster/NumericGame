@@ -9,7 +9,13 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 {
     //private int _numberStyle = 0;
     private float _gameTimer = Constants.StartingGameTimer;
-    private float _totalTimePlayed = 0;
+
+    private float _totalTimePlayed
+    {
+        get { return ApplicationState.TotalTimePlayed; }
+        set { ApplicationState.TotalTimePlayed = value; }
+    }
+
     private Game _mainGame;
     private ITween<float> _warningOverlayTween;
     private ITween<float> _idleOverlayTween;
@@ -48,8 +54,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 	    if (UserInfo.GetToday().Control == 1)
 	        _mainGame.SetNextLevelScore(int.MaxValue,0);
-	    ZestKit.enableBabysitter = true;
-	    ZestKit.removeAllTweensOnLevelLoad = true;
 	}
 
     void Start()
@@ -220,7 +224,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     {
         UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
         StartCoroutine(UserInfo.SendUserInfoToServer(true));
-        ZestKit.instance.stopAllTweens();
         SceneManager.LoadScene("MainMenu");
     }
     public void QuitGame()
@@ -298,11 +301,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
             }
         }
     }
-
-    void OnApplicationQuit()
-    {
-        QuitGame();
-    }
     public bool IsPaused()
     {
         return _gamePaused;
@@ -330,5 +328,11 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         go.color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorMatched;
+    }
+
+    public void OnApplicationPause(bool pause)
+    {
+        if (pause)
+            QuitGame();
     }
 }

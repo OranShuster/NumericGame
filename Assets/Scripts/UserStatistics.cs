@@ -180,6 +180,8 @@ public class UserStatistics : IEnumerable
             request.method = UnityWebRequest.kHttpVerbPOST;
             request.uploadHandler.contentType = "application/json";
             request.SetRequestHeader("content-type", "application/json");
+            Debug.Log(string.Format("Sent {0} score reports to server", reportsCount));
+            ScoreReportsToBeSent.Clear();
             if (blocking)
             {
                 request.Send();
@@ -190,12 +192,6 @@ public class UserStatistics : IEnumerable
                 yield return request.Send();
             if (request.isError)
                 Debug.LogWarning(request.error);
-            else
-            {
-                Debug.Log(string.Format("Sent {0} score reports to server", reportsCount));
-                for (var msgIdx = 1; msgIdx < reportsCount; msgIdx++)
-                    ScoreReportsToBeSent.Dequeue();
-            }
         }
     }
 

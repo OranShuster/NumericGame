@@ -120,7 +120,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
             LoseGame(LoseReasons.Idle);
 
         var gameTimerRelative = _gameTimer / Constants.TimerMax * 100;
-        GameTimerBar.color = Constants.ColorOKGreen;
+        GameTimerBar.color = Constants.ColorOkGreen;
         if (gameTimerRelative < 50)
             GameTimerBar.color = Constants.ColorWarningOrange;
         if (gameTimerRelative < 25)
@@ -228,9 +228,15 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     }
     public void QuitGame()
     {
-        UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
-        StartCoroutine(UserInfo.SendUserInfoToServer(true));
-        Application.Quit();
+        try
+        {
+            UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
+            StartCoroutine(UserInfo.SendUserInfoToServer(true));
+        }
+        finally
+        {
+            Debug.Log("Quitting");
+        }
     }
     public IEnumerator ShowMessage(string header, int Score, int Time, bool CanGoBack = false)
     {
@@ -332,7 +338,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 
     public void OnApplicationPause(bool pause)
     {
-        if (pause)
-            QuitGame();
+        if (!pause)
+            BackToMenu();
     }
 }

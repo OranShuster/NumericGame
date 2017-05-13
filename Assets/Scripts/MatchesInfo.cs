@@ -24,7 +24,7 @@ public class MatchesInfo
         _matchedCells.Add(go);
         if (!withScore) return;
         if (control)
-            AddedScore += 1;
+            AddedScore += 5;
         else
             AddedScore += go.GetComponent<NumberCell>().Value;
     }

@@ -20,7 +20,7 @@ public static class Constants
     public static Color32 ColorMatched = new Color32(21, 101, 192, 255);
     public static Color32 ColorDangerRed = new Color32(204, 0, 0, 255);
     public static Color32 ColorWarningOrange = new Color32(255, 136, 0, 255);
-    public static Color32 ColorOKGreen = new Color32(0, 126, 51,255);
+    public static Color32 ColorOkGreen = new Color32(0, 126, 51,255);
     public static Color32[] ControlBaseColors = new[]
     {
         new Color32(244,67,54,255),
@@ -58,8 +58,8 @@ public static class Constants
     public static float TimerMax = 90;
     public static float TimerLow = 10;
     public static int ScoreReportingInterval = 10;
-    public static float IdleTimerSeconds = 10;
-    public static float IdleTimerLow = 5;
+    public static float IdleTimerSeconds = 30;
+    public static float IdleTimerLow = 10;
 
     public static string DateFormat = "yyyy-MM-dd";
     public static string DateFormatOutput = "dd/MM/yyyy";

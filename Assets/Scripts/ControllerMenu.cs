@@ -72,6 +72,8 @@ public class ControllerMenu : MonoBehaviour
 
     public void StartGame()
     {
+        ApplicationState.SeriesDelta = 0;
+        ApplicationState.Score = 0;
         SceneManager.LoadScene("Tutorial");
     }
 

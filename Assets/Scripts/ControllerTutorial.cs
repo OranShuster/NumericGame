@@ -38,20 +38,17 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     }
     public void BackToMenu()
     {
-        _userStatistics.AddPlayTime((int)ApplicationState.TotalTimePlayed, Score);
-        StartCoroutine(_userStatistics.SendUserInfoToServer(true));
+        if (ApplicationState.SeriesDelta != 0)
+        {
+            _userStatistics.AddPlayTime((int)ApplicationState.TotalTimePlayed, Score);
+            StartCoroutine(_userStatistics.SendUserInfoToServer(true));
+        }
         SceneManager.LoadScene("MainMenu");
-    }
-    public void QuitGame()
-    {
-        _userStatistics.AddPlayTime((int)ApplicationState.TotalTimePlayed, Score);
-        StartCoroutine(_userStatistics.SendUserInfoToServer(true));
-        Application.Quit();
     }
     public void OnApplicationPause(bool pause)
     {
-        if (pause)
-            QuitGame();
+        if (!pause)
+            BackToMenu();
     }
 
     //Empty methods to comply with interface

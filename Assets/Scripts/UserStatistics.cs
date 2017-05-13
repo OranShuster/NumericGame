@@ -79,8 +79,8 @@ public class UserStatistics : IEnumerable
         //Check session interval
         var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
         if (timeSinceLastCompleteSession >= todayDateEntry.SessionInterval)
-            return todayDateEntry.SessionLength - todayDateEntry.CurrentSessionTimeSecs;
-        return timeSinceLastCompleteSession - todayDateEntry.SessionInterval;
+            return Mathf.FloorToInt(todayDateEntry.SessionLength - todayDateEntry.CurrentSessionTimeSecs);
+        return Mathf.FloorToInt(timeSinceLastCompleteSession - todayDateEntry.SessionInterval);
     }
 
     private bool CheckPastDayValid(PlayDate date)

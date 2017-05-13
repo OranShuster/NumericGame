@@ -262,19 +262,15 @@ public class Game : MonoBehaviour
             totalMatches.CombineMatchesInfo(sameMatches, ApplicationState.UserStatistics.IsControl());
         }
         if (totalMatches.NumberOfMatches>0)
-            StartCoroutine(HandleMatches(totalMatches));
-        else
+            yield return StartCoroutine(HandleMatches(totalMatches));
+        _controllerScript.IncreaseScore(-5);
+        if (ApplicationState.Score >= 0)
         {
-            _controllerScript.IncreaseScore(-5);
-            if (ApplicationState.Score >= 0)
-            {
-                _state = GameState.Playing;
-                yield break;
-            }
-            _state = GameState.Lost;
-            _controllerScript.LoseGame(LoseReasons.Points);
+            _state = GameState.Playing;
+            yield break;
         }
-        
+        _state = GameState.Lost;
+        _controllerScript.LoseGame(LoseReasons.Points);
     }
 
     private void InstantiateAndPlaceNewCell(int row, int column, GameObject cellPrefab)

@@ -144,9 +144,9 @@ public class Game : MonoBehaviour
 
     public IEnumerator ClearBoardMatches()
     {
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, new List<GameObject>(), false);
-        var sameMatches = _shapes.GetMatches(_maxNumber, 0, totalMatches.MatchedCells, false);
-        totalMatches.AddObjectRange(sameMatches.MatchedCells);
+        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, _controllerScript.IsControl(), false);
+        var sameMatches = _shapes.GetMatches(_maxNumber, 0, _controllerScript.IsControl(), false);
+        totalMatches.CombineMatchesInfo(sameMatches,false);
         yield return StartCoroutine(HandleMatches(totalMatches, false, false, true));
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = true;
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = 1;
@@ -210,12 +210,14 @@ public class Game : MonoBehaviour
             if (_controllerScript.Score >= NextLevelScore[SeriesDelta])
                 break;
 
-            //search if there are empty mathes
-            totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, new List<GameObject>());
+            //Check for new matches with new tiles
+            totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta,_controllerScript.IsControl(),withScore);
+
+            //Search identical matches 
             if (SeriesDelta != 0)
             {
-                var sameMatches = _shapes.GetMatches(_maxNumber, 0, totalMatches.MatchedCells, false);
-                totalMatches.CombineMatchesInfo(sameMatches);
+                var sameMatches = _shapes.GetMatches(_maxNumber, 0, _controllerScript.IsControl(), false);
+                totalMatches.CombineMatchesInfo(sameMatches,_controllerScript.IsControl());
             }
 
         }
@@ -245,12 +247,13 @@ public class Game : MonoBehaviour
         SetTileColorBase(hitGo2);
         SetTileColorBase(_hitGo);
 
-        //get the matches via the helper methods
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, new List<GameObject>());
+        //Find matches
+        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta,_controllerScript.IsControl(),true);
+        //Find identical strings with no score
         if (SeriesDelta != 0)
         {
-            var sameMatches = _shapes.GetMatches(_maxNumber, 0, totalMatches.MatchedCells, false);
-            totalMatches.CombineMatchesInfo(sameMatches);
+            var sameMatches = _shapes.GetMatches(_maxNumber, 0, false,false);
+            totalMatches.CombineMatchesInfo(sameMatches,_controllerScript.IsControl());
         }
         if (totalMatches.NumberOfMatches>0)
             StartCoroutine(HandleMatches(totalMatches));

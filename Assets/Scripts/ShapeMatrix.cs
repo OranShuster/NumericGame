@@ -56,20 +56,20 @@ public class ShapesMatrix
         _shapes[g2Row, g2Column] = temp;
     }
 
-    public MatchesInfo GetMatches(int boardSize,int seriesDelta,IEnumerable<GameObject> matchedGameObjects, bool countScore = true)
+    public MatchesInfo GetMatches(int boardSize,int seriesDelta,bool control, bool countScore)
     {
         var matchesInfo = new MatchesInfo();
         for (var ind = 0; ind < boardSize; ind++)
         {
-            var horizontalMatches = GetMatchesOnIndex(ind, boardSize, seriesDelta,true);
-            matchesInfo.AddObjectRange(horizontalMatches.MatchedCells,countScore);
-            var verticalMatches = GetMatchesOnIndex(ind, boardSize, seriesDelta,false);
-            matchesInfo.AddObjectRange(verticalMatches.MatchedCells,countScore);
+            var rowMatches = GetMatchesOnIndex(ind, seriesDelta, true, control, countScore);
+            matchesInfo.CombineMatchesInfo(rowMatches, control, countScore);
+            var colMatches = GetMatchesOnIndex(ind, seriesDelta, false, control, countScore);
+            matchesInfo.CombineMatchesInfo(colMatches, control,countScore);
         }
         return matchesInfo;
     }
 
-    private MatchesInfo GetMatchesOnIndex(int ind, int length, int delta, bool isRow)
+    private MatchesInfo GetMatchesOnIndex(int ind, int delta, bool isRow,bool control,bool countScore)
     {
         var allMatches = new MatchesInfo();
         var values = ToArray(ind, isRow);
@@ -79,10 +79,10 @@ public class ShapesMatrix
         allMatches.NumberOfMatches += numOfMatches;
         if (isRow)
             foreach (var colIndex in seriesIndexes)
-                allMatches.AddObject(_shapes[ind, colIndex]);
+                allMatches.AddTile(_shapes[ind, colIndex], control, countScore);
         else
             foreach (var rowIndex in seriesIndexes)
-                allMatches.AddObject(_shapes[rowIndex, ind]);
+                allMatches.AddTile(_shapes[rowIndex, ind],control,countScore);
         if (delta == 0)
             return allMatches;
         //right->left or down->up
@@ -90,10 +90,10 @@ public class ShapesMatrix
         allMatches.NumberOfMatches += numOfMatches;
         if (isRow)
             foreach (var colIndex in seriesIndexes)
-                allMatches.AddObject(_shapes[ind, colIndex]);
+                allMatches.AddTile(_shapes[ind, colIndex],control,countScore);
         else
             foreach (var rowIndex in seriesIndexes)
-                allMatches.AddObject(_shapes[rowIndex, ind]);
+                allMatches.AddTile(_shapes[rowIndex, ind],control,countScore);
         return allMatches;
     }
 

@@ -18,16 +18,16 @@ MonoBehaviour:
     Id: 59161a928b15da23a900000d
     ApiKey: 0963e7cf7cefcfcdc154d47897a235e977756bdf
     BuildSecret: 9629eb30115a39d5b4442b084a0d0dfd0c2bd88fd86d7a95b758670d2453b8e3
-  iconUrl: 
-  dashboardUrl: 
+  iconUrl: https://cdn-cf.fabric.io/assets/v1/icons/app_icon57_default_white-98fe1117611dadee6a1fac112b1dda77.png
+  dashboardUrl: https://www.fabric.io/oran-shuster/android/apps/com.bgu.numericalgame
   initialization: 0
   flowSequence: 0
   conflict: 
   kit: 
   installedKits:
   - Name: Crashlytics
-    InstallationStatus: 1
-    Installed: 0
+    InstallationStatus: 2
+    Installed: 1
     Enabled: 1
     Meta:
     - Key: ConfiguredTimestamp

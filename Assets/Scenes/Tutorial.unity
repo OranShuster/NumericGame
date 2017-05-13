@@ -822,7 +822,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1992464720}
-        m_MethodName: BackToMenu
+        m_MethodName: PauseGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -973,10 +973,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7f295412507f0d4ca11374309a47054, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MessagesOverlay: {fileID: 1263659390949320, guid: 0e9f20efee544cb42a8079cf3d0f6d31,
+    type: 2}
   TutorialText: {fileID: 816545236}
   SkipButton: {fileID: 494194860}
   GameField: {fileID: 1681912921}
-  BackToMenuButton: {fileID: 1902570711}
+  MenuButton: {fileID: 1902570711}
 --- !u!1 &2137127635
 GameObject:
   m_ObjectHideFlags: 0

@@ -77,6 +77,7 @@ public class ControllerMenu : MonoBehaviour
     {
         ApplicationState.SeriesDelta = 0;
         ApplicationState.Score = 0;
+        ApplicationState.TotalTimePlayed = 0;
         SceneManager.LoadScene("Tutorial");
     }
 

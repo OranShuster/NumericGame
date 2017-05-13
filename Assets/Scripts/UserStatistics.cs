@@ -5,121 +5,9 @@ using System.IO;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Globalization;
+using System.Linq;
 using System.Text;
-using Newtonsoft.Json.Serialization;
-using UnityEngine.UI;
-
-[Serializable]
-public class PlayDate
-{
-    public string Email { get; set; }
-    public string Code { get; set; }
-    public int SessionId { get; set; }
-    public string Date { get; set; }
-    public int NumberOfSessions { get; set; }
-    public int SessionLength { get; set; }
-    public int SessionInterval { get; set; }
-    public int Control { get; set; }
-    public int CurrentSession = 1;
-    public int CurrentSessionTimeSecs = 0;
-    public int LastSessionsEndTime = 0;
-    public List<Rounds> GameRounds = new List<Rounds>();
-
-    [JsonConstructor]
-    public PlayDate(string code, int session_length, string start_date, int num_of_sessions, int control, string email,
-        int session_interval, int id)
-    {
-        Code = code;
-        SessionLength = session_length;
-        SessionInterval = session_interval;
-        Control = control;
-        Date = start_date;
-        NumberOfSessions = num_of_sessions;
-        Email = email;
-        SessionId = id;
-    }
-
-    public PlayDate()
-    {
-    }
-
-    public string GetRemainingSessionTimeText()
-    {
-        TimeSpan t = TimeSpan.FromSeconds(SessionLength-CurrentSessionTimeSecs);
-
-        return string.Format("{0:D2}:{1:D2}:{2:D2}",
-            t.Hours,
-            t.Minutes,
-            t.Seconds);
-    }
-}
-
-[Serializable]
-public class Rounds
-{
-    public int RoundLength;
-    public int RoundScore;
-    public string RoundTime;
-    public Rounds(int length, int score, string time)
-    {
-        RoundLength = length;
-        RoundScore = score;
-        RoundTime = time;
-    }
-    public Rounds() { }
-    public string GetRoundLengthText()
-    {
-        TimeSpan t = TimeSpan.FromSeconds(RoundLength);
-
-        return string.Format("{0:D2}:{1:D2}",
-            t.Minutes,
-            t.Seconds);
-    }
-    public static string GetRoundLengthText(int time)
-    {
-        TimeSpan t = TimeSpan.FromSeconds(time);
-
-        return string.Format("{0:D2}:{1:D2}",
-            t.Minutes,
-            t.Seconds);
-    }
-}
-
-public class ScoreReports
-{
-    public int score;
-    public int timestamp;
-    public int session_id;
-}
-
-[Serializable]
-public class UserLocalData
-{
-    public PlayDate[] PlayDates { get; set; }
-    public string UserCode;
-
-    public UserLocalData(string userDataJson, string userCode)
-    {
-        PlayDates = JsonConvert.DeserializeObject<PlayDate[]>(userDataJson);
-        UserCode = userCode;
-        foreach (var date in PlayDates)
-        {
-            date.SessionInterval *= 60;
-            date.SessionLength *= 60;
-        }
-    }
-
-    public UserLocalData(PlayDate[] dates, string userCode)
-    {
-        UserCode = userCode;
-        PlayDates = dates;
-    }
-
-    [JsonConstructor]
-    private UserLocalData()
-    {
-    }
-}
 
 public class UserStatistics : IEnumerable
 {
@@ -164,29 +52,54 @@ public class UserStatistics : IEnumerable
 
     public int CanPlay()
     {
-        var todayDateEntry = GetToday();
-        if (todayDateEntry != null && todayDateEntry.CurrentSession <= todayDateEntry.NumberOfSessions)
+        if (UserLocalData.PlayDates.Where(day => IsPastDay(day.Date)).Any(day => !CheckPastDayValid(day)))
         {
-            var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
-            var finishedSession = todayDateEntry.CurrentSessionTimeSecs == 0;
-            if (finishedSession)
-            {
-                if (timeSinceLastCompleteSession >= todayDateEntry.SessionInterval)
-                    return todayDateEntry.SessionLength - todayDateEntry.CurrentSessionTimeSecs;
-                return 0;
-            }
-            return todayDateEntry.SessionLength - todayDateEntry.CurrentSessionTimeSecs;
+            return 0;
         }
-        return 0;
+        var todayDateEntry = GetToday();
+        return todayDateEntry == null ? 0 : CheckTodayValid(todayDateEntry);
     }
 
+    public string TimeToNextSession()
+    {
+        var todayEntry = GetToday();
+        var secondsToNextSession = todayEntry.SessionInterval - (GetEpochTime() - todayEntry.LastSessionsEndTime) ;
+        var t = TimeSpan.FromSeconds(secondsToNextSession);
+        return string.Format("{0:D2}:{1:D2}:{2:D2}",
+            t.Hours,
+            t.Minutes,
+            t.Seconds);
+    }
+
+    private int CheckTodayValid(PlayDate todayDateEntry)
+    {
+        //Finished today sessions
+        if (todayDateEntry.CurrentSession > todayDateEntry.NumberOfSessions) return 0;
+
+        //Check session interval
+        var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
+        if (timeSinceLastCompleteSession >= todayDateEntry.SessionInterval)
+            return todayDateEntry.SessionLength - todayDateEntry.CurrentSessionTimeSecs;
+        return timeSinceLastCompleteSession - todayDateEntry.SessionInterval;
+    }
+
+    private bool CheckPastDayValid(PlayDate date)
+    {
+        return date.CurrentSession > date.NumberOfSessions;
+    }
+
+    public bool IsPastDay(string date)
+    {
+        var dateObject = DateTime.ParseExact(date, Constants.DateFormat, CultureInfo.InvariantCulture);
+        return dateObject.Date < DateTime.Today.Date;
+    }
     internal void AddPlayTime(int length,int score)
     {
         var today = GetToday();
         var thisTime = DateTime.Now.ToShortTimeString();
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0,score),thisTime));
         today.CurrentSessionTimeSecs += length;
-        if (today.CurrentSessionTimeSecs>today.SessionLength)
+        if (today.CurrentSessionTimeSecs>=today.SessionLength)
         {
             today.CurrentSessionTimeSecs = 0;
             today.LastSessionsEndTime = GetEpochTime();

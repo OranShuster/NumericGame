@@ -22,5 +22,6 @@ Level=שלב
 Pause=השהייה
 Menu=תפריט
 NoMoreTimeInSession=הזמן משחק לסשן זה נגמר
+TimeUntillNextSession=הזמן הנותר לסשן הבא
 NoPlayerStatisticsLoaded=לא נטענו נתוני שחקן
 Cancel=ביטול

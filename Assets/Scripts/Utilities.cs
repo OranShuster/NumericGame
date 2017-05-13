@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -20,11 +21,11 @@ public static class Utilities
         INIParser ini = new INIParser();
         TextAsset asset = Resources.Load("StringsFile") as TextAsset;
         ini.Open(asset);
-        return Flipfont.ReverseText(ini.ReadValue("Translation", key, key), lineLength);
+        return ReverseText(ini.ReadValue("Translation", key, key), lineLength);
     }
     public static string PrintArray(int[] arr)
     {
-        return string.Join(",", Array.ConvertAll<int, String>(arr, i => i.ToString()));
+        return String.Join(",", Array.ConvertAll<int, String>(arr, i => i.ToString()));
     }
     public static float Remap(this float value, float from1, float to1, float from2, float to2)
     {
@@ -58,6 +59,34 @@ public static class Utilities
             var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
             request.Send();
         }
+    }
+
+    public static string ReverseText(string str, int lineLength=15)
+    {
+        string individualLine = ""; //Control individual line in the multi-line text component.
+        var reversedString = "";
+        var listofWords = str.Split(' ').ToList(); //Extract words from the sentence
+
+        foreach (var s in listofWords)
+        {
+            if (individualLine.Length >= lineLength)
+            {
+                reversedString += ReverseLine(individualLine) + "\n"; //Add a new line feed at the end, since we cannot accomodate more characters here.
+                individualLine = ""; //Reset this string for new line.
+            }
+            individualLine += s + " ";
+        }
+        individualLine = individualLine.Substring(0, individualLine.Length - 1);
+        if (individualLine != "")
+            reversedString += ReverseLine(individualLine);
+        return reversedString;
+    }
+
+    private static string ReverseLine(string s)
+    {
+        var charArray = s.ToCharArray();
+        Array.Reverse(charArray);
+        return new string(charArray);
     }
 }
 

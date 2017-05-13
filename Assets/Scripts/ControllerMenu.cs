@@ -23,10 +23,13 @@ public class ControllerMenu : MonoBehaviour
     public GameObject DeleteSaveButton;
     public Text StartGameErrorText;
 
+    private string TimeToNextSession="00:00:00";
+
     void Start()
     {
         StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton");
         ShowStatisticsButtonText.text = Utilities.LoadStringFromFile("StatisticsButton");
+
         _userStatistics = new UserStatistics();
         foreach (PlayDate date in _userStatistics)
         {
@@ -37,15 +40,29 @@ public class ControllerMenu : MonoBehaviour
                 AddRoundToScrollView(run);
             AddEmptyLineToScrollView();
         }
-        if (_userStatistics.CanPlay() == 0)
+        if (_userStatistics.IsTestUser())
+            DeleteSaveButton.SetActive(true);
+    }
+
+    void Update()
+    {
+        var canPlayStatus = _userStatistics.CanPlay();
+        if (canPlayStatus <= 0)
         {
             StartGameButton.interactable = false;
-            StartGameErrorText.enabled = true;
-            StartGameErrorText.text = Utilities.LoadStringFromFile("NoMoreTimeInSession", 25);
+            StartGameErrorText.gameObject.SetActive(true);
+            if (canPlayStatus == 0)
+            {
+                StartGameErrorText.text = Utilities.LoadStringFromFile("NoMoreTimeInSession", 25);
+                return;
+            }
+            TimeToNextSession = _userStatistics.TimeToNextSession();
+            StartGameErrorText.text = string.Format("{0}\n{1}", Utilities.LoadStringFromFile("TimeUntillNextSession", 30), TimeToNextSession);
         }
-        if (_userStatistics.IsTestUser())
+        else
         {
-            DeleteSaveButton.SetActive(true);
+            StartGameButton.interactable = true;
+            StartGameErrorText.gameObject.SetActive(false);
         }
     }
 

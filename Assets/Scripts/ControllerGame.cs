@@ -220,23 +220,12 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         ShowLevelupMessage(ApplicationState.SeriesDelta);
         _gamePaused = true;
     }
+
     public void BackToMenu()
     {
         UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
         StartCoroutine(UserInfo.SendUserInfoToServer(true));
         SceneManager.LoadScene("MainMenu");
-    }
-    public void QuitGame()
-    {
-        try
-        {
-            UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
-            StartCoroutine(UserInfo.SendUserInfoToServer(true));
-        }
-        finally
-        {
-            Debug.Log("Quitting");
-        }
     }
     public IEnumerator ShowMessage(string header, int Score, int Time, bool CanGoBack = false)
     {
@@ -340,5 +329,9 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     {
         if (!pause)
             BackToMenu();
+    }
+    public void QuitGame()
+    {
+
     }
 }

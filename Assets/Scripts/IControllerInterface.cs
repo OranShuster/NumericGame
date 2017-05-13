@@ -5,6 +5,5 @@
     void LoseGame(LoseReasons reason);
     void MoveMade();
     void LevelUp(int level);
-    void QuitGame();
     bool IsPaused();
 }

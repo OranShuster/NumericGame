@@ -112,7 +112,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
             _userStatistics.AddPlayTime((int)ApplicationState.TotalTimePlayed, Score);
             StartCoroutine(_userStatistics.SendUserInfoToServer(true));
         }
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("UserRegistration");
     }
     public void OnApplicationPause(bool pause)
     {

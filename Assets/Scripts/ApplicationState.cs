@@ -4,5 +4,6 @@
     public static int SeriesDelta=0;
     public static int Score=0;
     public static float TotalTimePlayed = 0;
+    public static bool ConnectionError { get; set; }
 }
 

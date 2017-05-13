@@ -107,12 +107,18 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     }
     public void BackToMenu()
     {
-        if (ApplicationState.SeriesDelta != 0)
+        try
         {
-            _userStatistics.AddPlayTime((int)ApplicationState.TotalTimePlayed, Score);
-            StartCoroutine(_userStatistics.SendUserInfoToServer(true));
+            if (ApplicationState.SeriesDelta != 0)
+            {
+                _userStatistics.AddPlayTime((int) ApplicationState.TotalTimePlayed, Score);
+                StartCoroutine(_userStatistics.SendUserInfoToServer(true));
+            }
         }
-        SceneManager.LoadScene("UserRegistration");
+        finally
+        {
+            SceneManager.LoadScene("UserRegistration");
+        }
     }
     public void OnApplicationPause(bool pause)
     {

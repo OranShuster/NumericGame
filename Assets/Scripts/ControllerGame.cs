@@ -77,6 +77,11 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
             if (Input.GetKeyDown(KeyCode.Escape))
                 PauseGame();
         }
+        if (ApplicationState.ConnectionError)
+        {
+            _gamePaused = true;
+            StartCoroutine(ShowMessage("Connection_Error", 0, 0, false));
+        }
     }
 
     public void PauseGame()
@@ -224,9 +229,15 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 
     public void BackToMenu()
     {
-        UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
-        StartCoroutine(UserInfo.SendUserInfoToServer(true));
-        SceneManager.LoadScene("UserRegistration");
+        try
+        {
+            UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
+            StartCoroutine(UserInfo.SendUserInfoToServer(true));
+        }
+        finally 
+        {
+            SceneManager.LoadScene("UserRegistration");
+        }
     }
     public IEnumerator ShowMessage(string header, int Score, int Time, bool CanGoBack = false)
     {

@@ -191,7 +191,11 @@ public class UserStatistics : IEnumerable
             else
                 yield return request.Send();
             if (request.isError)
+            {
+                ApplicationState.ConnectionError = true;
                 Debug.LogWarning(request.error);
+            }
+
         }
     }
 

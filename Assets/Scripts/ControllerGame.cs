@@ -209,7 +209,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         try
         {
             UserInfo.AddPlayTime((int)_totalTimePlayed, Score);
-            StartCoroutine(UserInfo.SendUserInfoToServer(true));
+            UserInfo.SendUserInfoToServerBlocking();
         }
         finally 
         {
@@ -292,7 +292,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 
     void SendUserInfoToServer()
     {
-        StartCoroutine(UserInfo.SendUserInfoToServer(false));
+        StartCoroutine(UserInfo.SendUserInfoToServer());
     }
 
     private void SetTileColorBase(Image go)

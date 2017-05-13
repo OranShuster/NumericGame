@@ -207,7 +207,7 @@ public class UserStatistics : IEnumerable
     {
         return (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
     }
-    public IEnumerator SendUserInfoToServer(bool blocking=false)
+    public IEnumerator SendUserInfoToServer()
     {
         if (ScoreReportsToBeSent.Count > 0)
         {
@@ -221,21 +221,38 @@ public class UserStatistics : IEnumerable
             request.uploadHandler.contentType = "application/json";
             request.SetRequestHeader("content-type", "application/json");
             Debug.Log(string.Format("Sent {0} score reports to server", reportsCount));
-            ScoreReportsToBeSent.Clear();
-            if (blocking)
-            {
-                request.Send();
-                while (!request.isDone)
-                    System.Threading.Thread.Sleep(250);
-            }
-            else
-                yield return request.Send();
+            ClearScoreReports();
+            yield return request.Send();
             if (request.isError || request.responseCode !=200  && !IsTestUser())
             {
                 ApplicationState.ConnectionError = true;
                 Debug.LogWarning(request.error);
             }
-
+        }
+    }
+    public void SendUserInfoToServerBlocking()
+    {
+        if (ScoreReportsToBeSent.Count > 0)
+        {
+            var scoreReportsArr = ScoreReportsToBeSent.ToArray();
+            var reportsCount = scoreReportsArr.GetLength(0);
+            var jsonString = JsonConvert.SerializeObject(scoreReportsArr);
+            var request = new UnityWebRequest(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId));
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonString));
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.method = UnityWebRequest.kHttpVerbPOST;
+            request.uploadHandler.contentType = "application/json";
+            request.SetRequestHeader("content-type", "application/json");
+            Debug.Log(string.Format("Sent {0} score reports to server", reportsCount));
+            ClearScoreReports();
+            request.Send();
+            while(!request.isDone)
+                System.Threading.Thread.Sleep(250);
+            if (request.isError || request.responseCode != 200 && !IsTestUser())
+            {
+                ApplicationState.ConnectionError = true;
+                Debug.LogWarning(request.error);
+            }
         }
     }
 
@@ -281,4 +298,8 @@ public class UserStatistics : IEnumerable
         File.Delete(_userDataPath);
     }
 
+    public void ClearScoreReports()
+    {
+        ScoreReportsToBeSent.Clear();
+    }
 }

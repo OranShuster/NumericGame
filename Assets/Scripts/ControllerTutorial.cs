@@ -113,7 +113,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
             if (ApplicationState.SeriesDelta != 0)
             {
                 _userStatistics.AddPlayTime((int) ApplicationState.TotalTimePlayed, Score);
-                StartCoroutine(_userStatistics.SendUserInfoToServer(true));
+                _userStatistics.SendUserInfoToServerBlocking();
             }
         }
         finally

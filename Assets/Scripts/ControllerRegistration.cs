@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Prime31.ZestKit;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -37,6 +38,8 @@ public class ControllerRegistration : MonoBehaviour
 
     void Start()
     {
+        ZestKit.enableBabysitter = true;
+        ZestKit.removeAllTweensOnLevelLoad = true;
         Application.logMessageReceived += Utilities.LoggerCallback;
         if (UserStatistics.PlayerDataValid())
         {

@@ -27,7 +27,7 @@ NoMoreTimeInSession=הזמן משחק לסשן זה נגמר
 TimeUntillNextSession=הזמן הנותר לסשן הבא
 NoPlayerStatisticsLoaded=לא נטענו נתוני שחקן
 Cancel=ביטול
-Idle=לא ביצעת מהלך במשך 01 שניות
+Idle=לא ביצעת מהלך במשך 03 שניות
 //game end messages
 Game_Over=המשחק הסתיים
 Session_Time=נגמר הזמן בסשן

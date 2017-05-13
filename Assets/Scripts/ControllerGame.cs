@@ -177,6 +177,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     public void IncreaseGameTimer(float inc)
     {
         _gameTimer += inc;
+        _gameTimer = Mathf.Min(_gameTimer, Constants.TimerMax);
     }
     public void IncreaseScore(int amount)
     {

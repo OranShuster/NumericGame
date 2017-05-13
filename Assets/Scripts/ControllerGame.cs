@@ -4,9 +4,6 @@ using System;
 using Prime31.ZestKit;
 using UnityEngine.SceneManagement;
 using System.Collections;
-using System.Linq;
-using Newtonsoft.Json;
-using System.Net;
 
 public class ControllerGame : MonoBehaviour,IControllerInterface
 {
@@ -14,9 +11,8 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     private float _gameTimer = Constants.StartingGameTimer;
     private float _totalTimePlayed = 0;
     private Game _mainGame;
-    private ITween<float> WarningOverlayTween;
-    private bool GamePaused = false;
-    Sprite[] numberSquareSprites;
+    private ITween<float> _warningOverlayTween;
+    private bool _gamePaused = false;
 
     public UserStatistics UserInfo { get; set; }
     public Text ScoreText;
@@ -26,7 +22,11 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     public Text MenuButtonText;
     public GameObject NumberTilePrefab;
     public Image GameTimerBar;
-    public int Score { get; set; }
+    private int Score
+    {
+        get { return ApplicationState.Score; }
+        set { ApplicationState.Score = value; }
+    }
 
     public Image GameField;
     public Text LevelNumText;
@@ -39,8 +39,8 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 	void Awake()
 	{
 		_mainGame = GameField.GetComponent<Game>();
-		UserInfo = new UserStatistics();
-		WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
+	    UserInfo = ApplicationState.UserStatistics;
+		_warningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
 		InvokeRepeating("SendUserInfoToServer", Constants.ScoreReportingInterval, Constants.ScoreReportingInterval);
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 	    if (UserInfo.GetToday().Control == 1)
@@ -51,10 +51,9 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 
     void Start()
     {
-        numberSquareSprites = Resources.LoadAll<Sprite>("Images/Numbers").OrderBy(t => Convert.ToInt32(t.name)).ToArray();
         ShowScore();
         _gameTimer = Constants.StartingGameTimer;
-        LevelNumText.text = "0";
+        LevelNumText.text = ApplicationState.SeriesDelta.ToString();
         TimeHeaderText.text = Utilities.LoadStringFromFile("Time");
         ScoreHeaderText.text = Utilities.LoadStringFromFile("Score");
         LevelHeaderText.text = Utilities.LoadStringFromFile("Level");
@@ -66,7 +65,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     {
         if (_mainGame.GetState() == GameState.Playing || _mainGame.GetState() == GameState.SelectionStarted)
         {
-            if (!GamePaused)
+            if (!_gamePaused)
                 UpdateTimer();
             if (Input.GetKeyDown(KeyCode.Escape))
                 PauseGame();
@@ -75,15 +74,15 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
 
     public void PauseGame()
     {
-        if (GamePaused)
+        if (_gamePaused)
         {
             HideMessage("MessageOverlay");
             MenuButton.interactable = true;
-            GamePaused = false;
+            _gamePaused = false;
         }
         else
         {
-            GamePaused = true;
+            _gamePaused = true;
             MenuButton.interactable = false;
             StartCoroutine(ShowMessage("Pause",Score,(int)_totalTimePlayed,true));
         }
@@ -95,7 +94,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         ZestKit.instance.stopAllTweens();
         var targetGameObject = GameField.transform.parent.FindChild(target).gameObject;
         Destroy(targetGameObject);
-        GamePaused = false;
+        _gamePaused = false;
     }
 
     private void UpdateTimer()
@@ -120,14 +119,14 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         GameTimerBar.rectTransform.localScale = new Vector3(Math.Min(gameTimerRelative, 1), 1, 1);
 
 
-        if (_gameTimer<Constants.TimerLow && !WarningOverlayTween.isRunning())
+        if (_gameTimer<Constants.TimerLow && !_warningOverlayTween.isRunning())
         {
-            WarningOverlayTween.start();
+            _warningOverlayTween.start();
         }
-        if (_gameTimer > Constants.TimerLow && WarningOverlayTween.isRunning())
+        if (_gameTimer > Constants.TimerLow && _warningOverlayTween.isRunning())
         {
-            WarningOverlayTween.stop();
-            WarningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000);
+            _warningOverlayTween.stop();
+            _warningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000);
             TimerWarningOverlay.color = new Color(255/ 255f, 68/ 255f, 68 / 255f, 0);
         }
     }
@@ -168,11 +167,8 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     }
     public void LevelUp(int level)
     {
-        var levelString = level.ToString();
-        LevelNumText.text = levelString;
-        GamePaused = true;
-        _gameTimer = Constants.StartingGameTimer;
-        ShowLevelupTutorial(level);
+        ShowLevelupMessage(ApplicationState.SeriesDelta);
+        _gamePaused = true;
     }
     public void BackToMenu()
     {
@@ -222,27 +218,19 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         MessageTitleGameObject.GetComponent<Text>().text = String.Format(Utilities.LoadStringFromFile(header));
         yield return new WaitForSeconds(0.4f);
     }
-    public void ShowLevelupTutorial(int level)
+    public void ShowLevelupMessage(int level)
     {
         var LevelupTutorial_instance = Instantiate(LevelupTutorial, GameField.transform.parent);
         LevelupTutorial_instance.transform.name = "TutorialOverlay";
-        var buttonCtrl = LevelupTutorial_instance.transform.Find("OverlayBackground/Continue").gameObject.GetComponent<Button>();
-        buttonCtrl.onClick.AddListener(() => HideMessage("TutorialOverlay"));
+        var buttonCtrl = LevelupTutorial_instance.transform.Find("OverlayBackground/Tutorial").gameObject.GetComponent<Button>();
+        buttonCtrl.onClick.AddListener(() => SceneManager.LoadScene("Tutorial"));
+        buttonCtrl.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Tutorial");
         var canvasGroup = LevelupTutorial_instance.GetComponent<CanvasGroup>();
         canvasGroup.ZKalphaTo(0.75f).setFrom(0).start();
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
-        var Tile1 = LevelupTutorial_instance.transform.Find("OverlayBackground/Tile1").gameObject;
-        var Tile2 = LevelupTutorial_instance.transform.Find("OverlayBackground/Tile2").gameObject;
-        var Tile3 = LevelupTutorial_instance.transform.Find("OverlayBackground/Tile3").gameObject;
-        var TileUp = LevelupTutorial_instance.transform.Find("OverlayBackground/TileUp").gameObject;
         var header = LevelupTutorial_instance.transform.Find("OverlayBackground/LevelupTutorialHeader").gameObject;
-        Tile1.GetComponent<Image>().overrideSprite = numberSquareSprites[0];
-        Tile2.GetComponent<Image>().overrideSprite =numberSquareSprites[0 + level];
-        Tile3.GetComponent<Image>().overrideSprite= numberSquareSprites[0 + level*2];
-        TileUp.GetComponent<Image>().overrideSprite = numberSquareSprites[numberSquareSprites.Length-1];
         header.GetComponent<Text>().text = String.Format("{0} {1}",level, Utilities.LoadStringFromFile("LevelUpMessage"));
-        AnimateTutorial(new GameObject[] { Tile1, Tile2, Tile3, TileUp });
     }
 
     private void AnimateTutorial(GameObject[] tiles)
@@ -284,7 +272,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     }
     public bool IsPaused()
     {
-        return GamePaused;
+        return _gamePaused;
     }
 
     void SendUserInfoToServer()
@@ -292,25 +280,21 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         StartCoroutine(UserInfo.SendUserInfoToServer(false));
     }
 
-    public bool IsControl()
-    {
-        return UserInfo.GetToday().Control == 1;
-    }
     private void SetTileColorBase(Image go)
     {
-        go.color = IsControl()
+        go.color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlBaseColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorBase;
     }
     private void SetTileColorSelected(Image go)
     {
-        go.color = IsControl()
+        go.color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorSelected;
     }
     private void SetTileColorMatched(Image go)
     {
-        go.color = IsControl()
+        go.color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorMatched;
     }

@@ -10,7 +10,13 @@ using UnityEngine.EventSystems;
 public class Game : MonoBehaviour
 {
     private Vector2[] _spawnPositions;
-    public int SeriesDelta = 0;
+
+    private int SeriesDelta
+    {
+        get { return ApplicationState.SeriesDelta; }
+        set { ApplicationState.SeriesDelta=value; }
+    }
+
     private Vector2 _cellSize;
     private GameObject _hitGo = null;
     private Sprite[] _numberSquareSprites;
@@ -40,7 +46,7 @@ public class Game : MonoBehaviour
 
     void Start()
     {
-        _tileImagesFolder = _controllerScript.IsControl() ? "Images/Control" : "Images/Numbers";
+        _tileImagesFolder = ApplicationState.UserStatistics.IsControl() ? "Images/Control" : "Images/Numbers";
         _numberSquareSprites = Resources.LoadAll<Sprite>(_tileImagesFolder).OrderBy(t => Convert.ToInt32(t.name)).ToArray();
         _maxNumber = _numberSquareSprites.Length;
         _rows = _maxNumber;
@@ -106,19 +112,19 @@ public class Game : MonoBehaviour
     }
     private void SetTileColorBase(GameObject go)
     {
-        go.GetComponent<Image>().color = _controllerScript.IsControl()
+        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlBaseColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorBase;
     }
     private void SetTileColorSelected(GameObject go)
     {
-        go.GetComponent<Image>().color = _controllerScript.IsControl()
+        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorSelected;
     }
     private void SetTileColorMatched(GameObject go)
     {
-        go.GetComponent<Image>().color = _controllerScript.IsControl()
+        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorMatched;
     }
@@ -144,8 +150,8 @@ public class Game : MonoBehaviour
 
     public IEnumerator ClearBoardMatches()
     {
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, _controllerScript.IsControl(), false);
-        var sameMatches = _shapes.GetMatches(_maxNumber, 0, _controllerScript.IsControl(), false);
+        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, ApplicationState.UserStatistics.IsControl(), false);
+        var sameMatches = _shapes.GetMatches(_maxNumber, 0, ApplicationState.UserStatistics.IsControl(), false);
         totalMatches.CombineMatchesInfo(sameMatches,false);
         yield return StartCoroutine(HandleMatches(totalMatches, false, false, true));
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = true;
@@ -207,23 +213,23 @@ public class Game : MonoBehaviour
             //will wait for both of the above animations
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
-            if (_controllerScript.Score >= NextLevelScore[SeriesDelta])
+            if (ApplicationState.Score >= NextLevelScore[SeriesDelta])
                 break;
 
             //Check for new matches with new tiles
-            totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta,_controllerScript.IsControl(),withScore);
+            totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, ApplicationState.UserStatistics.IsControl(), withScore);
 
             //Search identical matches 
             if (SeriesDelta != 0)
             {
-                var sameMatches = _shapes.GetMatches(_maxNumber, 0, _controllerScript.IsControl(), false);
-                totalMatches.CombineMatchesInfo(sameMatches,_controllerScript.IsControl());
+                var sameMatches = _shapes.GetMatches(_maxNumber, 0, ApplicationState.UserStatistics.IsControl(), false);
+                totalMatches.CombineMatchesInfo(sameMatches, ApplicationState.UserStatistics.IsControl());
             }
 
         }
-        if (_controllerScript.Score >= NextLevelScore[SeriesDelta])
+        if (ApplicationState.Score >= NextLevelScore[SeriesDelta])
         {
-            StartCoroutine(LevelUp());
+            LevelUp();
             _controllerScript.LevelUp(SeriesDelta);
         }
         _state = GameState.Playing;
@@ -248,19 +254,19 @@ public class Game : MonoBehaviour
         SetTileColorBase(_hitGo);
 
         //Find matches
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta,_controllerScript.IsControl(),true);
+        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, ApplicationState.UserStatistics.IsControl(), true);
         //Find identical strings with no score
         if (SeriesDelta != 0)
         {
             var sameMatches = _shapes.GetMatches(_maxNumber, 0, false,false);
-            totalMatches.CombineMatchesInfo(sameMatches,_controllerScript.IsControl());
+            totalMatches.CombineMatchesInfo(sameMatches, ApplicationState.UserStatistics.IsControl());
         }
         if (totalMatches.NumberOfMatches>0)
             StartCoroutine(HandleMatches(totalMatches));
         else
         {
             _controllerScript.IncreaseScore(-5);
-            if (_controllerScript.Score >= 0)
+            if (ApplicationState.Score >= 0)
             {
                 _state = GameState.Playing;
                 yield break;
@@ -310,7 +316,7 @@ public class Game : MonoBehaviour
         }
     }
 
-    public IEnumerator LevelUp()
+    public void LevelUp()
     {
         _state = GameState.Animating;
         SeriesDelta += 1;
@@ -318,8 +324,6 @@ public class Game : MonoBehaviour
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = 0;
 		ZestKit.instance.stopAllTweens();
         DestroyAllCells();
-        yield return StartCoroutine(InitializeCellAndSpawnPositions());
-        _state = GameState.Playing;
     }
 
     private void MoveAndAnimate(IEnumerable<GameObject> movedGameObjects, int distance, bool quickmode = false)
@@ -396,10 +400,8 @@ public class Game : MonoBehaviour
     public void SetNextLevelScore(int score, int level)
     {
         NextLevelScore[level] = score;
-        if (_controllerScript.Score >= NextLevelScore[SeriesDelta])
-        {
-            StartCoroutine(LevelUp());
-            _controllerScript.LevelUp(SeriesDelta);
-        }
+        if (ApplicationState.Score < NextLevelScore[SeriesDelta]) return;
+        LevelUp();
+        _controllerScript.LevelUp(SeriesDelta);
     }
 }

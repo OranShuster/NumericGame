@@ -11,19 +11,19 @@ public class ControllerTutorial : MonoBehaviour,IControllerInterface
     public Button SkipButton;
     public Image GameField;
 
-    private UserStatistics _userStatistics;
-
-    void Awake()
-    {
-        _userStatistics = new UserStatistics();
-    }
+    private UserStatistics _userStatistics=ApplicationState.UserStatistics;
 
     void Start ()
 	{
 	    SkipButton.image.ZKalphaTo(1,0.5f).start();
 	    SkipButton.GetComponentInChildren<Text>().ZKalphaTo(1,0.5f).start();
 	    TutorialText.ZKalphaTo(1,0.5f).start();
-	    TutorialText.text = Utilities.LoadStringFromFile("TutorialHeader", 25);
+	    var tutorialHeaderStringName = "TutorialHeaderControl";
+	    if (!_userStatistics.IsControl())
+	    {
+	        tutorialHeaderStringName = string.Format("TutorialHeader{0}", ApplicationState.SeriesDelta);
+	    }
+        TutorialText.text = Utilities.LoadStringFromFile(tutorialHeaderStringName, 35);
     }
 
     public void StartGame()
@@ -33,10 +33,6 @@ public class ControllerTutorial : MonoBehaviour,IControllerInterface
     }
     public bool IsPaused() { return false; }
 
-    public bool IsControl()
-    {
-        return _userStatistics.GetToday().Control == 1;
-    }
     //Empty methods to comply with interface
     public void IncreaseScore(int amount){}
     public void IncreaseGameTimer(float inc){}

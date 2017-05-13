@@ -57,7 +57,7 @@ public class ControllerMenu : MonoBehaviour
         if (canPlayStatus <= 0)
         {
             StartGameButton.interactable = false;
-            TimeToNextSession = _userStatistics.TimeToNextSession();
+            TimeToNextSession = canPlayStatus == 0 ? _userStatistics.TimeToNextSession() : "00:00:00";
             if (TimeToNextSession == "00:00:00")
             {
                 StartGameButtonText.text = Utilities.LoadStringFromFile("NoMoreGames", 30);

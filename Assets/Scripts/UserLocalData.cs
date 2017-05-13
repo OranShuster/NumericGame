@@ -51,7 +51,7 @@ public class PlayDate
     public float SessionLength { get; set; }
     public float SessionInterval { get; set; }
     public int Control { get; set; }
-    public int CurrentSession = 1;
+    public int CurrentSession = 0;
     public int CurrentSessionTimeSecs = 0;
     public int LastSessionsEndTime = 0;
     public List<Rounds> GameRounds = new List<Rounds>();

@@ -42,7 +42,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     public Image TimerWarningOverlay;
     public GameObject LevelupTutorial;
     public Button MenuButton;
-    private float _idleTimer=Constants.IdleTimerSeconds;
 
     void Awake()
 	{
@@ -65,6 +64,8 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         ScoreHeaderText.text = Utilities.LoadStringFromFile("Score");
         LevelHeaderText.text = Utilities.LoadStringFromFile("Level");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
+        IncreaseScore(0);
+        StartCoroutine(UserInfo.SendUserInfoToServer());
     }
 
     // Update is called once per frame
@@ -79,6 +80,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         }
         if (ApplicationState.ConnectionError)
         {
+            ApplicationState.ConnectionError = false;
             _gamePaused = true;
             StartCoroutine(ShowMessage("Connection_Error", 0, 0, false));
         }
@@ -113,7 +115,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     {
         _gameTimer -= Time.deltaTime;
         _totalTimePlayed += Time.deltaTime;
-        _idleTimer -= Time.deltaTime;
         TimerText.text = Mathf.CeilToInt(_gameTimer).ToString();
 
         var sessionTimeLeft = UserInfo.GetToday().SessionLength - UserInfo.GetToday().CurrentSessionTimeSecs;
@@ -121,8 +122,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
             LoseGame(LoseReasons.SessionTime);
         if (_gameTimer <= 0)
             LoseGame(LoseReasons.GameTime);
-        if (_idleTimer <= 0)
-            LoseGame(LoseReasons.Idle);
 
         var gameTimerRelative = _gameTimer / Constants.TimerMax * 100;
         GameTimerBar.color = Constants.ColorOkGreen;
@@ -133,24 +132,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         GameTimerBar.rectTransform.localScale = new Vector3(Math.Min(gameTimerRelative, 1), 1, 1);
 
         GameTimerWarning();
-        if (!_warningOverlayTween.isRunning() || _idleOverlayTween.isRunning())
-            IdleTimerWarning();
 
-    }
-
-    private void IdleTimerWarning()
-    {
-        if (_idleTimer < Constants.IdleTimerLow && !_idleOverlayTween.isRunning())
-        {
-            _idleOverlayTween.start();
-            TimerWarningOverlay.color = Constants.ColorWarningOrange;
-        }
-        if (_idleTimer > Constants.IdleTimerLow && _idleOverlayTween.isRunning())
-        {
-            _idleOverlayTween.stop();
-            _idleOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000);
-            TimerWarningOverlay.color = Constants.ColorWarningOrange - new Color(0, 0, 0, 1);
-        }
     }
 
     private void GameTimerWarning()
@@ -172,11 +154,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     {
 
         ScoreText.text = Math.Max(0, Score).ToString();
-    }
-
-    public void MoveMade()
-    {
-        _idleTimer = Constants.IdleTimerSeconds;
     }
 
     public void IncreaseGameTimer(float inc)

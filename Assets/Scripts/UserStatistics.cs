@@ -54,7 +54,7 @@ public class UserStatistics : IEnumerable
     {
         if (UserLocalData.PlayDates.Where(day => IsPastDay(day.Date)).Any(day => !CheckPastDayValid(day)))
         {
-            return 0;
+            return -1;
         }
         var todayDateEntry = GetToday();
         return todayDateEntry == null ? 0 : CheckTodayValid(todayDateEntry);
@@ -117,6 +117,8 @@ public class UserStatistics : IEnumerable
     public void AddPlayTime(int length,int score)
     {
         var today = GetToday();
+        if (today.CurrentSession == 0)
+            today.CurrentSession = 1;
         var thisTime = DateTime.Now.ToShortTimeString();
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0,score),thisTime));
         today.CurrentSessionTimeSecs += length;
@@ -211,7 +213,7 @@ public class UserStatistics : IEnumerable
             }
             else
                 yield return request.Send();
-            if (request.isError)
+            if (request.isError || request.responseCode !=200  && !IsTestUser())
             {
                 ApplicationState.ConnectionError = true;
                 Debug.LogWarning(request.error);

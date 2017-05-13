@@ -15,6 +15,7 @@ public class ControllerRegistration : MonoBehaviour
     {
         var usercode = RegistrationCodeInputField.text;
         RegistrationErrorText.text = "";
+        SubmitButtonText.GetComponentInParent<Button>().interactable = false;
         try
         {
             UserStatistics userStatistics = new UserStatistics(usercode);
@@ -29,6 +30,11 @@ public class ControllerRegistration : MonoBehaviour
         {
             ShowRegistrationErrorMessage();
         }
+        finally
+        {
+            SubmitButtonText.GetComponentInParent<Button>().interactable = true;
+        }
+
     }
 
     private void ShowRegistrationErrorMessage()

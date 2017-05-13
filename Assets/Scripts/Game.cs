@@ -89,7 +89,6 @@ public class Game : MonoBehaviour
                             }
                             else
                             {
-                                _controllerScript.MoveMade();
                                 _state = GameState.Animating;
                                 FixSortingLayer(_hitGo, hit);
                                 StartCoroutine(FindMatchesAndCollapse(hit));
@@ -127,6 +126,8 @@ public class Game : MonoBehaviour
         go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorMatched;
+        if (ApplicationState.UserStatistics.IsControl())
+            go.GetComponent<Outline>().effectDistance = new Vector2(-7.5f,-7.5f);
     }
 
     public IEnumerator InitializeCellAndSpawnPositions()
@@ -176,7 +177,7 @@ public class Game : MonoBehaviour
         {
             if (withScore)
             {
-                _controllerScript.IncreaseScore(totalMatches.AddedScore + (first_run * -5));
+                _controllerScript.IncreaseScore(totalMatches.AddedScore);
                 first_run = 0;
                 _controllerScript.IncreaseGameTimer(5 * totalMatches.NumberOfMatches);
             }

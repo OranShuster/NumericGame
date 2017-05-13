@@ -231,8 +231,14 @@ public class UserStatistics : IEnumerable
         return  control>=0;
     }
 
+    public bool IsControl()
+    {
+        return GetToday().Control == 1;
+    }
+
     public void DeleteSave()
     {
         File.Delete(_userDataPath);
     }
+
 }

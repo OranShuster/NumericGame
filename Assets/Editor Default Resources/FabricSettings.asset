@@ -23,7 +23,7 @@ MonoBehaviour:
   initialization: 0
   flowSequence: 0
   conflict: 
-  kit: 
+  kit: Crashlytics
   installedKits:
   - Name: Crashlytics
     InstallationStatus: 2

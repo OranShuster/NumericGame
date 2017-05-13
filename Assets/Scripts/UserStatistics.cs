@@ -63,12 +63,31 @@ public class UserStatistics : IEnumerable
     public string TimeToNextSession()
     {
         var todayEntry = GetToday();
+        if (todayEntry.CurrentSession > todayEntry.NumberOfSessions)
+        {
+            var TomorrowEntry = GetTomorrow();
+            if (TomorrowEntry != null)
+            {
+                TimeSpan span = DateTime.Today.AddDays(1).AddHours(8).Subtract(DateTime.Now);
+                return string.Format("{0:D2}:{1:D2}:{2:D2}",
+                    span.Hours,
+                    span.Minutes,
+                    span.Seconds);
+            }
+            return "00:00:00";
+        }
         var secondsToNextSession = todayEntry.SessionInterval - (GetEpochTime() - todayEntry.LastSessionsEndTime) ;
         var t = TimeSpan.FromSeconds(secondsToNextSession);
         return string.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
             t.Seconds);
+    }
+
+    private object GetTomorrow()
+    {
+        var todayDate = DateTime.Today.AddDays(1).ToString(Constants.DateFormat);
+        return Array.Find(UserLocalData.PlayDates, x => x.Date == todayDate);
     }
 
     private int CheckTodayValid(PlayDate todayDateEntry)

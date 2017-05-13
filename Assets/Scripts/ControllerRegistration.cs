@@ -36,16 +36,19 @@ public class ControllerRegistration : MonoBehaviour
         RegistrationErrorText.text = Utilities.LoadStringFromFile("RegistrationErrorMessage",50);
     }
 
-    void Start()
+    void Awake()
     {
-        ZestKit.enableBabysitter = true;
-        ZestKit.removeAllTweensOnLevelLoad = true;
-        Application.logMessageReceived += Utilities.LoggerCallback;
         if (UserStatistics.PlayerDataValid())
         {
             SceneManager.LoadScene("MainMenu");
             return;
         }
+    }
+    void Start()
+    {
+        ZestKit.enableBabysitter = true;
+        ZestKit.removeAllTweensOnLevelLoad = true;
+        Application.logMessageReceived += Utilities.LoggerCallback;
         RegistrationHeader.text = Utilities.LoadStringFromFile("UserRegistrationHeader");
         SubmitButtonText.text = Utilities.LoadStringFromFile("ConfirmText");
         RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");

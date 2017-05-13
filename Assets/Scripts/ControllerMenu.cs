@@ -11,6 +11,7 @@ public class ControllerMenu : MonoBehaviour
     public Text ShowStatisticsButtonText;
     public Text InstructionsButtonText;
     public GameObject GameInstructionsText;
+    public Text MenuButtonText;
 
     public GameObject PlayStats;
     public GameObject PlayStatsViewContent;
@@ -26,8 +27,6 @@ public class ControllerMenu : MonoBehaviour
     public Sprite DateStatisOkImage;
 
     public Button StartGameButton;
-    public GameObject DeleteSaveButton;
-    public Text StartGameErrorText;
 
     private string TimeToNextSession="00:00:00";
 
@@ -36,7 +35,7 @@ public class ControllerMenu : MonoBehaviour
         StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton");
         ShowStatisticsButtonText.text = Utilities.LoadStringFromFile("StatisticsButton");
         InstructionsButtonText.text = Utilities.LoadStringFromFile("Instructions");
-
+        MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
         ApplicationState.UserStatistics = new UserStatistics();
         foreach (PlayDate date in _userStatistics)
         {
@@ -50,8 +49,6 @@ public class ControllerMenu : MonoBehaviour
             }
             AddEmptyLineToScrollView();
         }
-        if (_userStatistics.IsTestUser())
-            DeleteSaveButton.SetActive(true);
     }
 
     void Update()
@@ -60,19 +57,18 @@ public class ControllerMenu : MonoBehaviour
         if (canPlayStatus <= 0)
         {
             StartGameButton.interactable = false;
-            StartGameErrorText.gameObject.SetActive(true);
             if (canPlayStatus == 0)
             {
-                StartGameErrorText.text = Utilities.LoadStringFromFile("NoMoreTimeInSession", 25);
+                StartGameButtonText.text = Utilities.LoadStringFromFile("NoMoreGames", 30);
                 return;
             }
             TimeToNextSession = _userStatistics.TimeToNextSession();
-            StartGameErrorText.text = string.Format("{0}\n{1}", Utilities.LoadStringFromFile("TimeUntillNextSession", 30), TimeToNextSession);
+            StartGameButtonText.text = string.Format("({1}) {0})", Utilities.LoadStringFromFile("NewGameButton", 30), TimeToNextSession);
         }
         else
         {
             StartGameButton.interactable = true;
-            StartGameErrorText.gameObject.SetActive(false);
+            StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton", 30);
         }
     }
 
@@ -180,9 +176,8 @@ public class ControllerMenu : MonoBehaviour
             dateStatus.sprite = null;
     }
 
-    public void DeleteSavesAndExit()
+    public void QuitGame()
     {
-        _userStatistics.DeleteSave();
         Application.Quit();
     }
 }

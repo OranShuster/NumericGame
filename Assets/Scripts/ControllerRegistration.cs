@@ -60,4 +60,9 @@ public class ControllerRegistration : MonoBehaviour
         RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");
 
     }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
 }

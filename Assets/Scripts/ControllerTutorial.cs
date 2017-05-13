@@ -39,6 +39,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
 
     public void StartGame()
     {
+        ZestKit.instance.stopAllTweens();
         SceneManager.LoadScene("MainGame");
     }
 

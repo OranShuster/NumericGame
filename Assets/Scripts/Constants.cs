@@ -58,6 +58,8 @@ public static class Constants
     public static float TimerMax = 90;
     public static float TimerLow = 10;
     public static int ScoreReportingInterval = 10;
+    public static float IdleTimerSeconds = 10;
+    public static float IdleTimerLow = 5;
 
     public static string DateFormat = "yyyy-MM-dd";
     public static string DateFormatOutput = "dd/MM/yyyy";
@@ -65,7 +67,6 @@ public static class Constants
 
     public const string TestCode = "desiree";
     public const string TestCode2 = "desiree2";
-
 
 
 }
@@ -76,4 +77,12 @@ public enum GameState
     SelectionStarted,
     Animating,
     Lost
+}
+
+public enum LoseReasons
+{
+    SessionTime,
+    Idle,
+    GameTime,
+    Points
 }

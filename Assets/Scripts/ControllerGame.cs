@@ -12,6 +12,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     private float _totalTimePlayed = 0;
     private Game _mainGame;
     private ITween<float> _warningOverlayTween;
+    private ITween<float> _idleOverlayTween;
     private bool _gamePaused = false;
 
     public UserStatistics UserInfo { get; set; }
@@ -35,13 +36,15 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     public Image TimerWarningOverlay;
     public GameObject LevelupTutorial;
     public Button MenuButton;
+    private float _idleTimer=Constants.IdleTimerSeconds;
 
-	void Awake()
+    void Awake()
 	{
 		_mainGame = GameField.GetComponent<Game>();
 	    UserInfo = ApplicationState.UserStatistics;
 		_warningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
-		InvokeRepeating("SendUserInfoToServer", Constants.ScoreReportingInterval, Constants.ScoreReportingInterval);
+	    _idleOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000).setRecycleTween(false);
+        InvokeRepeating("SendUserInfoToServer", Constants.ScoreReportingInterval, Constants.ScoreReportingInterval);
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 	    if (UserInfo.GetToday().Control == 1)
 	        _mainGame.SetNextLevelScore(int.MaxValue,0);
@@ -66,7 +69,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         if (_mainGame.GetState() == GameState.Playing || _mainGame.GetState() == GameState.SelectionStarted)
         {
             if (!_gamePaused)
-                UpdateTimer();
+                UpdateTimers();
             if (Input.GetKeyDown(KeyCode.Escape))
                 PauseGame();
         }
@@ -97,20 +100,22 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         _gamePaused = false;
     }
 
-    private void UpdateTimer()
+    private void UpdateTimers()
     {
         _gameTimer -= Time.deltaTime;
-        TimerText.text = Math.Ceiling(_gameTimer).ToString();
         _totalTimePlayed += Time.deltaTime;
-        var SessionTimeLeft = UserInfo.GetToday().SessionLength - UserInfo.GetToday().CurrentSessionTimeSecs;
-        if (_totalTimePlayed > SessionTimeLeft)
-        {
-            LoseGame(true);
-        }
-        if (_gameTimer <= 0)
-            LoseGame();
+        _idleTimer -= Time.deltaTime;
+        TimerText.text = Mathf.CeilToInt(_gameTimer).ToString();
 
-        var gameTimerRelative = _gameTimer / Constants.TimerMax*100;
+        var sessionTimeLeft = UserInfo.GetToday().SessionLength - UserInfo.GetToday().CurrentSessionTimeSecs;
+        if (_totalTimePlayed > sessionTimeLeft)
+            LoseGame(LoseReasons.SessionTime);
+        if (_gameTimer <= 0)
+            LoseGame(LoseReasons.GameTime);
+        if (_idleTimer <= 0)
+            LoseGame(LoseReasons.Idle);
+
+        var gameTimerRelative = _gameTimer / Constants.TimerMax * 100;
         GameTimerBar.color = Constants.ColorOKGreen;
         if (gameTimerRelative < 50)
             GameTimerBar.color = Constants.ColorWarningOrange;
@@ -118,16 +123,39 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
             GameTimerBar.color = Constants.ColorDangerRed;
         GameTimerBar.rectTransform.localScale = new Vector3(Math.Min(gameTimerRelative, 1), 1, 1);
 
+        GameTimerWarning();
+        if (!_warningOverlayTween.isRunning() || _idleOverlayTween.isRunning())
+            IdleTimerWarning();
 
-        if (_gameTimer<Constants.TimerLow && !_warningOverlayTween.isRunning())
+    }
+
+    private void IdleTimerWarning()
+    {
+        if (_idleTimer < Constants.IdleTimerLow && !_idleOverlayTween.isRunning())
+        {
+            _idleOverlayTween.start();
+            TimerWarningOverlay.color = Constants.ColorWarningOrange;
+        }
+        if (_idleTimer > Constants.IdleTimerLow && _idleOverlayTween.isRunning())
+        {
+            _idleOverlayTween.stop();
+            _idleOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000);
+            TimerWarningOverlay.color = Constants.ColorWarningOrange - new Color(0, 0, 0, 1);
+        }
+    }
+
+    private void GameTimerWarning()
+    {
+        if (_gameTimer < Constants.TimerLow && !_warningOverlayTween.isRunning())
         {
             _warningOverlayTween.start();
+            TimerWarningOverlay.color = Constants.ColorDangerRed;
         }
         if (_gameTimer > Constants.TimerLow && _warningOverlayTween.isRunning())
         {
             _warningOverlayTween.stop();
             _warningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000);
-            TimerWarningOverlay.color = new Color(255/ 255f, 68/ 255f, 68 / 255f, 0);
+            TimerWarningOverlay.color = Constants.ColorDangerRed - new Color(0, 0, 0, 1);
         }
     }
 
@@ -137,7 +165,10 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         ScoreText.text = Math.Max(0, Score).ToString();
     }
 
-    public void MoveMade(){}
+    public void MoveMade()
+    {
+        _idleTimer = Constants.IdleTimerSeconds;
+    }
 
     public void IncreaseGameTimer(float inc)
     {
@@ -156,12 +187,27 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         ShowScore();
     }
 
-    public void LoseGame(bool sessionTimeUp=false)
+    public void LoseGame(LoseReasons reason)
     {
         _mainGame.StopGame();
-        var headerMsg = "Game_Over";
-        if (sessionTimeUp)
-            headerMsg = "Session_Ended";
+        string headerMsg;
+        switch (reason)
+        {
+            case LoseReasons.Idle:
+                headerMsg = "Idle";
+                break;
+            case LoseReasons.Points:
+                headerMsg = "Negative_Points";
+                break;
+            case LoseReasons.SessionTime:
+                headerMsg = "Session_Time";
+                break;
+            case LoseReasons.GameTime:
+                headerMsg = "Game_Time";
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(reason.ToString(), reason, null);
+        }
         MenuButton.interactable = false;
         StartCoroutine(ShowMessage(headerMsg, Score, (int)_totalTimePlayed));
     }
@@ -231,19 +277,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         canvasGroup.blocksRaycasts = true;
         var header = LevelupTutorial_instance.transform.Find("OverlayBackground/LevelupTutorialHeader").gameObject;
         header.GetComponent<Text>().text = String.Format("{0} {1}",level, Utilities.LoadStringFromFile("LevelUpMessage"));
-    }
-
-    private void AnimateTutorial(GameObject[] tiles)
-    {
-        var tilesImages = new Image[] { tiles[0].GetComponent<Image>(), tiles[1].GetComponent<Image>(), tiles[2].GetComponent<Image>(), tiles[3].GetComponent<Image>() };
-        Action<ITween<Vector3>> MarkTilesAction = (task) => StartCoroutine(MarkTilesAnimation(tilesImages));
-        tiles[1].transform.ZKlocalPositionTo(tiles[3].transform.localPosition)
-            .setFrom(tiles[1].transform.localPosition)
-            .setLoops(LoopType.PingPong, 999, 1f).start();
-        tiles[3].transform.ZKlocalPositionTo(tiles[1].transform.localPosition)
-            .setFrom(tiles[3].transform.localPosition)
-            .setLoops(LoopType.PingPong, 999, 1f).setLoopCompletionHandler(MarkTilesAction)
-            .start();
     }
 
     private IEnumerator MarkTilesAnimation(Image[] tiles)

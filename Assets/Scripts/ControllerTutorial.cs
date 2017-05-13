@@ -36,7 +36,7 @@ public class ControllerTutorial : MonoBehaviour,IControllerInterface
     //Empty methods to comply with interface
     public void IncreaseScore(int amount){}
     public void IncreaseGameTimer(float inc){}
-    public void LoseGame(bool _){}
+    public void LoseGame(LoseReasons _){}
     public void MoveMade(){}
     public void LevelUp(int level){}
     public void QuitGame(){}

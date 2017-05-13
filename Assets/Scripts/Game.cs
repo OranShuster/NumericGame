@@ -272,7 +272,7 @@ public class Game : MonoBehaviour
                 yield break;
             }
             _state = GameState.Lost;
-            _controllerScript.LoseGame();
+            _controllerScript.LoseGame(LoseReasons.Points);
         }
         
     }

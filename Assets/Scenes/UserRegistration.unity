@@ -1166,7 +1166,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RegistrationHeader: {fileID: 371671974}
   RegistrationCodeInputField: {fileID: 834386650}
-  SubmitButtonText: {fileID: 387550396}
+  SubmitButton: {fileID: 25307659}
   RegistrationCodeInputPlaceholderText: {fileID: 1370014533}
   RegistrationErrorText: {fileID: 273237458}
 --- !u!1 &1370014531

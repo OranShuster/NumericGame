@@ -24,9 +24,16 @@ public class UserStatistics : IEnumerable
         }
         else
         {
-            var userDataJson = GetJsonFromServer(userCode);
-            UserLocalData = new UserLocalData(userDataJson, userCode);
-            Save(UserLocalData);
+            try
+            {
+                var userDataJson = GetJsonFromServer(userCode);
+                UserLocalData = new UserLocalData(userDataJson, userCode);
+                Save(UserLocalData);
+            }
+            catch
+            {
+                UserLocalData = null;
+            }
         }
     }
 
@@ -39,8 +46,8 @@ public class UserStatistics : IEnumerable
     {
         var getReq = UnityWebRequest.Get(Constants.BaseUrl + userCode + "/");
         getReq.Send();
-        while (!getReq.isDone) { System.Threading.Thread.Sleep(500); }
-        if (getReq.isError)
+        while (!getReq.isDone) { System.Threading.Thread.Sleep(250); }
+        if (getReq.isError || getReq.responseCode > 204)
         {
             Debug.LogError(getReq.error);
         }
@@ -56,6 +63,8 @@ public class UserStatistics : IEnumerable
         {
             return -1;
         }
+        if (DateTime.Now < DateTime.Today.AddHours(8))
+            return 0;
         var todayDateEntry = GetToday();
         return todayDateEntry == null ? 0 : CheckTodayValid(todayDateEntry);
     }
@@ -77,6 +86,14 @@ public class UserStatistics : IEnumerable
                     span.Seconds);
             }
             return "00:00:00";
+        }
+        if (DateTime.Now < DateTime.Today.AddHours(8))
+        {
+            TimeSpan span = DateTime.Today.AddDays(1).AddHours(8).Subtract(DateTime.Now);
+            return string.Format("{0:D2}:{1:D2}:{2:D2}",
+                span.Hours,
+                span.Minutes,
+                span.Seconds);
         }
         var secondsToNextSession = todayEntry.SessionInterval - (GetEpochTime() - todayEntry.LastSessionsEndTime) ;
         var t = TimeSpan.FromSeconds(secondsToNextSession);

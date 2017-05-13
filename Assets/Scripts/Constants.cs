@@ -34,20 +34,13 @@ public static class Constants
     };
     public static Color32[] ControlSelectedColors = new[]
     {
-        new Color32(245,245,245,150),
-        new Color32(245,245,245,150),
-        new Color32(245,245,245,150),
-        new Color32(245,245,245,150),
-        new Color32(245,245,245,150),
-        new Color32(245,245,245,150),
-        new Color32(245,245,245,150)
-//        new Color32(229,115,115,255),
-//        new Color32(255,183,77,255),
-//        new Color32(129,199,132,255),
-//        new Color32(56,190,235,255),
-//        new Color32(144,164,174,255),
-//        new Color32(212,225,87,255),
-//        new Color32(186,104,200,255)
+        new Color32(229,115,115,255),
+        new Color32(255,183,77,255),
+        new Color32(129,199,132,255),
+        new Color32(56,190,235,255),
+        new Color32(144,164,174,255),
+        new Color32(212,225,87,255),
+        new Color32(186,104,200,255)
     };
     public static Color32[] ControlMatchedColors = new[]
     {

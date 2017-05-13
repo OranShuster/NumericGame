@@ -114,12 +114,24 @@ public class Game : MonoBehaviour
         go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlBaseColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorBase;
+        if (ApplicationState.UserStatistics.IsControl())
+        {
+            go.GetComponent<Outline>().effectDistance = new Vector2(0, 0);
+            go.GetComponent<Outline>().effectColor =
+                new Color(1,1,1,0);
+        }
     }
     private void SetTileColorSelected(GameObject go)
     {
         go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControl()
             ? Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorSelected;
+        if (ApplicationState.UserStatistics.IsControl())
+        {
+            go.GetComponent<Outline>().effectDistance = new Vector2(-7.5f, -7.5f);
+            go.GetComponent<Outline>().effectColor =
+                Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1];
+        }
     }
     private void SetTileColorMatched(GameObject go)
     {
@@ -127,7 +139,11 @@ public class Game : MonoBehaviour
             ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorMatched;
         if (ApplicationState.UserStatistics.IsControl())
-            go.GetComponent<Outline>().effectDistance = new Vector2(-7.5f,-7.5f);
+        {
+            go.GetComponent<Outline>().effectDistance = new Vector2(-7.5f, -7.5f);
+            go.GetComponent<Outline>().effectColor =
+                Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1];
+        }
     }
 
     public IEnumerator InitializeCellAndSpawnPositions()

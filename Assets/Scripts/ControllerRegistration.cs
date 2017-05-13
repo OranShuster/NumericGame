@@ -7,7 +7,7 @@ public class ControllerRegistration : MonoBehaviour
 {
     public Text RegistrationHeader;
     public InputField RegistrationCodeInputField;
-    public Text SubmitButtonText;
+    public GameObject SubmitButton;
     public Text RegistrationCodeInputPlaceholderText;
     public Text RegistrationErrorText;
 
@@ -15,7 +15,7 @@ public class ControllerRegistration : MonoBehaviour
     {
         var usercode = RegistrationCodeInputField.text;
         RegistrationErrorText.text = "";
-        SubmitButtonText.GetComponentInParent<Button>().interactable = false;
+        SubmitButton.gameObject.SetActive(false);
         try
         {
             UserStatistics userStatistics = new UserStatistics(usercode);
@@ -32,7 +32,7 @@ public class ControllerRegistration : MonoBehaviour
         }
         finally
         {
-            SubmitButtonText.GetComponentInParent<Button>().interactable = true;
+            SubmitButton.gameObject.SetActive(true);
         }
 
     }
@@ -56,7 +56,7 @@ public class ControllerRegistration : MonoBehaviour
         ZestKit.removeAllTweensOnLevelLoad = true;
         Application.logMessageReceived += Utilities.LoggerCallback;
         RegistrationHeader.text = Utilities.LoadStringFromFile("UserRegistrationHeader");
-        SubmitButtonText.text = Utilities.LoadStringFromFile("ConfirmText");
+        SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
         RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");
 
     }

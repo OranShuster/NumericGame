@@ -184,7 +184,7 @@ public class UserStatistics : IEnumerable
     {
         var today = GetToday();
         var thisTime = DateTime.Now.ToShortTimeString();
-        today.GameRounds.Add(new Rounds(length, score,thisTime));
+        today.GameRounds.Add(new Rounds(length, Mathf.Max(0,score),thisTime));
         today.CurrentSessionTimeSecs += length;
         if (today.CurrentSessionTimeSecs>today.SessionLength)
         {

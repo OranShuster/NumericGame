@@ -163,7 +163,6 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         var headerMsg = "Game_Over";
         if (sessionTimeUp)
             headerMsg = "Session_Ended";
-        UserInfo.AddPlayTime((int)_totalTimePlayed, Mathf.Max(0,Score));
         MenuButton.interactable = false;
         StartCoroutine(ShowMessage(headerMsg, Score, (int)_totalTimePlayed));
     }

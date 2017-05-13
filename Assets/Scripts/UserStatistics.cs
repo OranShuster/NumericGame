@@ -93,7 +93,7 @@ public class UserStatistics : IEnumerable
         var dateObject = DateTime.ParseExact(date, Constants.DateFormat, CultureInfo.InvariantCulture);
         return dateObject.Date < DateTime.Today.Date;
     }
-    internal void AddPlayTime(int length,int score)
+    public void AddPlayTime(int length,int score)
     {
         var today = GetToday();
         var thisTime = DateTime.Now.ToShortTimeString();

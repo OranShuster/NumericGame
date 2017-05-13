@@ -32,6 +32,8 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         SceneManager.LoadScene("MainGame");
     }
 
+
+
     public bool IsPaused()
     {
         return false;
@@ -70,5 +72,9 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
 
     public void LevelUp(int level)
     {
+    }
+    public void QuitGame()
+    {
+
     }
 }

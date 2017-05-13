@@ -9,6 +9,8 @@ public class ControllerMenu : MonoBehaviour
 {
     public Text StartGameButtonText;
     public Text ShowStatisticsButtonText;
+    public Text InstructionsButtonText;
+    public GameObject GameInstructionsText;
 
     public GameObject PlayStats;
     public GameObject PlayStatsViewContent;
@@ -33,6 +35,7 @@ public class ControllerMenu : MonoBehaviour
     {
         StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton");
         ShowStatisticsButtonText.text = Utilities.LoadStringFromFile("StatisticsButton");
+        InstructionsButtonText.text = Utilities.LoadStringFromFile("Instructions");
 
         ApplicationState.UserStatistics = new UserStatistics();
         foreach (PlayDate date in _userStatistics)
@@ -80,6 +83,14 @@ public class ControllerMenu : MonoBehaviour
     public void ShowPlayTimeStatistics()
     {
         PlayStats.SetActive(!PlayStats.activeInHierarchy);
+        GameInstructionsText.SetActive(false);
+    }
+
+    public void ShowGameInstructions()
+    {
+        PlayStats.SetActive(false);
+        GameInstructionsText.SetActive(!GameInstructionsText.activeInHierarchy);
+
     }
 
     private void AddEmptyLineToScrollView()

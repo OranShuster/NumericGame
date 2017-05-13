@@ -42,9 +42,12 @@ public class ControllerMenu : MonoBehaviour
         {
             AddDateHeaderToScrollView();
             AddDateToScrollView(date);
-            AddRoundHeaderToScrollView();
-            foreach (var run in date.GameRounds)
-                AddRoundToScrollView(run);
+            if (date.GameRounds.Count > 0)
+            {
+                AddRoundHeaderToScrollView();
+                foreach (var run in date.GameRounds)
+                    AddRoundToScrollView(run);
+            }
             AddEmptyLineToScrollView();
         }
         if (_userStatistics.IsTestUser())

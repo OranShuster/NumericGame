@@ -69,7 +69,7 @@ public static class Utilities
 
         foreach (var s in listofWords)
         {
-            if (individualLine.Length >= lineLength)
+            if (individualLine.Length >= 99999)
             {
                 reversedString += ReverseLine(individualLine) + "\n"; //Add a new line feed at the end, since we cannot accomodate more characters here.
                 individualLine = ""; //Reset this string for new line.

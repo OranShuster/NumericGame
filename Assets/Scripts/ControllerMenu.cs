@@ -120,9 +120,9 @@ public class ControllerMenu : MonoBehaviour
         var lengthText = go.transform.Find("Length").gameObject.GetComponent<Text>();
         var scoreText = go.transform.Find("Score").gameObject.GetComponent<Text>();
         var timeText = go.transform.Find("Time").gameObject.GetComponent<Text>();
-        lengthText.text = Utilities.LoadStringFromFile("LengthHeader");
-        scoreText.text = Utilities.LoadStringFromFile("Score");
-        timeText.text = Utilities.LoadStringFromFile("Time");
+        lengthText.text = Utilities.LoadStringFromFile("LengthHeader",30);
+        scoreText.text = Utilities.LoadStringFromFile("Score",30);
+        timeText.text = Utilities.LoadStringFromFile("Time",30);
     }
     private void AddRoundToScrollView(Rounds round)
     {
@@ -152,9 +152,9 @@ public class ControllerMenu : MonoBehaviour
         var dateString = go.transform.Find("Date").gameObject.GetComponent<Text>();
         var sessionsString = go.transform.Find("Sessions").gameObject.GetComponent<Text>();
         var curSessionTime = go.transform.Find("CurrentSessionTime").gameObject.GetComponent<Text>();
-        dateString.text = Utilities.LoadStringFromFile("Date");
-        sessionsString.text = Utilities.LoadStringFromFile("SessionsHeader");
-        curSessionTime.text = Utilities.LoadStringFromFile("SessionTimeHeader");
+        dateString.text = Utilities.LoadStringFromFile("Date",30);
+        sessionsString.text = Utilities.LoadStringFromFile("SessionsHeader",30);
+        curSessionTime.text = Utilities.LoadStringFromFile("SessionTimeHeader",30);
     }
 
     private void AddDateToScrollView(PlayDate date)

@@ -35,3 +35,4 @@ Game_Time=זמן המשחק נגמר
 Negative_Points=הגעת לניקוד שלילי עקב איבוד נקודות
 Instructions=הוראות
 Connection_Error=בעיית תקשורת לשרת
+SentRequest=שולח

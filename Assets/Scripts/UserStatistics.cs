@@ -135,8 +135,6 @@ public class UserStatistics : IEnumerable
     public void AddPlayTime(int length,int score)
     {
         var today = GetToday();
-        if (today.CurrentSession == 0)
-            today.CurrentSession = 1;
         var thisTime = DateTime.Now.ToShortTimeString();
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0,score),thisTime));
         today.CurrentSessionTimeSecs += length;
@@ -144,7 +142,6 @@ public class UserStatistics : IEnumerable
         {
             today.CurrentSessionTimeSecs = 0;
             today.LastSessionsEndTime = GetEpochTime();
-            today.CurrentSession++;
         }
         Save(UserLocalData);
     }

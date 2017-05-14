@@ -81,6 +81,13 @@ public class ControllerMenu : MonoBehaviour
         ApplicationState.GameId = _userStatistics.GetToday().GameRounds.Count+1;
         if (ApplicationState.UserStatistics.GetToday().CurrentSession == 0)
             ApplicationState.UserStatistics.GetToday().CurrentSession = 1;
+        else
+        {
+            if (ApplicationState.UserStatistics.GetToday().CurrentSessionTimeSecs >=
+                ApplicationState.UserStatistics.GetToday().SessionLength)
+                ApplicationState.UserStatistics.GetToday().CurrentSession++;
+        }
+
         SceneManager.LoadScene("Tutorial");
     }
 

@@ -1,4 +1,5 @@
-﻿using Prime31.ZestKit;
+﻿using System.Collections;
+using Prime31.ZestKit;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -16,13 +17,19 @@ public class ControllerRegistration : MonoBehaviour
         var usercode = RegistrationCodeInputField.text;
         RegistrationErrorText.text = "";
         SubmitButton.gameObject.SetActive(false);
+        SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("SentRequest");
+        StartCoroutine(SendUserCode(usercode));
+    }
+
+    private IEnumerator SendUserCode(string usercode)
+    {
         try
         {
-            UserStatistics userStatistics = new UserStatistics(usercode);
+            var userStatistics = new UserStatistics(usercode);
             if (userStatistics.UserLocalData != null)
             {
                 SceneManager.LoadScene("MainMenu");
-                return;
+                yield break;
             }
             ShowRegistrationErrorMessage();
         }
@@ -32,9 +39,9 @@ public class ControllerRegistration : MonoBehaviour
         }
         finally
         {
+            SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
             SubmitButton.gameObject.SetActive(true);
         }
-
     }
 
     private void ShowRegistrationErrorMessage()

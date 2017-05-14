@@ -78,6 +78,7 @@ public class ControllerMenu : MonoBehaviour
         ApplicationState.Score = 0;
         ApplicationState.TotalTimePlayed = 0;
         ApplicationState.UserStatistics.ClearScoreReports();
+        ApplicationState.GameId = _userStatistics.GetToday().GameRounds.Count;
         SceneManager.LoadScene("Tutorial");
     }
 
@@ -155,7 +156,7 @@ public class ControllerMenu : MonoBehaviour
         var curSessionTime = go.transform.Find("CurrentSessionTime").gameObject.GetComponent<Text>();
         dateString.text = Utilities.LoadStringFromFile("Date",30);
         sessionsString.text = Utilities.LoadStringFromFile("SessionsHeader",30);
-        curSessionTime.text = Utilities.LoadStringFromFile("SessionTimeHeader",30);
+        curSessionTime.text = Utilities.LoadStringFromFile("SessionTimeHeader",50);
     }
 
     private void AddDateToScrollView(PlayDate date)
@@ -165,7 +166,8 @@ public class ControllerMenu : MonoBehaviour
         var sessionsString = go.transform.Find("Sessions").gameObject.GetComponent<Text>();
         var curSessionTime = go.transform.Find("CurrentSessionTime").gameObject.GetComponent<Text>();
         var dateStatus = go.transform.Find("DateStatus").gameObject.GetComponent<Image>();
-        dateString.text = DateTime.ParseExact(date.Date, Constants.DateFormat, CultureInfo.InvariantCulture).ToShortDateString();
+        dateString.text = DateTime.ParseExact(date.Date, Constants.DateFormat, CultureInfo.InvariantCulture)
+            .ToString(Constants.DateFormatOutput);
         sessionsString.text = String.Format("{0}/{1}", Math.Min(date.CurrentSession, date.NumberOfSessions), date.NumberOfSessions);
         curSessionTime.text = String.Format("{0}", date.GetRemainingSessionTimeText());
         var playDate = DateTime.ParseExact(date.Date, Constants.DateFormat, CultureInfo.InvariantCulture);

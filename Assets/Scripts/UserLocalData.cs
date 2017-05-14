@@ -38,6 +38,12 @@ public class ScoreReports
     public int score;
     public int timestamp;
     public int session_id;
+    public int game_id;
+    public override string ToString()
+    {
+        return string.Format("score = {0}, timestamp = {1}, session_id = {2}, game_id = {3}", score, timestamp,
+            session_id, game_id);
+    }
 }
 
 [Serializable]

@@ -1,18 +1,19 @@
 ﻿using System;
 using UnityEngine;
-using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using Debug = UnityEngine.Debug;
 
 public class UserStatistics : IEnumerable
 {
     public UserLocalData UserLocalData;
-    private Queue<ScoreReports> ScoreReportsToBeSent = new Queue<ScoreReports>();
+    private List<ScoreReports> ScoreReportsToBeSent = new List<ScoreReports>();
     static string _userDataPath = Application.persistentDataPath + "/userData.cjd";
     public UserStatistics(string userCode)
     {
@@ -211,54 +212,49 @@ public class UserStatistics : IEnumerable
     {
         if (ScoreReportsToBeSent.Count > 0)
         {
-            var scoreReportsArr = ScoreReportsToBeSent.ToArray();
-            var reportsCount = scoreReportsArr.GetLength(0);
-            var jsonString = JsonConvert.SerializeObject(scoreReportsArr);
+            var reportsCount = ScoreReportsToBeSent.Count;
+            var jsonString = JsonConvert.SerializeObject(ScoreReportsToBeSent);
+            Debug.Log(string.Format("Sent {0} score reports to server - {1}", reportsCount, Utilities.PrintArray<ScoreReports>(ScoreReportsToBeSent.ToArray())));
+            ClearScoreReports(reportsCount);
             var request = new UnityWebRequest(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId));
             request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonString));
             request.downloadHandler = new DownloadHandlerBuffer();
             request.method = UnityWebRequest.kHttpVerbPOST;
             request.uploadHandler.contentType = "application/json";
             request.SetRequestHeader("content-type", "application/json");
-            Debug.Log(string.Format("Sent {0} score reports to server", reportsCount));
-            ClearScoreReports();
             yield return request.Send();
-            if (request.isError || request.responseCode !=200  && !IsTestUser())
-            {
-                ApplicationState.ConnectionError = true;
-                Debug.LogWarning(request.error);
-            }
+            if (!request.isError && (request.responseCode == 200 || IsTestUser())) yield break;
+            ApplicationState.ConnectionError = true;
+            Debug.LogWarning(request.error);
         }
     }
     public void SendUserInfoToServerBlocking()
     {
         if (ScoreReportsToBeSent.Count > 0)
         {
-            var scoreReportsArr = ScoreReportsToBeSent.ToArray();
-            var reportsCount = scoreReportsArr.GetLength(0);
-            var jsonString = JsonConvert.SerializeObject(scoreReportsArr);
+            var reportsCount = ScoreReportsToBeSent.Count;
+            ClearScoreReports(reportsCount);
+            var jsonString = JsonConvert.SerializeObject(ScoreReportsToBeSent);
             var request = new UnityWebRequest(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId));
             request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonString));
             request.downloadHandler = new DownloadHandlerBuffer();
             request.method = UnityWebRequest.kHttpVerbPOST;
             request.uploadHandler.contentType = "application/json";
             request.SetRequestHeader("content-type", "application/json");
-            Debug.Log(string.Format("Sent {0} score reports to server", reportsCount));
-            ClearScoreReports();
+            Debug.Log(string.Format("Sent {0} score reports to server BLOCKING- {1}", reportsCount, Utilities.PrintArray<ScoreReports>(ScoreReportsToBeSent.ToArray())));
+            ClearScoreReports(reportsCount);
             request.Send();
             while(!request.isDone)
                 System.Threading.Thread.Sleep(250);
-            if (request.isError || request.responseCode != 200 && !IsTestUser())
-            {
-                ApplicationState.ConnectionError = true;
-                Debug.LogWarning(request.error);
-            }
+            if (!request.isError && (request.responseCode == 200 || IsTestUser())) return;
+            ApplicationState.ConnectionError = true;
+            Debug.LogWarning(request.error);
         }
     }
 
     public void AddScoreReport(ScoreReports scoreReport)
     {
-        ScoreReportsToBeSent.Enqueue(scoreReport);
+        ScoreReportsToBeSent.Add(scoreReport);
     }
 
     public static bool PlayerDataValid()
@@ -298,6 +294,10 @@ public class UserStatistics : IEnumerable
         File.Delete(_userDataPath);
     }
 
+    public void ClearScoreReports(int count)
+    {
+        ScoreReportsToBeSent.RemoveRange(0,count);
+    }
     public void ClearScoreReports()
     {
         ScoreReportsToBeSent.Clear();

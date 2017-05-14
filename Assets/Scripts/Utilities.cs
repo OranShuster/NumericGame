@@ -23,9 +23,10 @@ public static class Utilities
         ini.Open(asset);
         return ReverseText(ini.ReadValue("Translation", key, key), lineLength);
     }
-    public static string PrintArray(int[] arr)
+    public static string PrintArray<T>(T[] arr)
     {
-        return String.Join(",", Array.ConvertAll<int, String>(arr, i => i.ToString()));
+        var ret = String.Join(",", Array.ConvertAll<T, String>(arr, i => i.ToString()));
+        return ret;
     }
     public static float Remap(this float value, float from1, float to1, float from2, float to2)
     {

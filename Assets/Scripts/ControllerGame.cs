@@ -64,8 +64,12 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         ScoreHeaderText.text = Utilities.LoadStringFromFile("Score");
         LevelHeaderText.text = Utilities.LoadStringFromFile("Level");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
-        IncreaseScore(0);
-        StartCoroutine(UserInfo.SendUserInfoToServer());
+        if (ApplicationState.SeriesDelta == 0)
+        {
+            IncreaseScore(0);
+            StartCoroutine(UserInfo.SendUserInfoToServer());
+        }
+
     }
 
     // Update is called once per frame
@@ -169,7 +173,8 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         {
             score = Mathf.Max(0,amount),
             timestamp = unixTimestamp,
-            session_id = UserInfo.GetToday().CurrentSession
+            session_id = UserInfo.GetToday().CurrentSession,
+            game_id = ApplicationState.GameId
         });
         ShowScore();
     }
@@ -201,6 +206,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
     public void LevelUp(int level)
     {
         ShowLevelupMessage(ApplicationState.SeriesDelta);
+        MenuButton.interactable = false;
         _gamePaused = true;
     }
 

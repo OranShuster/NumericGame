@@ -86,7 +86,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         {
             ApplicationState.ConnectionError = false;
             _gamePaused = true;
-            StartCoroutine(ShowMessage("Connection_Error", 0, 0, false));
+            StartCoroutine(ShowMessage("Connection_Error",ApplicationState.Score , Mathf.CeilToInt(ApplicationState.TotalTimePlayed), false));
         }
     }
 

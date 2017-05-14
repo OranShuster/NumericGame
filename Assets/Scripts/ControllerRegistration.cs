@@ -11,6 +11,7 @@ public class ControllerRegistration : MonoBehaviour
     public GameObject SubmitButton;
     public Text RegistrationCodeInputPlaceholderText;
     public Text RegistrationErrorText;
+    public GameObject MenuButtonGameObject;
 
     public void CodeSubmitButtonClick()
     {
@@ -65,7 +66,7 @@ public class ControllerRegistration : MonoBehaviour
         RegistrationHeader.text = Utilities.LoadStringFromFile("UserRegistrationHeader");
         SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
         RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");
-
+        MenuButtonGameObject.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
     }
 
     public void QuitGame()

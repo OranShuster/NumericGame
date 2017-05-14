@@ -171,7 +171,7 @@ public class ControllerGame : MonoBehaviour,IControllerInterface
         var unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
         UserInfo.AddScoreReport(new ScoreReports()
         {
-            score = Mathf.Max(0,amount),
+            score = Mathf.Max(amount),
             timestamp = unixTimestamp,
             session_id = UserInfo.GetToday().CurrentSession,
             game_id = ApplicationState.GameId

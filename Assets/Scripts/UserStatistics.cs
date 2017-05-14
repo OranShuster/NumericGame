@@ -67,7 +67,7 @@ public class UserStatistics : IEnumerable
         if (DateTime.Now < DateTime.Today.AddHours(8))
             return 0;
         var todayDateEntry = GetToday();
-        return todayDateEntry == null ? 0 : CheckTodayValid(todayDateEntry);
+        return todayDateEntry == null ? -1 : CheckTodayValid(todayDateEntry);
     }
 
     public string TimeToNextSession()
@@ -119,7 +119,7 @@ public class UserStatistics : IEnumerable
         var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
         if (timeSinceLastCompleteSession >= todayDateEntry.SessionInterval)
             return Mathf.FloorToInt(todayDateEntry.SessionLength - todayDateEntry.CurrentSessionTimeSecs);
-        return Mathf.FloorToInt(timeSinceLastCompleteSession - todayDateEntry.SessionInterval);
+        return 0;
     }
 
     private bool CheckPastDayValid(PlayDate date)

@@ -17,13 +17,14 @@ public class ControllerRegistration : MonoBehaviour
     {
         var usercode = RegistrationCodeInputField.text;
         RegistrationErrorText.text = "";
-        SubmitButton.gameObject.SetActive(false);
+        SubmitButton.GetComponentInChildren<Button>().interactable=false;
         SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("SentRequest");
         StartCoroutine(SendUserCode(usercode));
     }
 
     private IEnumerator SendUserCode(string usercode)
     {
+        yield return new WaitForSeconds(0.2f);
         try
         {
             var userStatistics = new UserStatistics(usercode);
@@ -37,11 +38,8 @@ public class ControllerRegistration : MonoBehaviour
         catch
         {
             ShowRegistrationErrorMessage();
-        }
-        finally
-        {
-            SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
             SubmitButton.gameObject.SetActive(true);
+            SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
         }
     }
 
@@ -53,10 +51,7 @@ public class ControllerRegistration : MonoBehaviour
     void Awake()
     {
         if (UserStatistics.PlayerDataValid())
-        {
             SceneManager.LoadScene("MainMenu");
-            return;
-        }
     }
     void Start()
     {

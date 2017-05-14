@@ -69,21 +69,34 @@ public class UserStatistics : IEnumerable
 
     public string TimeToNextSession()
     {
-        if (DateTime.Now < DateTime.Today.AddHours(8))
-        {
-            TimeSpan span = DateTime.Today.AddDays(1).AddHours(8).Subtract(DateTime.Now);
-            return string.Format("{0:D2}:{1:D2}:{2:D2}",
-                span.Hours,
-                span.Minutes,
-                span.Seconds);
-        }
+        if (DateTime.Now < DateTime.Today.AddHours(8) || IsTodayFinished())
+            return TimeTo8AmTomorrow;
         var todayEntry = GetToday();
-        var secondsToNextSession = todayEntry.SessionInterval - (GetEpochTime() - todayEntry.LastSessionsEndTime) ;
-        var t = TimeSpan.FromSeconds(secondsToNextSession);
+        var t = TimeSpan.FromSeconds(todayEntry.SessionInterval - (GetEpochTime() - todayEntry.LastSessionsEndTime));
         return string.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
             t.Seconds);
+    }
+
+    private bool IsTodayFinished()
+    {
+        var todayEntry = GetToday();
+        return todayEntry.CurrentSession == todayEntry.NumberOfSessions &&
+                todayEntry.CurrentSessionTimeSecs >= todayEntry.SessionLength;
+    }
+
+    private static string TimeTo8AmTomorrow
+    {
+        get
+        {
+            TimeSpan t;
+            t = DateTime.Today.AddDays(1).AddHours(8).Subtract(DateTime.Now);
+            return string.Format("{0:D2}:{1:D2}:{2:D2}",
+                t.Hours,
+                t.Minutes,
+                t.Seconds);
+        }
     }
 
     private object GetTomorrow()

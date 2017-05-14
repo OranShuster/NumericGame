@@ -140,7 +140,6 @@ public class UserStatistics : IEnumerable
         today.CurrentSessionTimeSecs += length;
         if (today.CurrentSessionTimeSecs>=today.SessionLength)
         {
-            today.CurrentSessionTimeSecs = 0;
             today.LastSessionsEndTime = GetEpochTime();
         }
         Save(UserLocalData);

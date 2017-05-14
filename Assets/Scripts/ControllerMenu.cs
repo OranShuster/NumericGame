@@ -85,7 +85,11 @@ public class ControllerMenu : MonoBehaviour
         {
             if (ApplicationState.UserStatistics.GetToday().CurrentSessionTimeSecs >=
                 ApplicationState.UserStatistics.GetToday().SessionLength)
+            {
+                ApplicationState.UserStatistics.GetToday().CurrentSessionTimeSecs = 0;
                 ApplicationState.UserStatistics.GetToday().CurrentSession++;
+            }
+
         }
 
         SceneManager.LoadScene("Tutorial");

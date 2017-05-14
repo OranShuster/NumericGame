@@ -61,33 +61,14 @@ public class UserStatistics : IEnumerable
     public int CanPlay()
     {
         if (UserLocalData.PlayDates.Where(day => IsPastDay(day.Date)).Any(day => !CheckPastDayValid(day)))
-        {
             return -1;
-        }
         if (DateTime.Now < DateTime.Today.AddHours(8))
             return 0;
-        var todayDateEntry = GetToday();
-        return todayDateEntry == null ? -1 : CheckTodayValid(todayDateEntry);
+        return GetToday() == null ? -1 : CheckTodayValid(GetToday());
     }
 
     public string TimeToNextSession()
     {
-        var todayEntry = GetToday();
-        if (todayEntry == null)
-            return "00:00:00";
-        if (todayEntry.CurrentSession > todayEntry.NumberOfSessions)
-        {
-            var TomorrowEntry = GetTomorrow();
-            if (TomorrowEntry != null)
-            {
-                TimeSpan span = DateTime.Today.AddDays(1).AddHours(8).Subtract(DateTime.Now);
-                return string.Format("{0:D2}:{1:D2}:{2:D2}",
-                    span.Hours,
-                    span.Minutes,
-                    span.Seconds);
-            }
-            return "00:00:00";
-        }
         if (DateTime.Now < DateTime.Today.AddHours(8))
         {
             TimeSpan span = DateTime.Today.AddDays(1).AddHours(8).Subtract(DateTime.Now);
@@ -96,6 +77,7 @@ public class UserStatistics : IEnumerable
                 span.Minutes,
                 span.Seconds);
         }
+        var todayEntry = GetToday();
         var secondsToNextSession = todayEntry.SessionInterval - (GetEpochTime() - todayEntry.LastSessionsEndTime) ;
         var t = TimeSpan.FromSeconds(secondsToNextSession);
         return string.Format("{0:D2}:{1:D2}:{2:D2}",
@@ -113,12 +95,17 @@ public class UserStatistics : IEnumerable
     private int CheckTodayValid(PlayDate todayDateEntry)
     {
         //Finished today sessions
-        if (todayDateEntry.CurrentSession > todayDateEntry.NumberOfSessions) return 0;
-
+        if (todayDateEntry.CurrentSession == todayDateEntry.NumberOfSessions && 
+            todayDateEntry.CurrentSessionTimeSecs >= todayDateEntry.SessionLength)
+        {
+            if (GetTomorrow() == null)
+                return -1;
+            return 0;
+        }
         //Check session interval
         var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
         if (timeSinceLastCompleteSession >= todayDateEntry.SessionInterval)
-            return Mathf.FloorToInt(todayDateEntry.SessionLength - todayDateEntry.CurrentSessionTimeSecs);
+            return 1;
         return 0;
     }
 
@@ -140,6 +127,7 @@ public class UserStatistics : IEnumerable
         today.CurrentSessionTimeSecs += length;
         if (today.CurrentSessionTimeSecs>=today.SessionLength)
         {
+            today.CurrentSessionTimeSecs = today.SessionLength;
             today.LastSessionsEndTime = GetEpochTime();
         }
         Save(UserLocalData);

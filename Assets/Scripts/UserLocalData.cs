@@ -54,7 +54,7 @@ public class PlayDate
     public int SessionId { get; set; }
     public string Date { get; set; }
     public int NumberOfSessions { get; set; }
-    public float SessionLength { get; set; }
+    public int SessionLength { get; set; }
     public float SessionInterval { get; set; }
     public int Control { get; set; }
     public int CurrentSession = 0;
@@ -63,7 +63,7 @@ public class PlayDate
     public List<Rounds> GameRounds = new List<Rounds>();
 
     [JsonConstructor]
-    public PlayDate(string code, float session_length, string start_date, int num_of_sessions, int control, string email,
+    public PlayDate(string code, int session_length, string start_date, int num_of_sessions, int control, string email,
         float session_interval, int id)
     {
         Code = code;

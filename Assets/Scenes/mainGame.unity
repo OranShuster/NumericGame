@@ -1556,7 +1556,7 @@ Prefab:
     - target: {fileID: 114590511579031836, guid: d236df4e2b2f20f43b01ca7141bba298,
         type: 2}
       propertyPath: NextLevelScore.Array.data[1]
-      value: 1000
+      value: 1500
       objectReference: {fileID: 0}
     - target: {fileID: 114590511579031836, guid: d236df4e2b2f20f43b01ca7141bba298,
         type: 2}

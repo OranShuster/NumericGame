@@ -63,6 +63,8 @@ public class UserStatistics : IEnumerable
     public string TimeToNextSession()
     {
         var todayEntry = GetToday();
+        if (todayEntry == null)
+            return "00:00:00";
         if (todayEntry.CurrentSession > todayEntry.NumberOfSessions)
         {
             var TomorrowEntry = GetTomorrow();

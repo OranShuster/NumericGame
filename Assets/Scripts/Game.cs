@@ -266,7 +266,8 @@ public class Game : MonoBehaviour
         if (totalMatches.NumberOfMatches>0)
             yield return StartCoroutine(HandleMatches(totalMatches));
         else
-            _controllerScript.IncreaseScore(-5);
+            if (!ApplicationState.UserStatistics.IsControl())
+                _controllerScript.IncreaseScore(-5);
         if (ApplicationState.Score >= 0)
         {
             _state = GameState.Playing;

@@ -188,13 +188,11 @@ public class Game : MonoBehaviour
     public IEnumerator HandleMatches(MatchesInfo totalMatches, bool withScore = true, bool withEffects = true,
         bool quickMode = false)
     {
-        var first_run = 1;
         while (totalMatches.MatchedCells.Count() >= Constants.MinimumMatches)
         {
             if (withScore)
             {
                 _controllerScript.IncreaseScore(totalMatches.AddedScore);
-                first_run = 0;
                 _controllerScript.IncreaseGameTimer(5 * totalMatches.NumberOfMatches);
             }
             foreach (var item in totalMatches.MatchedCells.Distinct())

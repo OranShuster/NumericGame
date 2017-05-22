@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Runtime.Remoting.Messaging;
 using Newtonsoft.Json;
 
 [Serializable]
@@ -47,12 +49,12 @@ public class ScoreReports
 }
 
 [Serializable]
-public class PlayDate
+public class PlayDate : IComparable<PlayDate>
 {
     public string Email { get; set; }
     public string Code { get; set; }
     public int SessionId { get; set; }
-    public string Date { get; set; }
+    public DateTime DateObject { get; set; }
     public int NumberOfSessions { get; set; }
     public int SessionLength { get; set; }
     public float SessionInterval { get; set; }
@@ -70,7 +72,7 @@ public class PlayDate
         SessionLength = session_length;
         SessionInterval = session_interval;
         Control = control;
-        Date = start_date;
+        DateObject = DateTime.ParseExact(start_date,Constants.DateFormat,CultureInfo.InvariantCulture);
         NumberOfSessions = num_of_sessions;
         Email = email;
         SessionId = id;
@@ -88,6 +90,12 @@ public class PlayDate
             t.Hours,
             t.Minutes,
             t.Seconds);
+    }
+    int IComparable<PlayDate>.CompareTo(PlayDate other)
+    {
+        if (other.DateObject > this.DateObject)
+            return -1;
+        return other.DateObject == this.DateObject ? 0 : 1;
     }
 }
 

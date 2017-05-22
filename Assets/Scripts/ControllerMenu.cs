@@ -178,11 +178,11 @@ public class ControllerMenu : MonoBehaviour
         var sessionsString = go.transform.Find("Sessions").gameObject.GetComponent<Text>();
         var curSessionTime = go.transform.Find("CurrentSessionTime").gameObject.GetComponent<Text>();
         var dateStatus = go.transform.Find("DateStatus").gameObject.GetComponent<Image>();
-        dateString.text = DateTime.ParseExact(date.Date, Constants.DateFormat, CultureInfo.InvariantCulture)
-            .ToString(Constants.DateFormatOutput);
-        sessionsString.text = String.Format("{0}/{1}", Math.Min(date.CurrentSession, date.NumberOfSessions), date.NumberOfSessions);
+        dateString.text = date.DateObject.ToString(Constants.DateFormatOutput);
+        sessionsString.text = String.Format("{0}/{1}", Math.Min(date.CurrentSession, date.NumberOfSessions),
+            date.NumberOfSessions);
         curSessionTime.text = String.Format("{0}", date.GetRemainingSessionTimeText());
-        var playDate = DateTime.ParseExact(date.Date, Constants.DateFormat, CultureInfo.InvariantCulture);
+        var playDate = date.DateObject;
         if (DateTime.Today == playDate)
             dateStatus.sprite = (date.CurrentSession <= date.NumberOfSessions) ? null : DateStatisOkImage;
         if (DateTime.Today > playDate)

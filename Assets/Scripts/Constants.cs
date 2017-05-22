@@ -86,3 +86,10 @@ public enum LoseReasons
     GameTime,
     Points
 }
+
+public enum CanPlayStatus
+{
+    CanPlay,
+    HasNextTimeslot,
+    NoMoreTimeSlots
+}

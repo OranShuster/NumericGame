@@ -37,12 +37,37 @@ public static class Utilities
     public static void CreateMockUserData(int control)
     {
         var mockDates = new PlayDate[3];
-        mockDates[0] = new PlayDate() { SessionLength = 10000, NumberOfSessions = 3, Date = DateTime.Today.ToString(Constants.DateFormat), Control = control ,Code= control==1? "desiree2" : "desiree"};
-        mockDates[1] = new PlayDate() { SessionLength = 10000, NumberOfSessions = 3, Date = DateTime.Today.AddDays(1).ToString(Constants.DateFormat), Control = control, Code = control == 1 ? "desiree2" : "desiree" };
-        mockDates[2] = new PlayDate() { SessionLength = 10000, NumberOfSessions = 3, Date = DateTime.Today.AddDays(2).ToString(Constants.DateFormat), Control = control, Code = control == 1 ? "desiree2" : "desiree" };
-        var userLocalData = new UserLocalData(mockDates, "desiree");
+        mockDates[0] = new PlayDate
+        {
+            SessionLength = 10 * 60,
+            NumberOfSessions = 3,
+            DateObject = DateTime.Today,
+            Control = control,
+            Code = control == 1 ? "desiree2" : "desiree",
+            SessionInterval = 1f * 60 * 60
+        };
+        mockDates[1] = new PlayDate
+        {
+            SessionLength = 20 * 60,
+            NumberOfSessions = 3,
+            DateObject = DateTime.Today.AddDays(1),
+            Control = control,
+            Code = control == 1 ? "desiree2" : "desiree",
+            SessionInterval = 0.5f * 60 * 60
+        };
+        mockDates[2] = new PlayDate
+        {
+            SessionLength = 30 * 60,
+            NumberOfSessions = 3,
+            DateObject = DateTime.Today.AddDays(2),
+            Control = control,
+            Code = control == 1 ? "desiree2" : "desiree",
+            SessionInterval = 0.01f * 60 * 60
+        };
+        var userLocalData = new UserLocalData(mockDates, control == 1 ? "desiree2" : "desiree");
         UserStatistics.Save(userLocalData);
     }
+
     public static int IsTestCode(string usercode)
     {
         if (usercode == Constants.TestCode)
@@ -60,6 +85,16 @@ public static class Utilities
             var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
             request.Send();
         }
+    }
+
+    public static UnityWebRequest CreatePostUnityWebRequest(string url,string body)
+    {
+        var request = new UnityWebRequest(url);
+        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.method = UnityWebRequest.kHttpVerbPOST;
+        request.uploadHandler.contentType = "application/json";
+        request.SetRequestHeader("content-type", "application/json");
     }
 
     public static string ReverseText(string str, int lineLength=15)

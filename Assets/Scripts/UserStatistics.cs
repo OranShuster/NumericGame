@@ -58,18 +58,34 @@ public class UserStatistics : IEnumerable
         return jsonString;
     }
 
-    public int CanPlay()
+    public CanPlayStatus CanPlay()
     {
-        if (UserLocalData.PlayDates.Where(day => IsPastDay(day.Date)).Any(day => !CheckPastDayValid(day)))
+        //Check past days
+        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < DateTime.Today.Date).Any(day => !IsPlayDateValid(day)))
+            return CanPlayStatus.NoMoreTimeSlots;
+        //Check if you are after 8:00AM
+        if (DateTime.Now < DateTime.Today.AddHours(8) && CheckDateExists(DateTime.Today))
+            return CanPlayStatus.HasNextTimeslot;
+        //Check if exists a future PlayDate
+        if (GetNextPlayDate() == null)
             return -1;
-        if (DateTime.Now < DateTime.Today.AddHours(8))
-            return 0;
-        return GetToday() == null ? -1 : CheckTodayValid(GetToday());
+        //Check if today is valid
+        return CheckPlayDateValid(GetToday());
+    }
+
+    private bool CheckDateExists(DateTime today)
+    {
+        return UserLocalData.PlayDates.Count(day => day.DateObject.Date == DateTime.Today) == 1;
+    }
+
+    private PlayDate GetNextPlayDate()
+    {
+        return UserLocalData.PlayDates.Where(IsPlayDateValid).Min(date => date.);
     }
 
     public string TimeToNextSession()
     {
-        if (DateTime.Now < DateTime.Today.AddHours(8) || IsTodayFinished())
+        if (DateTime.Now < DateTime.Today.AddHours(8) || IsPlayDateValid(GetToday()))
             return TimeTo8AmTomorrow;
         var todayEntry = GetToday();
         var t = TimeSpan.FromSeconds(todayEntry.SessionInterval - (GetEpochTime() - todayEntry.LastSessionsEndTime));
@@ -79,19 +95,21 @@ public class UserStatistics : IEnumerable
             t.Seconds);
     }
 
-    private bool IsTodayFinished()
+    private static bool IsPlayDateValid(PlayDate date)
     {
-        var todayEntry = GetToday();
-        return todayEntry.CurrentSession == todayEntry.NumberOfSessions &&
-                todayEntry.CurrentSessionTimeSecs >= todayEntry.SessionLength;
+        if (date.DateObject.Date == DateTime.Today)
+            return date.CurrentSession <= date.NumberOfSessions;
+        if (date.DateObject.Date < DateTime.Today)
+            return date.CurrentSession == date.NumberOfSessions && 
+                date.CurrentSessionTimeSecs >= date.SessionLength;
+        return true;
     }
 
     private static string TimeTo8AmTomorrow
     {
         get
         {
-            TimeSpan t;
-            t = DateTime.Today.AddDays(1).AddHours(8).Subtract(DateTime.Now);
+            var t = DateTime.Today.AddDays(1).AddHours(8).Subtract(DateTime.Now);
             return string.Format("{0:D2}:{1:D2}:{2:D2}",
                 t.Hours,
                 t.Minutes,
@@ -101,36 +119,22 @@ public class UserStatistics : IEnumerable
 
     private object GetTomorrow()
     {
-        var todayDate = DateTime.Today.AddDays(1).ToString(Constants.DateFormat);
-        return Array.Find(UserLocalData.PlayDates, x => x.Date == todayDate);
+        var todayDate = DateTime.Today.AddDays(1);
+        return Array.Find(UserLocalData.PlayDates, x => x.DateObject == todayDate);
     }
 
-    private int CheckTodayValid(PlayDate todayDateEntry)
+    private int CheckPlayDateValid(PlayDate todayDateEntry)
     {
+        //No entries for today
+        if (todayDateEntry == null)
+            return 0;
         //Finished today sessions
         if (todayDateEntry.CurrentSession == todayDateEntry.NumberOfSessions && 
             todayDateEntry.CurrentSessionTimeSecs >= todayDateEntry.SessionLength)
-        {
-            if (GetTomorrow() == null)
-                return -1;
             return 0;
-        }
         //Check session interval
         var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
-        if (timeSinceLastCompleteSession >= todayDateEntry.SessionInterval)
-            return 1;
-        return 0;
-    }
-
-    private bool CheckPastDayValid(PlayDate date)
-    {
-        return date.CurrentSession > date.NumberOfSessions;
-    }
-
-    public bool IsPastDay(string date)
-    {
-        var dateObject = DateTime.ParseExact(date, Constants.DateFormat, CultureInfo.InvariantCulture);
-        return dateObject.Date < DateTime.Today.Date;
+        return timeSinceLastCompleteSession >= todayDateEntry.SessionInterval ? 1 : 0;
     }
     public void AddPlayTime(int length,int score)
     {
@@ -173,16 +177,19 @@ public class UserStatistics : IEnumerable
         try
         {
             reader = new StreamReader(_userDataPath);
-            byte[] encodedDataAsBytes = Convert.FromBase64String(reader.ReadToEnd());
-            string decodedString = Encoding.ASCII.GetString(encodedDataAsBytes);
+            var encodedDataAsBytes = Convert.FromBase64String(reader.ReadToEnd());
+            var decodedString = Encoding.ASCII.GetString(encodedDataAsBytes);
             return JsonConvert.DeserializeObject<UserLocalData>(decodedString);
+        }
+        catch
+        {
+            return null;
         }
         finally
         {
             if (reader != null)
                 reader.Close();
         }
-        return null;
     }
 
     public IEnumerator GetEnumerator()
@@ -191,8 +198,7 @@ public class UserStatistics : IEnumerable
     }
     public PlayDate GetToday()
     {
-        var todayDate = DateTime.Today.ToString(Constants.DateFormat);
-        return Array.Find(UserLocalData.PlayDates, x => x.Date == todayDate);
+        return Array.Find(UserLocalData.PlayDates, x => x.DateObject == DateTime.Today);
     }
     public float GetCurrentSessionTime()
     {
@@ -230,12 +236,9 @@ public class UserStatistics : IEnumerable
         var jsonString = JsonConvert.SerializeObject(ScoreReportsToBeSent);
         Debug.Log(string.Format("Sent {0} score reports to server - {1}", reportsCount, Utilities.PrintArray<ScoreReports>(ScoreReportsToBeSent.ToArray())));
         ClearScoreReports(reportsCount);
-        var request = new UnityWebRequest(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId));
-        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonString));
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.method = UnityWebRequest.kHttpVerbPOST;
-        request.uploadHandler.contentType = "application/json";
-        request.SetRequestHeader("content-type", "application/json");
+        var url = Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId);
+        var request = Utilities.CreatePostUnityWebRequest(url,jsonString);
+
         request.Send();
         while (!request.isDone)
             System.Threading.Thread.Sleep(250);

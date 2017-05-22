@@ -93,9 +93,9 @@ public class PlayDate : IComparable<PlayDate>
     }
     int IComparable<PlayDate>.CompareTo(PlayDate other)
     {
-        if (other.DateObject > this.DateObject)
+        if (other.DateObject > DateObject)
             return -1;
-        return other.DateObject == this.DateObject ? 0 : 1;
+        return other.DateObject == DateObject ? 0 : 1;
     }
 }
 

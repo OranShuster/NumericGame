@@ -1,12 +1,10 @@
-﻿namespace Fabric.Answers
-{
-	using UnityEngine;
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using Fabric.Answers.Internal;
+﻿using System.Collections.Generic;
+using Fabric.Kits.Answers.Runtime.Internal;
+using UnityEngine;
 
-	public class Answers : MonoBehaviour
+namespace Fabric.Kits.Answers.Runtime
+{
+    public class Answers : MonoBehaviour
 	{
 		private static IAnswers implementation;
 

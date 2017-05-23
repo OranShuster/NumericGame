@@ -29,7 +29,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         SkipButton.GetComponentInChildren<Text>().ZKalphaTo(1, 0.5f).start();
         TutorialText.ZKalphaTo(1, 0.5f).start();
         var tutorialHeaderStringName = "TutorialHeaderControl";
-        if (!_userStatistics.IsControl())
+        if (!_userStatistics.IsControlSession())
         {
             tutorialHeaderStringName = string.Format("TutorialHeader{0}", ApplicationState.SeriesDelta);
         }

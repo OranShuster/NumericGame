@@ -1,3 +1,5 @@
+using Fabric.Kits.Crashlytics.Runtime;
+
 namespace Fabric.Internal.Crashlytics.Editor
 {
 	using UnityEditor;
@@ -22,7 +24,7 @@ namespace Fabric.Internal.Crashlytics.Editor
 				return;
 			}
 
-			SetKitScriptExecutionOrder (typeof(Fabric.Internal.Crashlytics.CrashlyticsInit));
+			SetKitScriptExecutionOrder (typeof(CrashlyticsInit));
 
 			EnableCrashlyticsiOS ();
 			EnableCrashlyticsAndroid ();

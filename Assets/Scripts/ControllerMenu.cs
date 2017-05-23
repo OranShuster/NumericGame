@@ -56,11 +56,11 @@ public class ControllerMenu : MonoBehaviour
         var canPlayStatus = _userStatistics.CanPlay();
         switch (canPlayStatus)
         {
-            case -1:
+            case CanPlayStatus.NoMoreTimeSlots:
                 StartGameButton.interactable = false;
                 StartGameButtonText.text = Utilities.LoadStringFromFile("NoMoreGames", 30);
                 return;
-            case 0:
+            case CanPlayStatus.HasNextTimeslot:
                 StartGameButton.interactable = false;
                 StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30), _userStatistics.TimeToNextSession());
                 return;

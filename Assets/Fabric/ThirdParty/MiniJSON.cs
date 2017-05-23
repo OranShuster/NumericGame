@@ -26,15 +26,16 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace Fabric.Internal.ThirdParty.MiniJSON
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+
+namespace Fabric.ThirdParty
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Text;
-	
-	// Example usage:
+    // Example usage:
 	//
 	//  using UnityEngine;
 	//  using System.Collections;

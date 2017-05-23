@@ -1,4 +1,6 @@
-﻿namespace Fabric.Internal.Editor.Controller
+﻿using Fabric.ThirdParty;
+
+namespace Fabric.Internal.Editor.Controller
 {
 	using UnityEngine;
 	using UnityEditor;
@@ -744,7 +746,7 @@
 				});
 			}
 
-			return Internal.ThirdParty.MiniJSON.Json.Serialize (prepared);
+			return Json.Serialize (prepared);
 		}
 
 		private static Settings.InstalledKit.MetaTuple FindDependenciesRecordFor(Settings.InstalledKit kit)
@@ -762,7 +764,7 @@
 			if (record == null || record.Value == null) {
 				return new HashSet<VersionedDependency> ();
 			}
-			return new HashSet<VersionedDependency> ((Internal.ThirdParty.MiniJSON.Json.Deserialize (record.Value) as List<object>).ConvertAll (
+			return new HashSet<VersionedDependency> ((Json.Deserialize (record.Value) as List<object>).ConvertAll (
 				obj => {
 					Dictionary<string, object> typed = obj as Dictionary<string, object>;
 					return new VersionedDependency {

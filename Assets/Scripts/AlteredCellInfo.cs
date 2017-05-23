@@ -2,28 +2,27 @@
 using System.Linq;
 using UnityEngine;
 
-
-public class AlteredCellInfo
+namespace NumericalGame
 {
-    private List<GameObject> NewCell { get; set; }
-    public int MaxDistance { get; set; }
-
-    public IEnumerable<GameObject> AlteredCell
+    public class AlteredCellInfo
     {
-        get
+        private List<GameObject> NewCell { get; set; }
+        public int MaxDistance { get; set; }
+
+        public IEnumerable<GameObject> AlteredCell
         {
-            return NewCell.Distinct();
+            get { return NewCell.Distinct(); }
         }
-    }
 
-    public void AddCell(GameObject go)
-    {
-        if (!NewCell.Contains(go))
-            NewCell.Add(go);
-    }
+        public void AddCell(GameObject go)
+        {
+            if (!NewCell.Contains(go))
+                NewCell.Add(go);
+        }
 
-    public AlteredCellInfo()
-    {
-        NewCell = new List<GameObject>();
+        public AlteredCellInfo()
+        {
+            NewCell = new List<GameObject>();
+        }
     }
 }

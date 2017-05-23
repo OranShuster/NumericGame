@@ -50,7 +50,7 @@ public class ControllerRegistration : MonoBehaviour
 
     void Awake()
     {
-        if (UserStatistics.PlayerDataValid())
+        if (UserLocalData.PlayerDataValid())
             SceneManager.LoadScene("MainMenu");
     }
     void Start()

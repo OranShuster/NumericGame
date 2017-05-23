@@ -1,4 +1,6 @@
 ﻿
+using Fabric.Runtime;
+
 namespace Fabric.Internal.Editor
 {
 	using System;
@@ -224,7 +226,7 @@ namespace Fabric.Internal.Editor
 	
 		protected static void SetKitScriptExecutionOrder (Type kitScriptClass)
 		{
-			SetScriptExecutionOrder (typeof(Fabric.Internal.FabricInit), fabricScriptPriority);
+			SetScriptExecutionOrder (typeof(FabricInit), fabricScriptPriority);
 			SetScriptExecutionOrder (kitScriptClass, kitScriptPriority);
 		}
 

@@ -1,17 +1,15 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using Fabric.Runtime;
 
 [assembly:InternalsVisibleTo("Assembly-CSharp-Editor")]
 
-namespace Fabric.Crashlytics.Internal
+namespace Fabric.Kits.Crashlytics.Runtime.Internal
 {
-	using System;
-	using Fabric.Internal.Runtime;
-	using System.Diagnostics;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Text.RegularExpressions;
-
-	internal class Impl
+    internal class Impl
 	{
 		protected const string KitName = "Crashlytics";
 

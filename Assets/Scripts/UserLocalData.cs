@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Runtime.Remoting.Messaging;
+using System.Text;
 using Newtonsoft.Json;
+using UnityEngine;
 
 [Serializable]
 public class Rounds
@@ -125,5 +128,70 @@ public class UserLocalData
     [JsonConstructor]
     private UserLocalData()
     {
+    }
+
+    public static string _userDataPath = Application.persistentDataPath + "/userData.cjd";
+
+    public static void Save(UserLocalData userLocalData)
+    {
+        Debug.Log(String.Format("Saving user data from {0}", _userDataPath));
+        StreamWriter writer = null;
+        try
+        {
+            writer = new StreamWriter(_userDataPath);
+            var jsonString = JsonConvert.SerializeObject(userLocalData, Formatting.Indented);
+            byte[] toEncodeAsBytes = Encoding.ASCII.GetBytes(jsonString);
+            string encodedJson = Convert.ToBase64String(toEncodeAsBytes);
+            writer.Write(encodedJson); 
+        }
+        finally
+        {
+            if (writer != null)
+                writer.Close();
+        }
+
+    }
+
+    public static UserLocalData Load()
+    {
+        Debug.Log(String.Format("Loading user data from {0}", _userDataPath));
+        StreamReader reader = null;
+        try
+        {
+            reader = new StreamReader(_userDataPath);
+            var encodedDataAsBytes = Convert.FromBase64String(reader.ReadToEnd());
+            var decodedString = Encoding.ASCII.GetString(encodedDataAsBytes);
+            return JsonConvert.DeserializeObject<UserLocalData>(decodedString);
+        }
+        catch
+        {
+            return null;
+        }
+        finally
+        {
+            if (reader != null)
+                reader.Close();
+        }
+    }
+
+    public static bool PlayerDataValid()
+    {
+        if (!File.Exists(UserLocalData._userDataPath))
+            return false;
+        try
+        {
+            var userStats = new UserStatistics();
+            if (userStats.UserLocalData == null)
+            {
+                File.Delete(UserLocalData._userDataPath);
+                return false;
+            }
+        }
+        catch
+        {
+            File.Delete(UserLocalData._userDataPath);
+            return false;
+        }
+        return true;
     }
 }

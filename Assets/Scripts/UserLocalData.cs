@@ -13,11 +13,13 @@ public class Rounds
     public int RoundLength;
     public int RoundScore;
     public string RoundTime;
-    public Rounds(int length, int score, string time)
+    public int SessionInd;
+    public Rounds(int length, int score, string time,int sessionInd)
     {
         RoundLength = length;
         RoundScore = score;
         RoundTime = time;
+        SessionInd = sessionInd;
     }
     public Rounds() { }
     public string GetRoundLengthText()
@@ -60,7 +62,7 @@ public class PlayDate : IComparable<PlayDate>
     public DateTime DateObject { get; set; }
     public int NumberOfSessions { get; set; }
     public int SessionLength { get; set; }
-    public float SessionInterval { get; set; }
+    public int SessionInterval { get; set; }
     public int Control { get; set; }
     public int CurrentSession = 0;
     public int CurrentSessionTimeSecs = 0;
@@ -72,8 +74,8 @@ public class PlayDate : IComparable<PlayDate>
         float session_interval, int id)
     {
         Code = code;
-        SessionLength = session_length;
-        SessionInterval = session_interval;
+        SessionLength = session_length * 60;
+        SessionInterval = (int)(session_interval * 60 * 60);
         Control = control;
         DateObject = DateTime.ParseExact(start_date,Constants.DateFormat,CultureInfo.InvariantCulture);
         NumberOfSessions = num_of_sessions;
@@ -112,11 +114,6 @@ public class UserLocalData
     {
         PlayDates = JsonConvert.DeserializeObject<PlayDate[]>(userDataJson);
         UserCode = userCode;
-        foreach (var date in PlayDates)
-        {
-            date.SessionInterval *= 60 * 60; //to hours
-            date.SessionLength *= 60; // to minutes
-        }
     }
 
     public UserLocalData(PlayDate[] dates, string userCode)
@@ -130,19 +127,21 @@ public class UserLocalData
     {
     }
 
-    public static string _userDataPath = Application.persistentDataPath + "/userData.cjd";
-
     public static void Save(UserLocalData userLocalData)
     {
-        Debug.Log(String.Format("Saving user data from {0}", _userDataPath));
+        Debug.Log(String.Format("Saving user data from {0}", UserStatistics.UserDataPath));
         StreamWriter writer = null;
         try
         {
-            writer = new StreamWriter(_userDataPath);
+            writer = new StreamWriter(UserStatistics.UserDataPath);
             var jsonString = JsonConvert.SerializeObject(userLocalData, Formatting.Indented);
             byte[] toEncodeAsBytes = Encoding.ASCII.GetBytes(jsonString);
             string encodedJson = Convert.ToBase64String(toEncodeAsBytes);
-            writer.Write(encodedJson); 
+            writer.Write(encodedJson);
+        }
+        catch(Exception e)
+        {
+            Debug.LogError(e.StackTrace);
         }
         finally
         {
@@ -154,17 +153,18 @@ public class UserLocalData
 
     public static UserLocalData Load()
     {
-        Debug.Log(String.Format("Loading user data from {0}", _userDataPath));
+        Debug.Log(String.Format("Loading user data from {0}", UserStatistics.UserDataPath));
         StreamReader reader = null;
         try
         {
-            reader = new StreamReader(_userDataPath);
+            reader = new StreamReader(UserStatistics.UserDataPath);
             var encodedDataAsBytes = Convert.FromBase64String(reader.ReadToEnd());
             var decodedString = Encoding.ASCII.GetString(encodedDataAsBytes);
             return JsonConvert.DeserializeObject<UserLocalData>(decodedString);
         }
-        catch
+        catch(Exception e)
         {
+            Debug.LogError(e.StackTrace);
             return null;
         }
         finally
@@ -176,22 +176,35 @@ public class UserLocalData
 
     public static bool PlayerDataValid()
     {
-        if (!File.Exists(UserLocalData._userDataPath))
+        if (!File.Exists(UserStatistics.UserDataPath))
             return false;
         try
         {
             var userStats = new UserStatistics();
             if (userStats.UserLocalData == null)
             {
-                File.Delete(UserLocalData._userDataPath);
+                File.Delete(UserStatistics.UserDataPath);
                 return false;
             }
         }
         catch
         {
-            File.Delete(UserLocalData._userDataPath);
+            File.Delete(UserStatistics.UserDataPath);
             return false;
         }
         return true;
     }
 }
+#if UNIT_TEST
+public class Debug
+{
+public static void Log(string s) { Console.WriteLine(s); }
+public static void LogWarning(string s) { Console.WriteLine(s); }
+public static void LogError(string s) { Console.WriteLine(s); }
+}
+
+public class MonoBehaviour
+{
+
+}
+#endif

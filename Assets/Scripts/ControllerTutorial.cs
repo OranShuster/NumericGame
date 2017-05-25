@@ -46,7 +46,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     private void HideMessage(string target)
     {
         ZestKit.instance.stopAllTweens();
-        var targetGameObject = GameField.transform.parent.FindChild(target).gameObject;
+        var targetGameObject = GameField.transform.parent.Find(target).gameObject;
         Destroy(targetGameObject);
         _gamePaused = false;
     }

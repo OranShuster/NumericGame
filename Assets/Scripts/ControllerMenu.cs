@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using Prime31.ZestKit;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -28,8 +29,6 @@ public class ControllerMenu : MonoBehaviour
 
     public Button StartGameButton;
 
-    private string TimeToNextSession="00:00:00";
-
     void Awake()
     {
         StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton");
@@ -53,7 +52,7 @@ public class ControllerMenu : MonoBehaviour
 
     void Update()
     {
-        var canPlayStatus = _userStatistics.CanPlay();
+        var canPlayStatus = _userStatistics.CanPlay(DateTime.Now);
         switch (canPlayStatus)
         {
             case CanPlayStatus.NoMoreTimeSlots:
@@ -77,7 +76,6 @@ public class ControllerMenu : MonoBehaviour
         ApplicationState.Score = 0;
         ApplicationState.TotalTimePlayed = 0;
         ApplicationState.UserStatistics.ClearScoreReports();
-        ApplicationState.GameId = _userStatistics.GetToday().GameRounds.Count+1;
         if (ApplicationState.UserStatistics.GetToday().CurrentSession == 0)
             ApplicationState.UserStatistics.GetToday().CurrentSession = 1;
         else
@@ -90,7 +88,8 @@ public class ControllerMenu : MonoBehaviour
             }
 
         }
-
+        int sessionId = _userStatistics.GetToday().CurrentSession;
+        ApplicationState.GameId = _userStatistics.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
         SceneManager.LoadScene("Tutorial");
     }
 

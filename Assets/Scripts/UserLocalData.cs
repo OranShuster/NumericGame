@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Remoting.Messaging;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -102,6 +104,11 @@ public class PlayDate : IComparable<PlayDate>
             return -1;
         return other.DateObject == DateObject ? 0 : 1;
     }
+
+    public override string ToString()
+    {
+        return string.Format("{0} - {1} sessions", DateObject.Date, NumberOfSessions);
+    }
 }
 
 [Serializable]
@@ -130,23 +137,21 @@ public class UserLocalData
     public static void Save(UserLocalData userLocalData)
     {
         Debug.Log(String.Format("Saving user data from {0}", UserStatistics.UserDataPath));
-        StreamWriter writer = null;
+        IFormatter formatter = new BinaryFormatter();
+        Stream stream = null;
         try
         {
-            writer = new StreamWriter(UserStatistics.UserDataPath);
-            var jsonString = JsonConvert.SerializeObject(userLocalData, Formatting.Indented);
-            byte[] toEncodeAsBytes = Encoding.ASCII.GetBytes(jsonString);
-            string encodedJson = Convert.ToBase64String(toEncodeAsBytes);
-            writer.Write(encodedJson);
+            stream = new FileStream(UserStatistics.UserDataPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            formatter.Serialize(stream, userLocalData);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-            Debug.LogError(e.StackTrace);
+            Debug.LogError(e.Message);
         }
         finally
         {
-            if (writer != null)
-                writer.Close();
+            if (stream != null)
+                stream.Close();
         }
 
     }
@@ -154,23 +159,23 @@ public class UserLocalData
     public static UserLocalData Load()
     {
         Debug.Log(String.Format("Loading user data from {0}", UserStatistics.UserDataPath));
-        StreamReader reader = null;
+        IFormatter formatter = new BinaryFormatter();
+        Stream stream = null;
         try
         {
-            reader = new StreamReader(UserStatistics.UserDataPath);
-            var encodedDataAsBytes = Convert.FromBase64String(reader.ReadToEnd());
-            var decodedString = Encoding.ASCII.GetString(encodedDataAsBytes);
-            return JsonConvert.DeserializeObject<UserLocalData>(decodedString);
+            stream = new FileStream(UserStatistics.UserDataPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            UserLocalData obj = (UserLocalData) formatter.Deserialize(stream);
+            return obj;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-            Debug.LogError(e.StackTrace);
+            Debug.LogError(e.InnerException);
             return null;
         }
         finally
         {
-            if (reader != null)
-                reader.Close();
+            if (stream != null)
+                stream.Close();
         }
     }
 

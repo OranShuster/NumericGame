@@ -60,41 +60,40 @@ public class UserStatistics : IEnumerable
         return jsonString;
     }
 
-    public CanPlayStatus CanPlay(DateTime Now)
+    public CanPlayStatus CanPlay(DateTime now)
     {
+        Console.WriteLine("Checking date {0}", now);
         //Check past days
-        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < Now.Date)
+        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < now.Date)
             .Any(day => !FinishedDay(day)))
+        {
+            Console.WriteLine("Past days bad");
             return CanPlayStatus.NoMoreTimeSlots;
+        }
         //Check Today
-        //Check if you have sessions today
-        if (DateExistsAndHasSessions(GetToday()))
-            return CanPlayStatus.CanPlay;
+        if (!DateExistsAndHasSessions(now.Date))
+            return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
         //Check if you are after 8:00AM
-        if (Now < Now.AddHours(8) && DateExists(Now))
-            return CanPlayStatus.HasNextTimeslot;
-
-        //Check if exists a future PlayDate
-        return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
+        return now < now.Date.AddHours(8) ? CanPlayStatus.HasNextTimeslot : CanPlayStatus.CanPlay;
     }
 
     private bool DateExists(DateTime datetime)
     {
-        return UserLocalData.PlayDates.Count(day => day.DateObject.Date == datetime) == 1;
+        return UserLocalData.PlayDates.Count(day => day.DateObject.Date == datetime.Date) >= 1;
     }
 
     private PlayDate GetNextPlayDate()
     {
-        return UserLocalData.PlayDates.Where(DateExistsAndHasSessions).Min();
+        return UserLocalData.PlayDates.Where(playDate => DateExistsAndHasSessions(playDate.DateObject)).Min();
     }
 
-    public string TimeToNextSession()
+    public string TimeToNextSession(DateTime now)
     {
         var nextPlayDate = GetNextPlayDate();
         if (nextPlayDate.DateObject.Date > DateTime.Today)
-            return GetTimeSpanToDateTime(nextPlayDate.DateObject.Date.AddHours(8));
-        if (DateTime.Now < DateTime.Today.AddHours(8))
-            return GetTimeSpanToDateTime(DateTime.Today.AddHours(8));
+            return GetTimeSpanToDateTime(nextPlayDate.DateObject.Date.AddHours(8), now);
+        if (now < DateTime.Today.AddHours(8))
+            return GetTimeSpanToDateTime(DateTime.Today.AddHours(8), now);
         var t = TimeSpan.FromSeconds(nextPlayDate.SessionInterval -
                                      (GetEpochTime() - nextPlayDate.LastSessionsEndTime));
         return String.Format("{0:D2}:{1:D2}:{2:D2}",
@@ -103,9 +102,9 @@ public class UserStatistics : IEnumerable
             t.Seconds);
     }
 
-    private static string GetTimeSpanToDateTime(DateTime dateTime)
+    private static string GetTimeSpanToDateTime(DateTime dateTime,DateTime now)
     {
-        var t = dateTime.Subtract(DateTime.Now);
+        var t = dateTime.Subtract(now);
         return String.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
@@ -118,15 +117,17 @@ public class UserStatistics : IEnumerable
                playdate.CurrentSessionTimeSecs >= playdate.SessionLength;
     }
 
-    private bool DateExistsAndHasSessions(PlayDate date)
+    private bool DateExistsAndHasSessions(DateTime date)
     {
-        return DateExists(date.DateObject) && !FinishedDay(date);
+        return DateExists(date) && !FinishedDay(GetPlayDateByDateTime(date));
     }
 
-    public void AddPlayTime(int length, int score)
+    public void AddPlayTime(int length, int score,DateTime date)
     {
-        var today = GetToday();
+        var today = GetPlayDateByDateTime(date.Date);
         var thisTime = DateTime.Now.ToShortTimeString();
+        if (today.CurrentSession == 0)
+            today.CurrentSession = 1;
         if (today.CurrentSessionTimeSecs == today.SessionLength)
         {
             today.CurrentSessionTimeSecs = 0;
@@ -147,6 +148,10 @@ public class UserStatistics : IEnumerable
         return UserLocalData.PlayDates.GetEnumerator();
     }
 
+    public PlayDate GetPlayDateByDateTime(DateTime dateTime)
+    {
+        return Array.Find(UserLocalData.PlayDates, x => x.DateObject == dateTime.Date);
+    }
     public PlayDate GetToday()
     {
         return Array.Find(UserLocalData.PlayDates, x => x.DateObject == DateTime.Today);
@@ -165,7 +170,7 @@ public class UserStatistics : IEnumerable
         Debug.Log(String.Format("Sent {0} score reports to server - {1}", reportsCount,
             Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
         _scoreReportsToBeSent.Clear();
-        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId);
+        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode, GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         yield return request.Send();
         if (!request.isError && (request.responseCode == 200 || IsTestUser())) yield break;
@@ -181,7 +186,7 @@ public class UserStatistics : IEnumerable
         Debug.Log(String.Format("Sent {0} score reports to server - {1}", reportsCount,
             Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
         _scoreReportsToBeSent.Clear();
-        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId);
+        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode, GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         request.Send();
         while (!request.isDone)
@@ -204,7 +209,7 @@ public class UserStatistics : IEnumerable
 
     public bool IsControlSession()
     {
-        return GetToday().Control == 1;
+        return GetPlayDateByDateTime(DateTime.Today).Control == 1;
     }
 
     public void ClearScoreReports()

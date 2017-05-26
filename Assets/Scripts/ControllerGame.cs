@@ -218,7 +218,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     {
         try
         {
-            UserInfo.AddPlayTime((int) _totalTimePlayed, Score);
+            UserInfo.AddPlayTime((int) _totalTimePlayed, Score,DateTime.Today);
             UserInfo.SendUserInfoToServerBlocking();
         }
         finally

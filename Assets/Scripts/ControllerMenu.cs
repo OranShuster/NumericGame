@@ -61,7 +61,7 @@ public class ControllerMenu : MonoBehaviour
                 return;
             case CanPlayStatus.HasNextTimeslot:
                 StartGameButton.interactable = false;
-                StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30), _userStatistics.TimeToNextSession());
+                StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30), _userStatistics.TimeToNextSession(DateTime.Now));
                 return;
             default:
                 StartGameButton.interactable = true;

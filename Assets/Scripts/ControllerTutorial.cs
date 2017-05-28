@@ -24,6 +24,8 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
 
     void Start()
     {
+        ZestKit.enableBabysitter = true;
+        ZestKit.removeAllTweensOnLevelLoad = true;
         _mainGame = GameField.GetComponent<Game>();
         SkipButton.image.ZKalphaTo(1, 0.5f).start();
         SkipButton.GetComponentInChildren<Text>().ZKalphaTo(1, 0.5f).start();
@@ -110,11 +112,9 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     {
         try
         {
-            if (ApplicationState.SeriesDelta != 0)
-            {
-                _userStatistics.AddPlayTime((int) ApplicationState.TotalTimePlayed, Score,DateTime.Today);
-                _userStatistics.SendUserInfoToServerBlocking();
-            }
+            if (ApplicationState.SeriesDelta == 0) return;
+            _userStatistics.AddPlayTime((int) ApplicationState.TotalTimePlayed, Score);
+            _userStatistics.SendUserInfoToServerBlocking();
         }
         finally
         {

@@ -10,14 +10,14 @@ using UnityEngine.Networking;
 
 public class UserStatistics : IEnumerable
 {
-    public UserLocalData UserLocalData;
+    public UserLocalData UserLocalData = null;
     private List<ScoreReports> _scoreReportsToBeSent = new List<ScoreReports>();
     public static string UserDataPath = Application.persistentDataPath + "/userData.cjd";
 
     public UserStatistics(string userCode)
     {
         var control = Utilities.IsTestCode(userCode);
-        if (control >= 0)
+        if (control > 0)
         {
             Utilities.CreateMockUserData(control);
             UserLocalData = UserLocalData.Load();
@@ -60,26 +60,28 @@ public class UserStatistics : IEnumerable
         return jsonString;
     }
 
-    public CanPlayStatus CanPlay(DateTime now)
+    public CanPlayStatus CanPlay()
     {
-        Console.WriteLine("Checking date {0}", now);
+        Console.WriteLine("Checking date {0}", SystemTime.Now());
         //Check past days
-        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < now.Date)
+        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
         {
             Console.WriteLine("Past days bad");
             return CanPlayStatus.NoMoreTimeSlots;
         }
         //Check Today
-        if (!DateExistsAndHasSessions(now.Date))
+        if (!DateExistsAndHasSessions(SystemTime.Now().Date))
             return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
         //Check if you are after 8:00AM
-        return now < now.Date.AddHours(8) ? CanPlayStatus.HasNextTimeslot : CanPlayStatus.CanPlay;
+        return SystemTime.Now() < SystemTime.Now().Date.AddHours(8)
+            ? CanPlayStatus.HasNextTimeslot
+            : CanPlayStatus.CanPlay;
     }
 
     private bool DateExists(DateTime datetime)
     {
-        return UserLocalData.PlayDates.Count(day => day.DateObject.Date == datetime.Date) >= 1;
+        return UserLocalData.PlayDates.Count(day => day.DateObject.Date == datetime.Date) == 1;
     }
 
     private PlayDate GetNextPlayDate()
@@ -87,24 +89,24 @@ public class UserStatistics : IEnumerable
         return UserLocalData.PlayDates.Where(playDate => DateExistsAndHasSessions(playDate.DateObject)).Min();
     }
 
-    public string TimeToNextSession(DateTime now)
+    public string TimeToNextSession()
     {
         var nextPlayDate = GetNextPlayDate();
         if (nextPlayDate.DateObject.Date > DateTime.Today)
-            return GetTimeSpanToDateTime(nextPlayDate.DateObject.Date.AddHours(8), now);
-        if (now < DateTime.Today.AddHours(8))
-            return GetTimeSpanToDateTime(DateTime.Today.AddHours(8), now);
+            return GetTimeSpanToDateTime(nextPlayDate.DateObject.Date.AddHours(8));
+        if (SystemTime.Now() < DateTime.Today.AddHours(8))
+            return GetTimeSpanToDateTime(DateTime.Today.AddHours(8));
         var t = TimeSpan.FromSeconds(nextPlayDate.SessionInterval -
-                                     (GetEpochTime() - nextPlayDate.LastSessionsEndTime));
+                                     (Utilities.GetEpochTime() - nextPlayDate.LastSessionsEndTime));
         return String.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
             t.Seconds);
     }
 
-    private static string GetTimeSpanToDateTime(DateTime dateTime,DateTime now)
+    public static string GetTimeSpanToDateTime(DateTime to)
     {
-        var t = dateTime.Subtract(now);
+        var t = to.Subtract(SystemTime.Now());
         return String.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
@@ -122,9 +124,9 @@ public class UserStatistics : IEnumerable
         return DateExists(date) && !FinishedDay(GetPlayDateByDateTime(date));
     }
 
-    public void AddPlayTime(int length, int score,DateTime date)
+    public void AddPlayTime(int length, int score)
     {
-        var today = GetPlayDateByDateTime(date.Date);
+        var today = GetPlayDateByDateTime(SystemTime.Now().Date);
         var thisTime = DateTime.Now.ToShortTimeString();
         if (today.CurrentSession == 0)
             today.CurrentSession = 1;
@@ -133,12 +135,12 @@ public class UserStatistics : IEnumerable
             today.CurrentSessionTimeSecs = 0;
             today.CurrentSession++;
         }
-        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime,today.CurrentSession));
+        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime, today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
         if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {
             today.CurrentSessionTimeSecs = today.SessionLength;
-            today.LastSessionsEndTime = GetEpochTime();
+            today.LastSessionsEndTime = Utilities.GetEpochTime();
         }
         UserLocalData.Save(UserLocalData);
     }
@@ -152,14 +154,10 @@ public class UserStatistics : IEnumerable
     {
         return Array.Find(UserLocalData.PlayDates, x => x.DateObject == dateTime.Date);
     }
+
     public PlayDate GetToday()
     {
         return Array.Find(UserLocalData.PlayDates, x => x.DateObject == DateTime.Today);
-    }
-
-    public static int GetEpochTime()
-    {
-        return (int) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
     }
 
     public IEnumerator SendUserInfoToServer()
@@ -170,7 +168,8 @@ public class UserStatistics : IEnumerable
         Debug.Log(String.Format("Sent {0} score reports to server - {1}", reportsCount,
             Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
         _scoreReportsToBeSent.Clear();
-        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode, GetPlayDateByDateTime(DateTime.Today).SessionId);
+        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
+                      GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         yield return request.Send();
         if (!request.isError && (request.responseCode == 200 || IsTestUser())) yield break;
@@ -180,7 +179,7 @@ public class UserStatistics : IEnumerable
         Debug.LogWarning(request.error);
     }
 
-    private void DisablePlayer()
+    public void DisablePlayer()
     {
         foreach (var playdate in UserLocalData.PlayDates.Where(playDate => playDate.DateObject >= DateTime.Today))
             playdate.DateObject = playdate.DateObject.Date.AddYears(-1);
@@ -194,7 +193,8 @@ public class UserStatistics : IEnumerable
         Debug.Log(String.Format("Sent {0} score reports to server - {1}", reportsCount,
             Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
         _scoreReportsToBeSent.Clear();
-        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode, GetPlayDateByDateTime(DateTime.Today).SessionId);
+        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
+                      GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         request.Send();
         while (!request.isDone)
@@ -212,16 +212,31 @@ public class UserStatistics : IEnumerable
 
     public bool IsTestUser()
     {
-        return Utilities.IsTestCode(UserLocalData.UserCode) >= 0;
+        return Utilities.IsTestCode(UserLocalData.UserCode) > 0;
     }
 
     public bool IsControlSession()
     {
-        return GetPlayDateByDateTime(DateTime.Today).Control == 1;
+        return GetPlayDateByDateTime(DateTime.Today).Control == 2;
     }
 
     public void ClearScoreReports()
     {
         _scoreReportsToBeSent.Clear();
+    }
+
+    public static class SystemTime
+    {
+        public static Func<DateTime> Now = () => DateTime.Now;
+
+        public static void SetDateTime(DateTime dateTimeNow)
+        {
+            Now = () => dateTimeNow;
+        }
+
+        public static void ResetDateTime()
+        {
+            Now = () => DateTime.Now;
+        }
     }
 }

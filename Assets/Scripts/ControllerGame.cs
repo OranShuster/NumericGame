@@ -45,6 +45,8 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     void Awake()
     {
+        ZestKit.enableBabysitter = true;
+        ZestKit.removeAllTweensOnLevelLoad = true;
         _mainGame = GameField.GetComponent<Game>();
         UserInfo = ApplicationState.UserStatistics;
         _warningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000)
@@ -171,11 +173,10 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     public void IncreaseScore(int amount)
     {
         Score += amount;
-        var unixTimestamp = (Int32) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
         UserInfo.AddScoreReport(new ScoreReports()
         {
             score = Mathf.Max(amount),
-            timestamp = unixTimestamp,
+            timestamp = Utilities.GetEpochTime(),
             session_id = UserInfo.GetToday().CurrentSession,
             game_id = ApplicationState.GameId
         });
@@ -218,7 +219,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     {
         try
         {
-            UserInfo.AddPlayTime((int) _totalTimePlayed, Score,DateTime.Today);
+            UserInfo.AddPlayTime((int) _totalTimePlayed, Score);
             UserInfo.SendUserInfoToServerBlocking();
         }
         finally

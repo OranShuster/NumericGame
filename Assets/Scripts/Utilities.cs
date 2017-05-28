@@ -8,6 +8,11 @@ using UnityEngine.Networking;
 
 public static class Utilities
 {
+    public static int GetEpochTime()
+    {
+        return (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+    }
+
     public static bool AreNeighbors(NumberCell s1, NumberCell s2)
     {
         return (s1.Column == s2.Column ||
@@ -75,21 +80,23 @@ public static class Utilities
 
     public static int IsTestCode(string usercode)
     {
-        if (usercode == Constants.TestCode)
-            return 0;
-        if (usercode == Constants.TestCode2)
-            return 1;
-        return -1;
+        switch (usercode)
+        {
+            case Constants.TestCode:
+                return 1;
+            case Constants.TestCode2:
+                return 2;
+            default:
+                return 0;
+        }
     }
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
-        var MinLogLevel = LogType.Log;
-        if (MinLogLevel >= type)
-        {
-            var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
-            request.Send();
-        }
+        const LogType MinLogLevel = LogType.Log;
+        if (MinLogLevel < type) return;
+        var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
+        request.Send();
     }
 
     public static UnityWebRequest CreatePostUnityWebRequest(string url, string body)

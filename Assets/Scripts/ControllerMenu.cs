@@ -31,6 +31,8 @@ public class ControllerMenu : MonoBehaviour
 
     void Awake()
     {
+        ZestKit.enableBabysitter = true;
+        ZestKit.removeAllTweensOnLevelLoad = true;
         StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton");
         ShowStatisticsButtonText.text = Utilities.LoadStringFromFile("StatisticsButton");
         InstructionsButtonText.text = Utilities.LoadStringFromFile("Instructions");
@@ -52,7 +54,7 @@ public class ControllerMenu : MonoBehaviour
 
     void Update()
     {
-        var canPlayStatus = _userStatistics.CanPlay(DateTime.Now);
+        var canPlayStatus = _userStatistics.CanPlay();
         switch (canPlayStatus)
         {
             case CanPlayStatus.NoMoreTimeSlots:
@@ -61,7 +63,7 @@ public class ControllerMenu : MonoBehaviour
                 return;
             case CanPlayStatus.HasNextTimeslot:
                 StartGameButton.interactable = false;
-                StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30), _userStatistics.TimeToNextSession(DateTime.Now));
+                StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30), _userStatistics.TimeToNextSession());
                 return;
             default:
                 StartGameButton.interactable = true;

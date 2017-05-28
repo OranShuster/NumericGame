@@ -27,7 +27,6 @@ NoMoreGames=התחל משחק )המשחק נגמר(
 TimeUntillNextSession=הזמן הנותר לחלון זמן הבא
 NoPlayerStatisticsLoaded=לא נטענו נתוני שחקן
 Cancel=ביטול
-Idle=לא ביצעת מהלך במשך 03 שניות
 //game end messages
 Game_Over=המשחק הסתיים
 Session_Time=חלון הזמן נגמר

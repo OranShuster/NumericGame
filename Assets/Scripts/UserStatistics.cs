@@ -48,7 +48,7 @@ public class UserStatistics : IEnumerable
         getReq.Send();
         while (!getReq.isDone)
         {
-            Thread.Sleep(250);
+            Thread.Sleep(100);
         }
         if (getReq.isError || getReq.responseCode > 204)
         {
@@ -174,8 +174,16 @@ public class UserStatistics : IEnumerable
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         yield return request.Send();
         if (!request.isError && (request.responseCode == 200 || IsTestUser())) yield break;
+        if (request.responseCode == Constants.InvalidPlayerCode)
+            DisablePlayer();
         ApplicationState.ConnectionError = true;
         Debug.LogWarning(request.error);
+    }
+
+    private void DisablePlayer()
+    {
+        foreach (var playdate in UserLocalData.PlayDates.Where(playDate => playDate.DateObject >= DateTime.Today))
+            playdate.DateObject = playdate.DateObject.Date.AddYears(-1);
     }
 
     public void SendUserInfoToServerBlocking()

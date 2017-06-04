@@ -12,6 +12,8 @@ public class ControllerRegistration : MonoBehaviour
     public Text RegistrationCodeInputPlaceholderText;
     public Text RegistrationErrorText;
     public GameObject MenuButtonGameObject;
+    public GameObject FabricGameObject;
+    public GameObject CrashGameObject;
 
     public void CodeSubmitButtonClick()
     {
@@ -27,8 +29,8 @@ public class ControllerRegistration : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         try
         {
-            var userStatistics = new UserStatistics(usercode);
-            if (userStatistics.UserLocalData != null)
+            ApplicationState.UserStatistics = new UserStatistics(usercode);
+            if (ApplicationState.UserStatistics.UserLocalData != null)
             {
                 SceneManager.LoadScene("MainMenu");
                 yield break;
@@ -51,17 +53,23 @@ public class ControllerRegistration : MonoBehaviour
     void Awake()
     {
         if (UserLocalData.PlayerDataValid())
+        {
+            ApplicationState.UserStatistics = new UserStatistics();
             SceneManager.LoadScene("MainMenu");
+        }
     }
     void Start()
     {
         ZestKit.enableBabysitter = true;
         ZestKit.removeAllTweensOnLevelLoad = true;
+        DontDestroyOnLoad(FabricGameObject);
+        DontDestroyOnLoad(CrashGameObject);
         Application.logMessageReceived += Utilities.LoggerCallback;
         RegistrationHeader.text = Utilities.LoadStringFromFile("UserRegistrationHeader");
         SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
         RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");
         MenuButtonGameObject.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
+
     }
 
     public void QuitGame()

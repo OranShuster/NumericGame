@@ -62,7 +62,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         ShowScore();
         _gameTimer = Constants.StartingGameTimer;
         LevelNumText.text = ApplicationState.SeriesDelta.ToString();
-        TimeHeaderText.text = Utilities.LoadStringFromFile("Time");
+        TimeHeaderText.text = Utilities.LoadStringFromFile("Timer");
         ScoreHeaderText.text = Utilities.LoadStringFromFile("Score");
         LevelHeaderText.text = Utilities.LoadStringFromFile("Level");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");

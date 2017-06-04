@@ -1,14 +1,13 @@
-﻿using Fabric.ThirdParty;
-
-namespace Fabric.Internal.Editor.API
+﻿namespace Fabric.Internal.Editor.API
 {
 	using UnityEditor;
 	using System.Collections.Generic; 
 	using System.Collections;
 	using System.IO;
 	using Fabric.Internal.Editor.Model;
+	using Fabric.Internal.ThirdParty.MiniJSON;
 
-    public class Parser
+	public class Parser
 	{
 		public static List<Organization> ParseOrganizations(Stream stream)
 		{

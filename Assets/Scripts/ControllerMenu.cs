@@ -37,7 +37,6 @@ public class ControllerMenu : MonoBehaviour
         ShowStatisticsButtonText.text = Utilities.LoadStringFromFile("StatisticsButton");
         InstructionsButtonText.text = Utilities.LoadStringFromFile("Instructions");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
-        ApplicationState.UserStatistics = new UserStatistics();
         foreach (PlayDate date in _userStatistics)
         {
             AddDateHeaderToScrollView();

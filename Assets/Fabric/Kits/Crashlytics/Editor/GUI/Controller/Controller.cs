@@ -1,6 +1,4 @@
-﻿using Fabric.Kits.Crashlytics.Runtime;
-
-namespace Fabric.Internal.Crashlytics.Editor.Controller
+﻿namespace Fabric.Internal.Crashlytics.Editor.Controller
 {
 	using UnityEngine;
 	using UnityEditor;
@@ -23,7 +21,7 @@ namespace Fabric.Internal.Crashlytics.Editor.Controller
 		{
 			get {
 				if (prefab == null) {
-					prefab = new PrefabPage (AdvanceToValidationPage (), PrefabName, typeof (CrashlyticsInit));
+					prefab = new PrefabPage (AdvanceToValidationPage (), PrefabName, typeof (Fabric.Internal.Crashlytics.CrashlyticsInit));
 
 					Fabric.Internal.Editor.Update.PeriodicPinger.Enqueue (new Fabric.Internal.Editor.Analytics.Events.PageViewEvent {
 						ScreenName = "PrefabPage (Crashlytics)",

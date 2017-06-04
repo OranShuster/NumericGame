@@ -74,9 +74,11 @@ public class UserStatistics : IEnumerable
         if (!DateExistsAndHasSessions(SystemTime.Now().Date))
             return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
         //Check if you are after 8:00AM
-        return SystemTime.Now() < SystemTime.Now().Date.AddHours(8)
-            ? CanPlayStatus.HasNextTimeslot
-            : CanPlayStatus.CanPlay;
+        if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
+            return CanPlayStatus.HasNextTimeslot;
+        var today = GetToday();
+        Debug.Log(Utilities.GetEpochTime() - today.LastSessionsEndTime);
+        return Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval ? CanPlayStatus.HasNextTimeslot : CanPlayStatus.CanPlay;
     }
 
     private bool DateExists(DateTime datetime)
@@ -92,10 +94,10 @@ public class UserStatistics : IEnumerable
     public string TimeToNextSession()
     {
         var nextPlayDate = GetNextPlayDate();
-        if (nextPlayDate.DateObject.Date > DateTime.Today)
+        if (nextPlayDate.DateObject.Date > SystemTime.Now().Date)
             return GetTimeSpanToDateTime(nextPlayDate.DateObject.Date.AddHours(8));
-        if (SystemTime.Now() < DateTime.Today.AddHours(8))
-            return GetTimeSpanToDateTime(DateTime.Today.AddHours(8));
+        if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
+            return GetTimeSpanToDateTime(SystemTime.Now().Date.AddHours(8));
         var t = TimeSpan.FromSeconds(nextPlayDate.SessionInterval -
                                      (Utilities.GetEpochTime() - nextPlayDate.LastSessionsEndTime));
         return String.Format("{0:D2}:{1:D2}:{2:D2}",
@@ -127,7 +129,7 @@ public class UserStatistics : IEnumerable
     public void AddPlayTime(int length, int score)
     {
         var today = GetPlayDateByDateTime(SystemTime.Now().Date);
-        var thisTime = DateTime.Now.ToShortTimeString();
+        var thisTime = SystemTime.Now().ToShortTimeString();
         if (today.CurrentSession == 0)
             today.CurrentSession = 1;
         if (today.CurrentSessionTimeSecs == today.SessionLength)
@@ -137,8 +139,10 @@ public class UserStatistics : IEnumerable
         }
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime, today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
+        Debug.Log(String.Format("Adding {0} play time to {1}.{2} session time left", length, thisTime, today.SessionLength - today.CurrentSessionTimeSecs));
         if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {
+            Debug.Log(String.Format("Incrementing session. seesion interval is {0}",today.SessionInterval));
             today.CurrentSessionTimeSecs = today.SessionLength;
             today.LastSessionsEndTime = Utilities.GetEpochTime();
         }
@@ -157,7 +161,7 @@ public class UserStatistics : IEnumerable
 
     public PlayDate GetToday()
     {
-        return Array.Find(UserLocalData.PlayDates, x => x.DateObject == DateTime.Today);
+        return Array.Find(UserLocalData.PlayDates, x => x.DateObject == SystemTime.Now().Date);
     }
 
     public IEnumerator SendUserInfoToServer()

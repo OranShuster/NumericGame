@@ -1,6 +1,4 @@
-﻿using Fabric.Runtime;
-
-namespace Fabric.Internal.Editor.View.Templates
+﻿namespace Fabric.Internal.Editor.View.Templates
 {
 	using UnityEditor;
 	using UnityEngine;
@@ -172,7 +170,7 @@ namespace Fabric.Internal.Editor.View.Templates
 				}
 
 				DragAndDrop.AcceptDrag ();
-				AddPrefab (FabricPrefabName, typeof(FabricInit));
+				AddPrefab (FabricPrefabName, typeof(Fabric.Internal.FabricInit));
 				AddPrefab (prefabName, prefabScript);
 				removeListener ();
 

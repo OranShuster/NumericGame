@@ -1,8 +1,10 @@
-using System.Collections.Generic;
-
-namespace Fabric.Kits.Answers.Runtime.Internal
+namespace Fabric.Answers.Internal
 {
-    /// <summary>
+	using System;
+	using System.Collections;
+	using System.Collections.Generic;
+	
+	/// <summary>
 	/// An interface defining a shared Answers Event's API which must be fulfilled. 
 	/// This interface is implemented by both <code>AnswersAndroidImplementation</code> and <code>AnswersAppleImplementation</code>
 	/// to properly bridge their respective native SDK's from C#.

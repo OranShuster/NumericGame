@@ -1,8 +1,15 @@
-﻿using System.Collections.Generic;
-
-namespace Fabric.Kits.Answers.Runtime.Internal
+﻿namespace Fabric.Answers.Internal
 {
-    internal class AnswersStubImplementation : IAnswers
+	using UnityEngine;
+	using System;
+	using System.Collections;
+	using System.Collections.Generic;
+	using System.Runtime.InteropServices;
+	using System.IO;
+	using System.Text.RegularExpressions;
+	using Fabric.Internal.ThirdParty.MiniJSON;
+
+	internal class AnswersStubImplementation : IAnswers
 	{
 		/// <summary>
 		/// When not using Android or Apple platforms, Unity needs a default behavior for Answers

@@ -1,10 +1,9 @@
-﻿using Fabric.ThirdParty;
-
-namespace Fabric.Internal.Editor.Update.Dependency
+﻿namespace Fabric.Internal.Editor.Update.Dependency
 {
 	using System.Collections.Generic;
+	using Fabric.Internal.ThirdParty.MiniJSON;
 
-    internal class DependencyGraphObject
+	internal class DependencyGraphObject
 	{
 		#region PluginObject
 		internal class PluginObject

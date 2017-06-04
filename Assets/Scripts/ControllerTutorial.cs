@@ -29,6 +29,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         _mainGame = GameField.GetComponent<Game>();
         SkipButton.image.ZKalphaTo(1, 0.5f).start();
         SkipButton.GetComponentInChildren<Text>().ZKalphaTo(1, 0.5f).start();
+        SkipButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Tutorial",4);
         TutorialText.ZKalphaTo(1, 0.5f).start();
         var tutorialHeaderStringName = "TutorialHeaderControl";
         if (!_userStatistics.IsControlSession())

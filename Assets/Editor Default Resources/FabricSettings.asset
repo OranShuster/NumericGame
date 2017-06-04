@@ -12,18 +12,18 @@ MonoBehaviour:
   m_Name: FabricSettings
   m_EditorClassIdentifier: 
   email: thristle666@gmail.com
-  rawToken: '{"access_token":"aeaf569270b9c215b92536b5a21cd42272ddc35f7ecb439e5aeb8f3eb341a6d7","refresh_token":"acdd9533e79a4e7cf96e9ec1fd072563493055ddec0c278ad521303ca14dcca0","token_type":"bearer","expires_in":86400}'
+  rawToken: '{"access_token":"da5c7a351c6c52c091f0733aac17e0c2d495f07ab10b75afa62c92a3d3972c64","refresh_token":"d245f8469ea90555272a7a8f88de0952fcb1ca384cabbc4bfa1e098849432c0f","token_type":"bearer","expires_in":86400}'
   organization:
     Name: Oran Shuster
     Id: 59161a928b15da23a900000d
     ApiKey: 0963e7cf7cefcfcdc154d47897a235e977756bdf
     BuildSecret: 9629eb30115a39d5b4442b084a0d0dfd0c2bd88fd86d7a95b758670d2453b8e3
-  iconUrl: https://cdn-cf.fabric.io/assets/v1/icons/app_icon57_default_white-98fe1117611dadee6a1fac112b1dda77.png
+  iconUrl: https://s3.amazonaws.com/assets.crashlytics.com/production/project/6594340/project_icon/3048658/icon.png
   dashboardUrl: https://www.fabric.io/oran-shuster/android/apps/com.bgu.numericalgame
   initialization: 0
   flowSequence: 0
   conflict: 
-  kit: Crashlytics
+  kit: 
   installedKits:
   - Name: Crashlytics
     InstallationStatus: 2
@@ -31,7 +31,7 @@ MonoBehaviour:
     Enabled: 1
     Meta:
     - Key: ConfiguredTimestamp
-      Value: 1494621090
+      Value: 1496449956
       Platform: 
     - Key: Dependencies
       Value: '[{"name":"Crashlytics-Android","version":"2.6.3"},{"name":"Crashlytics-Core-Android","version":"2.3.12"},{"name":"Fabric-Android","version":"1.3.14"},{"name":"Answers-Android","version":"1.3.10"},{"name":"Beta-Android","version":"1.1.4"},{"name":"Crashlytics-iOS","version":"3.8.3"},{"name":"Crashlytics-Wrapper-iOS","version":"0.0.0"},{"name":"Crashlytics-Wrapper-Android","version":"0.0.0"}]'

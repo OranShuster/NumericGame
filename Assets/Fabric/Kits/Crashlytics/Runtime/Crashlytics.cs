@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
-
-namespace Fabric.Kits.Crashlytics.Runtime
+﻿namespace Fabric.Crashlytics
 {
-    public class Crashlytics
+	using UnityEngine;
+	using Fabric.Internal.Runtime;
+	using System.Diagnostics;
+
+	public class Crashlytics
 	{
 		private static readonly Internal.Impl impl;
 

@@ -10,6 +10,7 @@ public static class Utilities
 {
     public static int GetEpochTime()
     {
+        return (int) UserStatistics.SystemTime.Now().ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
         return (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
     }
 

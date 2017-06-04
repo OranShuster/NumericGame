@@ -1,6 +1,14 @@
-﻿namespace Fabric.Kits.Crashlytics.Runtime.Internal
+﻿namespace Fabric.Crashlytics.Internal
 {
-#if UNITY_ANDROID && !UNITY_EDITOR
+	using UnityEngine;
+	using System;
+	using System.Diagnostics;
+	using System.Runtime.InteropServices;
+	using System.Collections;
+	using System.Collections.Generic;
+	using Fabric.Internal.Runtime;
+
+	#if UNITY_ANDROID && !UNITY_EDITOR
 	internal class AndroidImpl : Impl
 	{
 		private readonly List<IntPtr> references = new List<IntPtr> ();

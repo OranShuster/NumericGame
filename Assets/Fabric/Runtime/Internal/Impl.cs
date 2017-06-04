@@ -1,6 +1,7 @@
 ﻿namespace Fabric.Runtime.Internal
 {
-    using System.Collections.Generic;
+	using global::Fabric.Internal.Runtime;
+	using System.Collections.Generic;
 
 	internal class Impl
 	{

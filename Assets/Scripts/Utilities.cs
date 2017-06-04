@@ -8,61 +8,110 @@ using UnityEngine.Networking;
 
 public static class Utilities
 {
+    public static int GetEpochTime()
+    {
+        return (int) UserStatistics.SystemTime.Now().ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        return (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+    }
+
     public static bool AreNeighbors(NumberCell s1, NumberCell s2)
     {
         return (s1.Column == s2.Column ||
-                        s1.Row == s2.Row)
-                        && Mathf.Abs(s1.Column - s2.Column) <= 1
-                        && Mathf.Abs(s1.Row - s2.Row) <= 1;
+                s1.Row == s2.Row)
+               && Mathf.Abs(s1.Column - s2.Column) <= 1
+               && Mathf.Abs(s1.Row - s2.Row) <= 1;
     }
 
-    public static string LoadStringFromFile(string key, int lineLength=15)
+    public static string LoadStringFromFile(string key, int lineLength = 15)
     {
         INIParser ini = new INIParser();
         TextAsset asset = Resources.Load("StringsFile") as TextAsset;
         ini.Open(asset);
         return ReverseText(ini.ReadValue("Translation", key, key), lineLength);
     }
+
     public static string PrintArray<T>(T[] arr)
     {
         var ret = String.Join(",", Array.ConvertAll<T, String>(arr, i => i.ToString()));
         return ret;
     }
+
     public static float Remap(this float value, float from1, float to1, float from2, float to2)
     {
         var ret = (value - from1) / (to1 - from1) * (to2 - from2) + from2;
-        return Mathf.Clamp(ret,from2,to2);
+        return Mathf.Clamp(ret, from2, to2);
     }
 
     public static void CreateMockUserData(int control)
     {
+        int SessionLength = 10 * 60;
+        int SessionInterval = 1 * 60 * 60;
+        int SessionNum = 3;
         var mockDates = new PlayDate[3];
-        mockDates[0] = new PlayDate() { SessionLength = 10000, NumberOfSessions = 3, Date = DateTime.Today.ToString(Constants.DateFormat), Control = control ,Code= control==1? "desiree2" : "desiree"};
-        mockDates[1] = new PlayDate() { SessionLength = 10000, NumberOfSessions = 3, Date = DateTime.Today.AddDays(1).ToString(Constants.DateFormat), Control = control, Code = control == 1 ? "desiree2" : "desiree" };
-        mockDates[2] = new PlayDate() { SessionLength = 10000, NumberOfSessions = 3, Date = DateTime.Today.AddDays(2).ToString(Constants.DateFormat), Control = control, Code = control == 1 ? "desiree2" : "desiree" };
-        var userLocalData = new UserLocalData(mockDates, "desiree");
-        UserStatistics.Save(userLocalData);
+        mockDates[0] = new PlayDate
+        {
+            SessionLength = SessionLength,
+            NumberOfSessions = SessionNum,
+            DateObject = DateTime.Today,
+            Control = control,
+            Code = control == 1 ? "desiree2" : "desiree",
+            SessionInterval = SessionInterval
+        };
+        mockDates[1] = new PlayDate
+        {
+            SessionLength = SessionLength,
+            NumberOfSessions = SessionNum,
+            DateObject = DateTime.Today.AddDays(1),
+            Control = control,
+            Code = control == 1 ? "desiree2" : "desiree",
+            SessionInterval = SessionInterval
+        };
+        mockDates[2] = new PlayDate
+        {
+            SessionLength = SessionLength,
+            NumberOfSessions = SessionNum,
+            DateObject = DateTime.Today.AddDays(2),
+            Control = control,
+            Code = control == 1 ? "desiree2" : "desiree",
+            SessionInterval = SessionInterval
+        };
+        var userLocalData = new UserLocalData(mockDates, control == 1 ? "desiree2" : "desiree");
+        UserLocalData.Save(userLocalData);
     }
+
     public static int IsTestCode(string usercode)
     {
-        if (usercode == Constants.TestCode)
-            return 0;
-        if (usercode == Constants.TestCode2)
-            return 1;
-        return -1;
+        switch (usercode)
+        {
+            case Constants.TestCode:
+                return 1;
+            case Constants.TestCode2:
+                return 2;
+            default:
+                return 0;
+        }
     }
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
-        var MinLogLevel = LogType.Log;
-        if (MinLogLevel >= type)
-        {
-            var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
-            request.Send();
-        }
+        const LogType MinLogLevel = LogType.Log;
+        if (MinLogLevel < type) return;
+        var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
+        request.Send();
     }
 
-    public static string ReverseText(string str, int lineLength=15)
+    public static UnityWebRequest CreatePostUnityWebRequest(string url, string body)
+    {
+        var request = new UnityWebRequest(url);
+        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.method = UnityWebRequest.kHttpVerbPOST;
+        request.uploadHandler.contentType = "application/json";
+        request.SetRequestHeader("content-type", "application/json");
+        return request;
+    }
+
+    public static string ReverseText(string str, int lineLength = 15)
     {
         string individualLine = ""; //Control individual line in the multi-line text component.
         var reversedString = "";
@@ -72,7 +121,9 @@ public static class Utilities
         {
             if (individualLine.Length >= lineLength)
             {
-                reversedString += ReverseLine(individualLine) + "\n"; //Add a new line feed at the end, since we cannot accomodate more characters here.
+                reversedString +=
+                    ReverseLine(individualLine) +
+                    "\n"; //Add a new line feed at the end, since we cannot accomodate more characters here.
                 individualLine = ""; //Reset this string for new line.
             }
             individualLine += s + " ";
@@ -96,6 +147,7 @@ public class CoroutineWithData
     public Coroutine coroutine { get; private set; }
     public object result;
     private IEnumerator target;
+
     public CoroutineWithData(MonoBehaviour owner, IEnumerator target)
     {
         this.target = target;
@@ -130,10 +182,10 @@ public static class DebugUtilities
     public static void DebugPositions(GameObject hitGo, GameObject hitGo2)
     {
         var lala =
-                        hitGo.GetComponent<NumberCell>().Row + "-"
-                        + hitGo.GetComponent<NumberCell>().Column + "-"
-                         + hitGo2.GetComponent<NumberCell>().Row + "-"
-                         + hitGo2.GetComponent<NumberCell>().Column;
+            hitGo.GetComponent<NumberCell>().Row + "-"
+            + hitGo.GetComponent<NumberCell>().Column + "-"
+            + hitGo2.GetComponent<NumberCell>().Row + "-"
+            + hitGo2.GetComponent<NumberCell>().Column;
         Debug.Log(lala);
 
     }
@@ -164,6 +216,7 @@ public static class DebugUtilities
         }
         return x;
     }
+
     public static Color HexToRgb(string hex)
     {
         var bigint = Convert.ToUInt32(hex, 16);
@@ -171,7 +224,6 @@ public static class DebugUtilities
         var g = (bigint >> 8) & 255;
         var b = bigint & 255;
 
-        return new Color(r,g,b);
+        return new Color(r, g, b);
     }
 }
-

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using Prime31.ZestKit;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -28,15 +29,14 @@ public class ControllerMenu : MonoBehaviour
 
     public Button StartGameButton;
 
-    private string TimeToNextSession="00:00:00";
-
     void Awake()
     {
+        ZestKit.enableBabysitter = true;
+        ZestKit.removeAllTweensOnLevelLoad = true;
         StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton");
         ShowStatisticsButtonText.text = Utilities.LoadStringFromFile("StatisticsButton");
         InstructionsButtonText.text = Utilities.LoadStringFromFile("Instructions");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
-        ApplicationState.UserStatistics = new UserStatistics();
         foreach (PlayDate date in _userStatistics)
         {
             AddDateHeaderToScrollView();
@@ -56,11 +56,11 @@ public class ControllerMenu : MonoBehaviour
         var canPlayStatus = _userStatistics.CanPlay();
         switch (canPlayStatus)
         {
-            case -1:
+            case CanPlayStatus.NoMoreTimeSlots:
                 StartGameButton.interactable = false;
                 StartGameButtonText.text = Utilities.LoadStringFromFile("NoMoreGames", 30);
                 return;
-            case 0:
+            case CanPlayStatus.HasNextTimeslot:
                 StartGameButton.interactable = false;
                 StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30), _userStatistics.TimeToNextSession());
                 return;
@@ -77,7 +77,6 @@ public class ControllerMenu : MonoBehaviour
         ApplicationState.Score = 0;
         ApplicationState.TotalTimePlayed = 0;
         ApplicationState.UserStatistics.ClearScoreReports();
-        ApplicationState.GameId = _userStatistics.GetToday().GameRounds.Count+1;
         if (ApplicationState.UserStatistics.GetToday().CurrentSession == 0)
             ApplicationState.UserStatistics.GetToday().CurrentSession = 1;
         else
@@ -90,7 +89,8 @@ public class ControllerMenu : MonoBehaviour
             }
 
         }
-
+        int sessionId = _userStatistics.GetToday().CurrentSession;
+        ApplicationState.GameId = _userStatistics.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
         SceneManager.LoadScene("Tutorial");
     }
 
@@ -178,11 +178,11 @@ public class ControllerMenu : MonoBehaviour
         var sessionsString = go.transform.Find("Sessions").gameObject.GetComponent<Text>();
         var curSessionTime = go.transform.Find("CurrentSessionTime").gameObject.GetComponent<Text>();
         var dateStatus = go.transform.Find("DateStatus").gameObject.GetComponent<Image>();
-        dateString.text = DateTime.ParseExact(date.Date, Constants.DateFormat, CultureInfo.InvariantCulture)
-            .ToString(Constants.DateFormatOutput);
-        sessionsString.text = String.Format("{0}/{1}", Math.Min(date.CurrentSession, date.NumberOfSessions), date.NumberOfSessions);
+        dateString.text = date.DateObject.ToString(Constants.DateFormatOutput);
+        sessionsString.text = String.Format("{0}/{1}", Math.Min(date.CurrentSession, date.NumberOfSessions),
+            date.NumberOfSessions);
         curSessionTime.text = String.Format("{0}", date.GetRemainingSessionTimeText());
-        var playDate = DateTime.ParseExact(date.Date, Constants.DateFormat, CultureInfo.InvariantCulture);
+        var playDate = date.DateObject;
         if (DateTime.Today == playDate)
             dateStatus.sprite = (date.CurrentSession <= date.NumberOfSessions) ? null : DateStatisOkImage;
         if (DateTime.Today > playDate)

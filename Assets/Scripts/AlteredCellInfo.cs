@@ -2,7 +2,6 @@
 using System.Linq;
 using UnityEngine;
 
-
 public class AlteredCellInfo
 {
     private List<GameObject> NewCell { get; set; }
@@ -10,10 +9,7 @@ public class AlteredCellInfo
 
     public IEnumerable<GameObject> AlteredCell
     {
-        get
-        {
-            return NewCell.Distinct();
-        }
+        get { return NewCell.Distinct(); }
     }
 
     public void AddCell(GameObject go)

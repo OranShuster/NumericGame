@@ -1,6 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Runtime.Remoting.Messaging;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using Newtonsoft.Json;
+using UnityEngine;
 
 [Serializable]
 public class Rounds
@@ -8,11 +15,13 @@ public class Rounds
     public int RoundLength;
     public int RoundScore;
     public string RoundTime;
-    public Rounds(int length, int score, string time)
+    public int SessionInd;
+    public Rounds(int length, int score, string time,int sessionInd)
     {
         RoundLength = length;
         RoundScore = score;
         RoundTime = time;
+        SessionInd = sessionInd;
     }
     public Rounds() { }
     public string GetRoundLengthText()
@@ -47,15 +56,15 @@ public class ScoreReports
 }
 
 [Serializable]
-public class PlayDate
+public class PlayDate : IComparable<PlayDate>
 {
     public string Email { get; set; }
     public string Code { get; set; }
     public int SessionId { get; set; }
-    public string Date { get; set; }
+    public DateTime DateObject { get; set; }
     public int NumberOfSessions { get; set; }
     public int SessionLength { get; set; }
-    public float SessionInterval { get; set; }
+    public int SessionInterval { get; set; }
     public int Control { get; set; }
     public int CurrentSession = 0;
     public int CurrentSessionTimeSecs = 0;
@@ -67,10 +76,10 @@ public class PlayDate
         float session_interval, int id)
     {
         Code = code;
-        SessionLength = session_length;
-        SessionInterval = session_interval;
+        SessionLength = session_length * 60;
+        SessionInterval = (int)(session_interval * 60 * 60);
         Control = control;
-        Date = start_date;
+        DateObject = DateTime.ParseExact(start_date,Constants.DateFormat,CultureInfo.InvariantCulture);
         NumberOfSessions = num_of_sessions;
         Email = email;
         SessionId = id;
@@ -89,6 +98,17 @@ public class PlayDate
             t.Minutes,
             t.Seconds);
     }
+    int IComparable<PlayDate>.CompareTo(PlayDate other)
+    {
+        if (other.DateObject > DateObject)
+            return -1;
+        return other.DateObject == DateObject ? 0 : 1;
+    }
+
+    public override string ToString()
+    {
+        return string.Format("{0} - {1} sessions", DateObject.Date, NumberOfSessions);
+    }
 }
 
 [Serializable]
@@ -101,11 +121,6 @@ public class UserLocalData
     {
         PlayDates = JsonConvert.DeserializeObject<PlayDate[]>(userDataJson);
         UserCode = userCode;
-        foreach (var date in PlayDates)
-        {
-            date.SessionInterval *= 60 * 60; //to hours
-            date.SessionLength *= 60; // to minutes
-        }
     }
 
     public UserLocalData(PlayDate[] dates, string userCode)
@@ -118,4 +133,83 @@ public class UserLocalData
     private UserLocalData()
     {
     }
+
+    public static void Save(UserLocalData userLocalData)
+    {
+        Debug.Log(String.Format("Saving user data from {0}", UserStatistics.UserDataPath));
+        IFormatter formatter = new BinaryFormatter();
+        Stream stream = null;
+        try
+        {
+            stream = new FileStream(UserStatistics.UserDataPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            formatter.Serialize(stream, userLocalData);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.Message);
+        }
+        finally
+        {
+            if (stream != null)
+                stream.Close();
+        }
+
+    }
+
+    public static UserLocalData Load()
+    {
+        Debug.Log(String.Format("Loading user data from {0}", UserStatistics.UserDataPath));
+        IFormatter formatter = new BinaryFormatter();
+        Stream stream = null;
+        try
+        {
+            stream = new FileStream(UserStatistics.UserDataPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            UserLocalData obj = (UserLocalData) formatter.Deserialize(stream);
+            return obj;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.InnerException);
+            return null;
+        }
+        finally
+        {
+            if (stream != null)
+                stream.Close();
+        }
+    }
+
+    public static bool PlayerDataValid()
+    {
+        if (!File.Exists(UserStatistics.UserDataPath))
+            return false;
+        try
+        {
+            var userStats = new UserStatistics();
+            if (userStats.UserLocalData == null)
+            {
+                File.Delete(UserStatistics.UserDataPath);
+                return false;
+            }
+        }
+        catch
+        {
+            File.Delete(UserStatistics.UserDataPath);
+            return false;
+        }
+        return true;
+    }
 }
+#if UNIT_TEST
+public class Debug
+{
+public static void Log(string s) { Console.WriteLine(s); }
+public static void LogWarning(string s) { Console.WriteLine(s); }
+public static void LogError(string s) { Console.WriteLine(s); }
+}
+
+public class MonoBehaviour
+{
+
+}
+#endif

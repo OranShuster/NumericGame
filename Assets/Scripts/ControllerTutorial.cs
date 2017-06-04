@@ -24,12 +24,15 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
 
     void Start()
     {
+        ZestKit.enableBabysitter = true;
+        ZestKit.removeAllTweensOnLevelLoad = true;
         _mainGame = GameField.GetComponent<Game>();
         SkipButton.image.ZKalphaTo(1, 0.5f).start();
         SkipButton.GetComponentInChildren<Text>().ZKalphaTo(1, 0.5f).start();
+        SkipButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Tutorial",4);
         TutorialText.ZKalphaTo(1, 0.5f).start();
         var tutorialHeaderStringName = "TutorialHeaderControl";
-        if (!_userStatistics.IsControl())
+        if (!_userStatistics.IsControlSession())
         {
             tutorialHeaderStringName = string.Format("TutorialHeader{0}", ApplicationState.SeriesDelta);
         }
@@ -46,7 +49,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     private void HideMessage(string target)
     {
         ZestKit.instance.stopAllTweens();
-        var targetGameObject = GameField.transform.parent.FindChild(target).gameObject;
+        var targetGameObject = GameField.transform.parent.Find(target).gameObject;
         Destroy(targetGameObject);
         _gamePaused = false;
     }
@@ -110,11 +113,9 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     {
         try
         {
-            if (ApplicationState.SeriesDelta != 0)
-            {
-                _userStatistics.AddPlayTime((int) ApplicationState.TotalTimePlayed, Score);
-                _userStatistics.SendUserInfoToServerBlocking();
-            }
+            if (ApplicationState.SeriesDelta == 0) return;
+            _userStatistics.AddPlayTime((int) ApplicationState.TotalTimePlayed, Score);
+            _userStatistics.SendUserInfoToServerBlocking();
         }
         finally
         {

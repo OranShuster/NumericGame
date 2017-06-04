@@ -46,7 +46,7 @@ public class Game : MonoBehaviour
 
     void Start()
     {
-        _tileImagesFolder = ApplicationState.UserStatistics.IsControl() ? "Images/Control" : "Images/Numbers";
+        _tileImagesFolder = ApplicationState.UserStatistics.IsControlSession() ? "Images/Control" : "Images/Numbers";
         _numberSquareSprites = Resources.LoadAll<Sprite>(_tileImagesFolder).OrderBy(t => Convert.ToInt32(t.name)).ToArray();
         _maxNumber = _numberSquareSprites.Length;
         _rows = _maxNumber;
@@ -111,10 +111,10 @@ public class Game : MonoBehaviour
     }
     private void SetTileColorBase(GameObject go)
     {
-        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControl()
+        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControlSession()
             ? Constants.ControlBaseColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorBase;
-        if (ApplicationState.UserStatistics.IsControl())
+        if (ApplicationState.UserStatistics.IsControlSession())
         {
             go.GetComponent<Outline>().effectDistance = new Vector2(0, 0);
             go.GetComponent<Outline>().effectColor =
@@ -123,10 +123,10 @@ public class Game : MonoBehaviour
     }
     private void SetTileColorSelected(GameObject go)
     {
-        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControl()
+        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControlSession()
             ? Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorSelected;
-        if (ApplicationState.UserStatistics.IsControl())
+        if (ApplicationState.UserStatistics.IsControlSession())
         {
             go.GetComponent<Outline>().effectDistance = new Vector2(-7.5f, -7.5f);
             go.GetComponent<Outline>().effectColor =
@@ -135,10 +135,10 @@ public class Game : MonoBehaviour
     }
     private void SetTileColorMatched(GameObject go)
     {
-        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControl()
+        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControlSession()
             ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorMatched;
-        if (ApplicationState.UserStatistics.IsControl())
+        if (ApplicationState.UserStatistics.IsControlSession())
         {
             go.GetComponent<Outline>().effectDistance = new Vector2(-7.5f, -7.5f);
             go.GetComponent<Outline>().effectColor =
@@ -167,8 +167,8 @@ public class Game : MonoBehaviour
 
     public IEnumerator ClearBoardMatches()
     {
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, ApplicationState.UserStatistics.IsControl(), false);
-        var sameMatches = _shapes.GetMatches(_maxNumber, 0, ApplicationState.UserStatistics.IsControl(), false);
+        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, ApplicationState.UserStatistics.IsControlSession(), false);
+        var sameMatches = _shapes.GetMatches(_maxNumber, 0, ApplicationState.UserStatistics.IsControlSession(), false);
         totalMatches.CombineMatchesInfo(sameMatches,false);
         yield return StartCoroutine(HandleMatches(totalMatches, false, false, true));
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = true;
@@ -188,13 +188,11 @@ public class Game : MonoBehaviour
     public IEnumerator HandleMatches(MatchesInfo totalMatches, bool withScore = true, bool withEffects = true,
         bool quickMode = false)
     {
-        var first_run = 1;
         while (totalMatches.MatchedCells.Count() >= Constants.MinimumMatches)
         {
             if (withScore)
             {
                 _controllerScript.IncreaseScore(totalMatches.AddedScore);
-                first_run = 0;
                 _controllerScript.IncreaseGameTimer(5 * totalMatches.NumberOfMatches);
             }
             foreach (var item in totalMatches.MatchedCells.Distinct())
@@ -236,13 +234,13 @@ public class Game : MonoBehaviour
                 break;
 
             //Check for new matches with new tiles
-            totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, ApplicationState.UserStatistics.IsControl(), withScore);
+            totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, ApplicationState.UserStatistics.IsControlSession(), withScore);
 
             //Search identical matches 
             if (SeriesDelta != 0)
             {
-                var sameMatches = _shapes.GetMatches(_maxNumber, 0, ApplicationState.UserStatistics.IsControl(), false);
-                totalMatches.CombineMatchesInfo(sameMatches, ApplicationState.UserStatistics.IsControl());
+                var sameMatches = _shapes.GetMatches(_maxNumber, 0, ApplicationState.UserStatistics.IsControlSession(), false);
+                totalMatches.CombineMatchesInfo(sameMatches, ApplicationState.UserStatistics.IsControlSession());
             }
 
         }
@@ -273,12 +271,12 @@ public class Game : MonoBehaviour
         SetTileColorBase(_hitGo);
 
         //Find matches
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, ApplicationState.UserStatistics.IsControl(), true);
+        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, ApplicationState.UserStatistics.IsControlSession(), true);
         //Find identical strings with no score
         if (SeriesDelta != 0)
         {
             var sameMatches = _shapes.GetMatches(_maxNumber, 0, false,false);
-            totalMatches.CombineMatchesInfo(sameMatches, ApplicationState.UserStatistics.IsControl());
+            totalMatches.CombineMatchesInfo(sameMatches, ApplicationState.UserStatistics.IsControlSession());
         }
         if (totalMatches.NumberOfMatches>0)
             yield return StartCoroutine(HandleMatches(totalMatches));

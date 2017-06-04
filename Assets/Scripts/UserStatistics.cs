@@ -1,27 +1,26 @@
 ﻿using System;
-using UnityEngine;
-using System.IO;
-using Newtonsoft.Json;
-using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
-using Debug = UnityEngine.Debug;
+using System.Threading;
+using Newtonsoft.Json;
+using UnityEngine;
+using UnityEngine.Networking;
 
 public class UserStatistics : IEnumerable
 {
-    public UserLocalData UserLocalData;
-    private List<ScoreReports> ScoreReportsToBeSent = new List<ScoreReports>();
-    static string _userDataPath = Application.persistentDataPath + "/userData.cjd";
+    public UserLocalData UserLocalData = null;
+    private List<ScoreReports> _scoreReportsToBeSent = new List<ScoreReports>();
+    public static string UserDataPath = Application.persistentDataPath + "/userData.cjd";
+
     public UserStatistics(string userCode)
     {
         var control = Utilities.IsTestCode(userCode);
-        if (control >= 0)
+        if (control > 0)
         {
             Utilities.CreateMockUserData(control);
-            UserLocalData = Load();
+            UserLocalData = UserLocalData.Load();
         }
         else
         {
@@ -29,7 +28,7 @@ public class UserStatistics : IEnumerable
             {
                 var userDataJson = GetJsonFromServer(userCode);
                 UserLocalData = new UserLocalData(userDataJson, userCode);
-                Save(UserLocalData);
+                UserLocalData.Save(UserLocalData);
             }
             catch
             {
@@ -40,14 +39,17 @@ public class UserStatistics : IEnumerable
 
     public UserStatistics()
     {
-        UserLocalData = Load();
+        UserLocalData = UserLocalData.Load();
     }
 
     public string GetJsonFromServer(string userCode)
     {
         var getReq = UnityWebRequest.Get(Constants.BaseUrl + userCode + "/");
         getReq.Send();
-        while (!getReq.isDone) { System.Threading.Thread.Sleep(250); }
+        while (!getReq.isDone)
+        {
+            Thread.Sleep(100);
+        }
         if (getReq.isError || getReq.responseCode > 204)
         {
             Debug.LogError(getReq.error);
@@ -58,187 +60,149 @@ public class UserStatistics : IEnumerable
         return jsonString;
     }
 
-    public int CanPlay()
+    public CanPlayStatus CanPlay()
     {
-        if (UserLocalData.PlayDates.Where(day => IsPastDay(day.Date)).Any(day => !CheckPastDayValid(day)))
-            return -1;
-        if (DateTime.Now < DateTime.Today.AddHours(8))
-            return 0;
-        return GetToday() == null ? -1 : CheckTodayValid(GetToday());
+        Console.WriteLine("Checking date {0}", SystemTime.Now());
+        //Check past days
+        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
+            .Any(day => !FinishedDay(day)))
+        {
+            Console.WriteLine("Past days bad");
+            return CanPlayStatus.NoMoreTimeSlots;
+        }
+        //Check Today
+        if (!DateExistsAndHasSessions(SystemTime.Now().Date))
+            return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
+        //Check if you are after 8:00AM
+        if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
+            return CanPlayStatus.HasNextTimeslot;
+        var today = GetToday();
+        Debug.Log(Utilities.GetEpochTime() - today.LastSessionsEndTime);
+        return Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval ? CanPlayStatus.HasNextTimeslot : CanPlayStatus.CanPlay;
+    }
+
+    private bool DateExists(DateTime datetime)
+    {
+        return UserLocalData.PlayDates.Count(day => day.DateObject.Date == datetime.Date) == 1;
+    }
+
+    private PlayDate GetNextPlayDate()
+    {
+        return UserLocalData.PlayDates.Where(playDate => DateExistsAndHasSessions(playDate.DateObject)).Min();
     }
 
     public string TimeToNextSession()
     {
-        if (DateTime.Now < DateTime.Today.AddHours(8) || IsTodayFinished())
-            return TimeTo8AmTomorrow;
-        var todayEntry = GetToday();
-        var t = TimeSpan.FromSeconds(todayEntry.SessionInterval - (GetEpochTime() - todayEntry.LastSessionsEndTime));
-        return string.Format("{0:D2}:{1:D2}:{2:D2}",
+        var nextPlayDate = GetNextPlayDate();
+        if (nextPlayDate.DateObject.Date > SystemTime.Now().Date)
+            return GetTimeSpanToDateTime(nextPlayDate.DateObject.Date.AddHours(8));
+        if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
+            return GetTimeSpanToDateTime(SystemTime.Now().Date.AddHours(8));
+        var t = TimeSpan.FromSeconds(nextPlayDate.SessionInterval -
+                                     (Utilities.GetEpochTime() - nextPlayDate.LastSessionsEndTime));
+        return String.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
             t.Seconds);
     }
 
-    private bool IsTodayFinished()
+    public static string GetTimeSpanToDateTime(DateTime to)
     {
-        var todayEntry = GetToday();
-        return todayEntry.CurrentSession == todayEntry.NumberOfSessions &&
-                todayEntry.CurrentSessionTimeSecs >= todayEntry.SessionLength;
+        var t = to.Subtract(SystemTime.Now());
+        return String.Format("{0:D2}:{1:D2}:{2:D2}",
+            t.Hours,
+            t.Minutes,
+            t.Seconds);
     }
 
-    private static string TimeTo8AmTomorrow
+    private static bool FinishedDay(PlayDate playdate)
     {
-        get
+        return playdate.CurrentSession == playdate.NumberOfSessions &&
+               playdate.CurrentSessionTimeSecs >= playdate.SessionLength;
+    }
+
+    private bool DateExistsAndHasSessions(DateTime date)
+    {
+        return DateExists(date) && !FinishedDay(GetPlayDateByDateTime(date));
+    }
+
+    public void AddPlayTime(int length, int score)
+    {
+        var today = GetPlayDateByDateTime(SystemTime.Now().Date);
+        var thisTime = SystemTime.Now().ToShortTimeString();
+        if (today.CurrentSession == 0)
+            today.CurrentSession = 1;
+        if (today.CurrentSessionTimeSecs == today.SessionLength)
         {
-            TimeSpan t;
-            t = DateTime.Today.AddDays(1).AddHours(8).Subtract(DateTime.Now);
-            return string.Format("{0:D2}:{1:D2}:{2:D2}",
-                t.Hours,
-                t.Minutes,
-                t.Seconds);
+            today.CurrentSessionTimeSecs = 0;
+            today.CurrentSession++;
         }
-    }
-
-    private object GetTomorrow()
-    {
-        var todayDate = DateTime.Today.AddDays(1).ToString(Constants.DateFormat);
-        return Array.Find(UserLocalData.PlayDates, x => x.Date == todayDate);
-    }
-
-    private int CheckTodayValid(PlayDate todayDateEntry)
-    {
-        //Finished today sessions
-        if (todayDateEntry.CurrentSession == todayDateEntry.NumberOfSessions && 
-            todayDateEntry.CurrentSessionTimeSecs >= todayDateEntry.SessionLength)
-        {
-            if (GetTomorrow() == null)
-                return -1;
-            return 0;
-        }
-        //Check session interval
-        var timeSinceLastCompleteSession = GetEpochTime() - todayDateEntry.LastSessionsEndTime;
-        if (timeSinceLastCompleteSession >= todayDateEntry.SessionInterval)
-            return 1;
-        return 0;
-    }
-
-    private bool CheckPastDayValid(PlayDate date)
-    {
-        return date.CurrentSession > date.NumberOfSessions;
-    }
-
-    public bool IsPastDay(string date)
-    {
-        var dateObject = DateTime.ParseExact(date, Constants.DateFormat, CultureInfo.InvariantCulture);
-        return dateObject.Date < DateTime.Today.Date;
-    }
-    public void AddPlayTime(int length,int score)
-    {
-        var today = GetToday();
-        var thisTime = DateTime.Now.ToShortTimeString();
-        today.GameRounds.Add(new Rounds(length, Mathf.Max(0,score),thisTime));
+        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime, today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
-        if (today.CurrentSessionTimeSecs>=today.SessionLength)
+        Debug.Log(String.Format("Adding {0} play time to {1}.{2} session time left", length, thisTime, today.SessionLength - today.CurrentSessionTimeSecs));
+        if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {
+            Debug.Log(String.Format("Incrementing session. seesion interval is {0}",today.SessionInterval));
             today.CurrentSessionTimeSecs = today.SessionLength;
-            today.LastSessionsEndTime = GetEpochTime();
+            today.LastSessionsEndTime = Utilities.GetEpochTime();
         }
-        Save(UserLocalData);
-    }
-
-    public static void Save(UserLocalData userLocalData)
-    {
-        Debug.Log(string.Format("Saving user data from {0}", _userDataPath));
-        StreamWriter writer = null;
-        try
-        {
-            writer = new StreamWriter(_userDataPath);
-            var jsonString = JsonConvert.SerializeObject(userLocalData, Formatting.Indented);
-            byte[] toEncodeAsBytes = Encoding.ASCII.GetBytes(jsonString);
-            string encodedJson = Convert.ToBase64String(toEncodeAsBytes);
-            writer.Write(encodedJson); 
-        }
-        finally
-        {
-            if (writer != null)
-                writer.Close();
-        }
-
-    }
-
-    public static UserLocalData Load()
-    {
-        Debug.Log(string.Format("Loading user data from {0}", _userDataPath));
-        StreamReader reader = null;
-        try
-        {
-            reader = new StreamReader(_userDataPath);
-            byte[] encodedDataAsBytes = Convert.FromBase64String(reader.ReadToEnd());
-            string decodedString = Encoding.ASCII.GetString(encodedDataAsBytes);
-            return JsonConvert.DeserializeObject<UserLocalData>(decodedString);
-        }
-        finally
-        {
-            if (reader != null)
-                reader.Close();
-        }
-        return null;
+        UserLocalData.Save(UserLocalData);
     }
 
     public IEnumerator GetEnumerator()
     {
         return UserLocalData.PlayDates.GetEnumerator();
     }
+
+    public PlayDate GetPlayDateByDateTime(DateTime dateTime)
+    {
+        return Array.Find(UserLocalData.PlayDates, x => x.DateObject == dateTime.Date);
+    }
+
     public PlayDate GetToday()
     {
-        var todayDate = DateTime.Today.ToString(Constants.DateFormat);
-        return Array.Find(UserLocalData.PlayDates, x => x.Date == todayDate);
+        return Array.Find(UserLocalData.PlayDates, x => x.DateObject == SystemTime.Now().Date);
     }
-    public float GetCurrentSessionTime()
-    {
-        var today = GetToday();
-        if (today != null)
-            return today.CurrentSessionTimeSecs;
-        return -1;
-    }
-    public static int GetEpochTime()
-    {
-        return (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-    }
+
     public IEnumerator SendUserInfoToServer()
     {
-        if (ScoreReportsToBeSent.Count <= 0) yield break;
-        var reportsCount = ScoreReportsToBeSent.Count;
-        var jsonString = JsonConvert.SerializeObject(ScoreReportsToBeSent);
-        Debug.Log(string.Format("Sent {0} score reports to server - {1}", reportsCount, Utilities.PrintArray<ScoreReports>(ScoreReportsToBeSent.ToArray())));
-        ClearScoreReports(reportsCount);
-        var request = new UnityWebRequest(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId));
-        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonString));
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.method = UnityWebRequest.kHttpVerbPOST;
-        request.uploadHandler.contentType = "application/json";
-        request.SetRequestHeader("content-type", "application/json");
+        if (_scoreReportsToBeSent.Count <= 0) yield break;
+        var reportsCount = _scoreReportsToBeSent.Count;
+        var jsonString = JsonConvert.SerializeObject(_scoreReportsToBeSent);
+        Debug.Log(String.Format("Sent {0} score reports to server - {1}", reportsCount,
+            Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
+        _scoreReportsToBeSent.Clear();
+        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
+                      GetPlayDateByDateTime(DateTime.Today).SessionId);
+        var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         yield return request.Send();
         if (!request.isError && (request.responseCode == 200 || IsTestUser())) yield break;
+        if (request.responseCode == Constants.InvalidPlayerCode)
+            DisablePlayer();
         ApplicationState.ConnectionError = true;
         Debug.LogWarning(request.error);
     }
+
+    public void DisablePlayer()
+    {
+        foreach (var playdate in UserLocalData.PlayDates.Where(playDate => playDate.DateObject >= DateTime.Today))
+            playdate.DateObject = playdate.DateObject.Date.AddYears(-1);
+    }
+
     public void SendUserInfoToServerBlocking()
     {
-        if (ScoreReportsToBeSent.Count <= 0) return;
-        var reportsCount = ScoreReportsToBeSent.Count;
-        var jsonString = JsonConvert.SerializeObject(ScoreReportsToBeSent);
-        Debug.Log(string.Format("Sent {0} score reports to server - {1}", reportsCount, Utilities.PrintArray<ScoreReports>(ScoreReportsToBeSent.ToArray())));
-        ClearScoreReports(reportsCount);
-        var request = new UnityWebRequest(Constants.BaseUrl + string.Format("/{0}/{1}/", UserLocalData.UserCode, GetToday().SessionId));
-        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonString));
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.method = UnityWebRequest.kHttpVerbPOST;
-        request.uploadHandler.contentType = "application/json";
-        request.SetRequestHeader("content-type", "application/json");
+        if (_scoreReportsToBeSent.Count <= 0) return;
+        var reportsCount = _scoreReportsToBeSent.Count;
+        var jsonString = JsonConvert.SerializeObject(_scoreReportsToBeSent);
+        Debug.Log(String.Format("Sent {0} score reports to server - {1}", reportsCount,
+            Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
+        _scoreReportsToBeSent.Clear();
+        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
+                      GetPlayDateByDateTime(DateTime.Today).SessionId);
+        var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         request.Send();
         while (!request.isDone)
-            System.Threading.Thread.Sleep(250);
+            Thread.Sleep(250);
         if (!request.isError && (request.responseCode == 200 || IsTestUser())) return;
         ApplicationState.ConnectionError = true;
         Debug.LogWarning(request.error);
@@ -247,52 +211,36 @@ public class UserStatistics : IEnumerable
 
     public void AddScoreReport(ScoreReports scoreReport)
     {
-        ScoreReportsToBeSent.Add(scoreReport);
-    }
-
-    public static bool PlayerDataValid()
-    {
-        if (!File.Exists(_userDataPath))
-            return false;
-        try
-        {
-            var userStats = new UserStatistics();
-            if (userStats.UserLocalData == null)
-            {
-                File.Delete(_userDataPath);
-                return false;
-            }
-        }
-        catch
-        {
-            File.Delete(_userDataPath);
-            return false;
-        }
-        return true;
+        _scoreReportsToBeSent.Add(scoreReport);
     }
 
     public bool IsTestUser()
     {
-        var control = Utilities.IsTestCode(UserLocalData.UserCode);
-        return  control>=0;
+        return Utilities.IsTestCode(UserLocalData.UserCode) > 0;
     }
 
-    public bool IsControl()
+    public bool IsControlSession()
     {
-        return GetToday().Control == 1;
+        return GetPlayDateByDateTime(DateTime.Today).Control == 2;
     }
 
-    public void DeleteSave()
-    {
-        File.Delete(_userDataPath);
-    }
-
-    public void ClearScoreReports(int count)
-    {
-        ScoreReportsToBeSent.RemoveRange(0,count);
-    }
     public void ClearScoreReports()
     {
-        ScoreReportsToBeSent.Clear();
+        _scoreReportsToBeSent.Clear();
+    }
+
+    public static class SystemTime
+    {
+        public static Func<DateTime> Now = () => DateTime.Now;
+
+        public static void SetDateTime(DateTime dateTimeNow)
+        {
+            Now = () => dateTimeNow;
+        }
+
+        public static void ResetDateTime()
+        {
+            Now = () => DateTime.Now;
+        }
     }
 }

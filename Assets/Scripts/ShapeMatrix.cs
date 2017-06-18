@@ -144,8 +144,6 @@ public class ShapesMatrix
         _numberCounts[item.GetComponent<NumberCell>().Value]--;
         _shapes[item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column] = null;
         _values[item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column] = 0;
-        //Debug.logger.Log("190217|0104", String.Format("values - {0} total - {1} Removed {2}",
-        //Utilities.PrintArray(_numberCounts), _numberCounts.Sum(), item.GetComponent<NumberCell>().Value));
     }
 
     public void Add(GameObject item)
@@ -154,8 +152,6 @@ public class ShapesMatrix
         _shapes[item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column] = item;
         _values[item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column] =
             item.GetComponent<NumberCell>().Value;
-        //Debug.logger.Log("180217|2224", String.Format("values - {0} total - {1} Added - {2}",
-        //Utilities.PrintArray(_numberCounts), _numberCounts.Sum(), item.GetComponent<NumberCell>().Value));
     }
 
     public AlteredCellInfo Collapse(IEnumerable<int> columns)

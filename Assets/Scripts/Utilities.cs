@@ -11,7 +11,6 @@ public static class Utilities
     public static int GetEpochTime()
     {
         return (int) UserStatistics.SystemTime.Now().ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-        return (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
     }
 
     public static bool AreNeighbors(NumberCell s1, NumberCell s2)
@@ -94,10 +93,16 @@ public static class Utilities
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
-        const LogType MinLogLevel = LogType.Log;
-        if (MinLogLevel < type) return;
-        var request = UnityWebRequest.Post(Constants.BaseUrl + "/log", logString);
-        request.Send();
+        ApplicationState.logs.Add(new LogMessage()
+        {
+            location = stackTrace.Split('\n')[1],
+            timestamp = Utilities.GetEpochTime(),
+            log_id = int.Parse(logString.Split('|')[0]),
+            raw_data = logString.Split('|')[1]
+        });
+
+        if (ApplicationState.logs.Count >= 5)
+            ApplicationState.SendLogs();
     }
 
     public static UnityWebRequest CreatePostUnityWebRequest(string url, string body)
@@ -142,6 +147,15 @@ public static class Utilities
     }
 }
 
+public class LogMessage
+{
+    public int timestamp;
+    public int log_id;
+    public string priority;
+    public string location;
+    public string raw_data;
+}
+
 public class CoroutineWithData
 {
     public Coroutine coroutine { get; private set; }
@@ -164,19 +178,6 @@ public class CoroutineWithData
     }
 }
 
-public class GithubIssueRequest
-{
-    public string title;
-    public string body;
-    public string assignee = "OranShuster";
-
-    public GithubIssueRequest(string title, string body)
-    {
-        this.title = title;
-        this.body = body;
-    }
-}
-
 public static class DebugUtilities
 {
     public static void DebugPositions(GameObject hitGo, GameObject hitGo2)
@@ -186,14 +187,14 @@ public static class DebugUtilities
             + hitGo.GetComponent<NumberCell>().Column + "-"
             + hitGo2.GetComponent<NumberCell>().Row + "-"
             + hitGo2.GetComponent<NumberCell>().Column;
-        Debug.Log(lala);
+        Debug.Log(String.Format("1017|{0}",lala));
 
     }
 
     public static void ShowArray(ShapesMatrix shapes, int size)
     {
 
-        Debug.Log(GetArrayContents(shapes, size));
+        Debug.Log(String.Format("1018|{0}", GetArrayContents(shapes, size)));
     }
 
     public static string GetArrayContents(ShapesMatrix shapes, int size)

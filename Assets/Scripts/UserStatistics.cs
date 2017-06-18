@@ -52,17 +52,16 @@ public class UserStatistics : IEnumerable
         }
         if (getReq.isError || getReq.responseCode > 204)
         {
-            Debug.LogError(getReq.error);
+            Debug.LogError(String.Format("1009|{0}",getReq.error));
         }
         var dl = getReq.downloadHandler;
         var jsonString = Encoding.ASCII.GetString(dl.data);
-        Debug.Log("Got user json " + jsonString);
+        Debug.Log("1010|Got user json " + jsonString);
         return jsonString;
     }
 
     public CanPlayStatus CanPlay()
     {
-        Console.WriteLine("Checking date {0}", SystemTime.Now());
         //Check past days
         if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
@@ -77,7 +76,6 @@ public class UserStatistics : IEnumerable
         if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
             return CanPlayStatus.HasNextTimeslot;
         var today = GetToday();
-        Debug.Log(Utilities.GetEpochTime() - today.LastSessionsEndTime);
         return Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval ? CanPlayStatus.HasNextTimeslot : CanPlayStatus.CanPlay;
     }
 
@@ -139,10 +137,10 @@ public class UserStatistics : IEnumerable
         }
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime, today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
-        Debug.Log(String.Format("Adding {0} play time to {1}.{2} session time left", length, thisTime, today.SessionLength - today.CurrentSessionTimeSecs));
+        Debug.Log(String.Format("1011|Adding {0} play time to {1}.{2} session time left", length, thisTime, today.SessionLength - today.CurrentSessionTimeSecs));
         if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {
-            Debug.Log(String.Format("Incrementing session. seesion interval is {0}",today.SessionInterval));
+            Debug.Log(String.Format("1012|Incrementing session. seesion interval is {0}",today.SessionInterval));
             today.CurrentSessionTimeSecs = today.SessionLength;
             today.LastSessionsEndTime = Utilities.GetEpochTime();
         }
@@ -169,7 +167,7 @@ public class UserStatistics : IEnumerable
         if (_scoreReportsToBeSent.Count <= 0) yield break;
         var reportsCount = _scoreReportsToBeSent.Count;
         var jsonString = JsonConvert.SerializeObject(_scoreReportsToBeSent);
-        Debug.Log(String.Format("Sent {0} score reports to server - {1}", reportsCount,
+        Debug.Log(String.Format("1013|Sent {0} score reports to server - {1}", reportsCount,
             Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
         _scoreReportsToBeSent.Clear();
         var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
@@ -180,7 +178,7 @@ public class UserStatistics : IEnumerable
         if (request.responseCode == Constants.InvalidPlayerCode)
             DisablePlayer();
         ApplicationState.ConnectionError = true;
-        Debug.LogWarning(request.error);
+        Debug.LogWarning(String.Format("1014|{0}",request.error));
     }
 
     public void DisablePlayer()
@@ -194,7 +192,7 @@ public class UserStatistics : IEnumerable
         if (_scoreReportsToBeSent.Count <= 0) return;
         var reportsCount = _scoreReportsToBeSent.Count;
         var jsonString = JsonConvert.SerializeObject(_scoreReportsToBeSent);
-        Debug.Log(String.Format("Sent {0} score reports to server - {1}", reportsCount,
+        Debug.Log(String.Format("1015|Sent {0} score reports to server - {1}", reportsCount,
             Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
         _scoreReportsToBeSent.Clear();
         var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
@@ -205,7 +203,7 @@ public class UserStatistics : IEnumerable
             Thread.Sleep(250);
         if (!request.isError && (request.responseCode == 200 || IsTestUser())) return;
         ApplicationState.ConnectionError = true;
-        Debug.LogWarning(request.error);
+        Debug.LogWarning(String.Format("1016|{0}",request.error));
 
     }
 

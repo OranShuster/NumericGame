@@ -14,24 +14,11 @@ public static class Constants
     public static readonly int MinimumMatches = 3;
 
 
-    public static Color32 ColorBase = new Color32(66, 133, 244, 255);
     public static Color32 ColorSelected = new Color32(100, 181, 246, 255);
     public static Color32 ColorMatched = new Color32(21, 101, 192, 255);
     public static Color32 ColorDangerRed = new Color32(204, 0, 0, 255);
     public static Color32 ColorWarningOrange = new Color32(255, 136, 0, 255);
     public static Color32 ColorOkGreen = new Color32(0, 126, 51, 255);
-
-    public static Color32[] ControlBaseColors = new[]
-    {
-        new Color32(244, 67, 54, 255),
-        new Color32(255, 152, 0, 255),
-        new Color32(76, 175, 80, 255),
-        new Color32(0, 153, 204, 255),
-        new Color32(96, 125, 139, 255),
-        new Color32(205, 220, 57, 255),
-        new Color32(156, 39, 176, 255)
-
-    };
 
     public static Color32[] ControlSelectedColors = new[]
     {
@@ -66,6 +53,7 @@ public static class Constants
     public static string DateFormat = "yyyy-MM-dd";
     public static string DateFormatOutput = "dd/MM/yyyy";
     public static string BaseUrl = "https://cnl.bgu.ac.il/numeric_game/playrpc/";
+    public static string LogUrl = "https://cnl.bgu.ac.il/numeric_game/logrpc/";
 
     public const string TestCode = "desiree";
     public const string TestCode2 = "desiree2";

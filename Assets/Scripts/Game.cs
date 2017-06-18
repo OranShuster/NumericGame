@@ -111,36 +111,46 @@ public class Game : MonoBehaviour
     }
     private void SetTileColorBase(GameObject go)
     {
-        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControlSession()
-            ? Constants.ControlBaseColors[go.GetComponent<NumberCell>().Value - 1]
-            : Constants.ColorBase;
+        var numberImage = go.transform.Find("NumberImage").gameObject;
+        numberImage.GetComponent<Image>().color = Color.white;
         if (ApplicationState.UserStatistics.IsControlSession())
         {
+            numberImage.GetComponent<Outline>().effectDistance = new Vector2(0, 0);
+            numberImage.GetComponent<Outline>().effectColor =
+                new Color(1,1,1,0);
             go.GetComponent<Outline>().effectDistance = new Vector2(0, 0);
             go.GetComponent<Outline>().effectColor =
-                new Color(1,1,1,0);
+                new Color(1, 1, 1, 0);
         }
     }
     private void SetTileColorSelected(GameObject go)
     {
-        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControlSession()
+        var numberImage = go.transform.Find("NumberImage").gameObject;
+        numberImage.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControlSession()
             ? Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorSelected;
         if (ApplicationState.UserStatistics.IsControlSession())
         {
-            go.GetComponent<Outline>().effectDistance = new Vector2(-7.5f, -7.5f);
+            numberImage.GetComponent<Outline>().effectDistance = new Vector2(5f, 5f);
+            numberImage.GetComponent<Outline>().effectColor =
+                Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1];
+            go.GetComponent<Outline>().effectDistance = new Vector2(5f, 5f);
             go.GetComponent<Outline>().effectColor =
                 Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1];
         }
     }
     private void SetTileColorMatched(GameObject go)
     {
-        go.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControlSession()
+        var numberImage = go.transform.Find("NumberImage").gameObject;
+        numberImage.GetComponent<Image>().color = ApplicationState.UserStatistics.IsControlSession()
             ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorMatched;
         if (ApplicationState.UserStatistics.IsControlSession())
         {
-            go.GetComponent<Outline>().effectDistance = new Vector2(-7.5f, -7.5f);
+            numberImage.GetComponent<Outline>().effectDistance = new Vector2(5f, 5f);
+            numberImage.GetComponent<Outline>().effectColor =
+                Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1];
+            go.GetComponent<Outline>().effectDistance = new Vector2(5f, 5f);
             go.GetComponent<Outline>().effectColor =
                 Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1];
         }
@@ -201,7 +211,7 @@ public class Game : MonoBehaviour
             }
             if (!quickMode)
             {
-                Debug.logger.Log("Match_Score{02061724}", totalMatches.PrintMatches());
+                Debug.Log(String.Format("02061724|{0}", totalMatches.PrintMatches()));
                 _soundManager.PlayCrincle();
                 yield return new WaitForSeconds(0.75f);
             }
@@ -304,7 +314,8 @@ public class Game : MonoBehaviour
         var numberValue = _shapes.GenerateNumber(_maxNumber);
         //assign the specific properties
         go.GetComponent<NumberCell>().Assign(numberValue, row, column);
-        go.GetComponent<Image>().overrideSprite = _numberSquareSprites[numberValue - 1];
+        var numberImage = go.transform.Find("NumberImage").gameObject.GetComponent<Image>();
+        numberImage.overrideSprite = _numberSquareSprites[numberValue - 1];
         SetTileColorBase(go);
         _shapes.Add(go);
     }
@@ -351,7 +362,6 @@ public class Game : MonoBehaviour
             var location = calculate_cell_location(item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column);
             var itemRectTransform = item.GetComponent<RectTransform>() as RectTransform;
             itemRectTransform.ZKanchoredPositionTo(new Vector2(location[0], -location[1]), duration * distance).start();
-            //Debug.logger.Log("{180217|2143",String.Format("Moved object to x={0} y={1}", location[0], -location[1]));
         }
     }
     public static void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
@@ -387,7 +397,8 @@ public class Game : MonoBehaviour
                 newCell.transform.SetParent(GameField.transform, false);
                 newCell.transform.SetAsFirstSibling();
                 newCell.GetComponent<NumberCell>().Assign(numberValue, item.Row, item.Column);
-                newCell.GetComponent<Image>().overrideSprite = _numberSquareSprites[numberValue-1];
+                var numberImage = newCell.transform.Find("NumberImage").gameObject.GetComponent<Image>();
+                numberImage.overrideSprite = _numberSquareSprites[numberValue - 1];
                 SetTileColorBase(newCell);
                 var newCellRectTransform = newCell.GetComponent<RectTransform>() as RectTransform;
                 newCellRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _cellSize.x);

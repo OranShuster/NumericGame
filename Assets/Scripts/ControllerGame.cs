@@ -71,7 +71,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             IncreaseScore(0);
             StartCoroutine(UserInfo.SendUserInfoToServer());
         }
-
+        Debug.Log("1002|Game Started");
     }
 
     // Update is called once per frame
@@ -224,6 +224,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         }
         finally
         {
+            Debug.Log("1004|Game Ended");
             SceneManager.LoadScene("UserRegistration");
         }
     }
@@ -288,26 +289,6 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             String.Format("{0} {1}", level, Utilities.LoadStringFromFile("LevelUpMessage"));
     }
 
-    private IEnumerator MarkTilesAnimation(Image[] tiles)
-    {
-
-        for (int index = 0; index < 3; index++)
-        {
-            if (tiles[index] != null)
-            {
-                SetTileColorMatched(tiles[index]);
-            }
-        }
-        yield return new WaitForSeconds(1f);
-        foreach (var tile in tiles)
-        {
-            if (tile != null)
-            {
-                SetTileColorBase(tile);
-            }
-        }
-    }
-
     public bool IsPaused()
     {
         return _gamePaused;
@@ -316,27 +297,6 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     void SendUserInfoToServer()
     {
         StartCoroutine(UserInfo.SendUserInfoToServer());
-    }
-
-    private void SetTileColorBase(Image go)
-    {
-        go.color = ApplicationState.UserStatistics.IsControlSession()
-            ? Constants.ControlBaseColors[go.GetComponent<NumberCell>().Value - 1]
-            : Constants.ColorBase;
-    }
-
-    private void SetTileColorSelected(Image go)
-    {
-        go.color = ApplicationState.UserStatistics.IsControlSession()
-            ? Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1]
-            : Constants.ColorSelected;
-    }
-
-    private void SetTileColorMatched(Image go)
-    {
-        go.color = ApplicationState.UserStatistics.IsControlSession()
-            ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
-            : Constants.ColorMatched;
     }
 
     public void OnApplicationPause(bool pause)

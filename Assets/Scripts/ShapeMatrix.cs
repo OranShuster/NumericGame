@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class ShapesMatrix
 {
@@ -18,24 +19,12 @@ public class ShapesMatrix
 
     public GameObject this[int row, int column]
     {
-        get
-        {
-            try
-            {
-                return _shapes[row, column];
-            }
-            catch
-            {
-                return null;
-            }
-        }
+        get { return _shapes[row, column];  }
         set
         {
-            if (value != null)
-            {
-                _shapes[row, column] = value;
-                _values[row, column] = value.GetComponent<NumberCell>().Value;
-            }
+            if (value == null) return;
+            _shapes[row, column] = value;
+            _values[row, column] = value.GetComponent<NumberCell>().Value;
         }
     }
 
@@ -106,36 +95,31 @@ public class ShapesMatrix
         return allMatches;
     }
 
-    private List<int> FindSeries(int[] values, int delta, out int numOfMatches)
+    private static List<int> FindSeries(int[] values, int delta, out int numOfMatches)
     {
         numOfMatches = 0;
         var allSeriesIndexes = new List<int>();
         var curSeriesIndexes = new List<int>();
-        var curDiff = 0;
         for (var ind = 0; ind < values.Length - 1; ind++)
         {
-            curDiff = values[ind + 1] - values[ind];
+            var curDiff = values[ind + 1] - values[ind];
             if (curDiff == delta)
             {
                 if (curSeriesIndexes.Count == 0)
                     curSeriesIndexes.Add(ind);
                 curSeriesIndexes.Add(ind + 1);
+                continue;
             }
-            else
+            if (curSeriesIndexes.Count >= 3)
             {
-                if (curSeriesIndexes.Count >= 3)
-                {
-                    allSeriesIndexes.AddRange(curSeriesIndexes);
-                    numOfMatches++;
-                }
-                curSeriesIndexes.Clear();
+                allSeriesIndexes.AddRange(curSeriesIndexes);
+                numOfMatches++;
             }
+            curSeriesIndexes.Clear();
         }
-        if (curSeriesIndexes.Count >= 3)
-        {
-            allSeriesIndexes.AddRange(curSeriesIndexes);
-            numOfMatches++;
-        }
+        if (curSeriesIndexes.Count < 3) return allSeriesIndexes;
+        allSeriesIndexes.AddRange(curSeriesIndexes);
+        numOfMatches++;
         return allSeriesIndexes;
     }
 
@@ -164,29 +148,25 @@ public class ShapesMatrix
             for (var row = _shapes.GetLength(0) - 1; row >= 0; row--)
             {
                 //if you find a null item
-                if (_shapes[row, column] == null)
+                if (_shapes[row, column] != null) continue;
+                //start searching for the first non-null
+                for (var row2 = row - 1; row2 >= 0; row2--)
                 {
-                    //start searching for the first non-null
-                    for (var row2 = row - 1; row2 >= 0; row2--)
-                    {
-                        //if you find one, bring it down (i.e. replace it with the null you found)
-                        if (_shapes[row2, column] != null)
-                        {
-                            _shapes[row, column] = _shapes[row2, column];
-                            _shapes[row2, column] = null;
+                    //if you find one, bring it down (i.e. replace it with the null you found)
+                    if (_shapes[row2, column] == null) continue;
+                    _shapes[row, column] = _shapes[row2, column];
+                    _shapes[row2, column] = null;
 
-                            //calculate the biggest distance
-                            if (row2 - row > collapseInfo.MaxDistance)
-                                collapseInfo.MaxDistance = row2 - row;
+                    //calculate the biggest distance
+                    if (row2 - row > collapseInfo.MaxDistance)
+                        collapseInfo.MaxDistance = row2 - row;
 
-                            //assign new row and column (name does not change)
-                            _shapes[row, column].GetComponent<NumberCell>().Row = row;
-                            _shapes[row, column].GetComponent<NumberCell>().Column = column;
+                    //assign new row and column (name does not change)
+                    _shapes[row, column].GetComponent<NumberCell>().Row = row;
+                    _shapes[row, column].GetComponent<NumberCell>().Column = column;
 
-                            collapseInfo.AddCell(_shapes[row, column]);
-                            break;
-                        }
-                    }
+                    collapseInfo.AddCell(_shapes[row, column]);
+                    break;
                 }
             }
         }
@@ -198,10 +178,8 @@ public class ShapesMatrix
     {
         var emptyItems = new List<CellTuple>();
         for (var row = 0; row < rows; row++)
-        {
             if (_shapes[row, column] == null)
-                emptyItems.Add(new CellTuple() {Row = row, Column = column});
-        }
+                emptyItems.Add(new CellTuple {Row = row, Column = column});
         return emptyItems;
     }
 
@@ -210,13 +188,11 @@ public class ShapesMatrix
         var chances = new List<int>();
         var totalSquares = (int) Math.Pow(maxNumber, 2);
         for (var currentNum = 1; currentNum < maxNumber + 1; currentNum++)
-        {
             chances.AddRange(Enumerable.Repeat(currentNum, totalSquares - _numberCounts[currentNum]));
-        }
-        return chances[UnityEngine.Random.Range(0, chances.Count - 1)];
+        return chances[Random.Range(0, chances.Count - 1)];
     }
 
-    int[] ToArray(int ind, bool isRow)
+    private int[] ToArray(int ind, bool isRow)
     {
         var values = new int[_shapes.GetLength(0)];
         if (isRow)

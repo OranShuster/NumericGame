@@ -210,6 +210,8 @@ public class UserStatistics : IEnumerable
 
     public void AddScoreReport(ScoreReports scoreReport)
     {
+        if (ApplicationState.UserStatistics.IsTestUser())
+            return;
         _scoreReportsToBeSent.Add(scoreReport);
     }
 

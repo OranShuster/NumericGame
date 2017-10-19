@@ -45,12 +45,12 @@ public class UserStatistics : IEnumerable
     public string GetJsonFromServer(string userCode)
     {
         var getReq = UnityWebRequest.Get(Constants.BaseUrl + userCode + "/");
-        getReq.Send();
+        getReq.SendWebRequest();
         while (!getReq.isDone)
         {
             Thread.Sleep(100);
         }
-        if (getReq.isError || getReq.responseCode > 204)
+        if (getReq.isNetworkError || getReq.responseCode > 204)
         {
             Debug.LogError(String.Format("1009|{0}",getReq.error));
         }
@@ -173,8 +173,8 @@ public class UserStatistics : IEnumerable
         var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
                       GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
-        yield return request.Send();
-        if (!request.isError && (request.responseCode == 200 || IsTestUser())) yield break;
+        yield return request.SendWebRequest();
+        if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) yield break;
         if (request.responseCode == Constants.InvalidPlayerCode)
             DisablePlayer();
         ApplicationState.ConnectionError = true;
@@ -198,10 +198,10 @@ public class UserStatistics : IEnumerable
         var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
                       GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
-        request.Send();
+        request.SendWebRequest();
         while (!request.isDone)
             Thread.Sleep(250);
-        if (!request.isError && (request.responseCode == 200 || IsTestUser())) return;
+        if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) return;
         ApplicationState.ConnectionError = true;
         Debug.LogWarning(String.Format("1016|{0}",request.error));
 

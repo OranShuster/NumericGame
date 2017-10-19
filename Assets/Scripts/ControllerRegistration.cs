@@ -19,13 +19,13 @@ public class ControllerRegistration : MonoBehaviour
     {
         var usercode = RegistrationCodeInputField.text;
         RegistrationErrorText.text = "";
-        SubmitButton.GetComponentInChildren<Button>().interactable=false;
-        SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("SentRequest");
         StartCoroutine(SendUserCode(usercode));
     }
 
     private IEnumerator SendUserCode(string usercode)
     {
+        SubmitButton.GetComponentInChildren<Button>().interactable=false;
+        SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("SentRequest");
         yield return new WaitForSeconds(0.2f);
         try
         {
@@ -36,11 +36,13 @@ public class ControllerRegistration : MonoBehaviour
                 yield break;
             }
             ShowRegistrationErrorMessage();
+            SubmitButton.GetComponentInChildren<Button>().interactable=true;
+            SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
         }
         catch
         {
             ShowRegistrationErrorMessage();
-            SubmitButton.gameObject.SetActive(true);
+            SubmitButton.GetComponentInChildren<Button>().interactable=true;
             SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
         }
     }

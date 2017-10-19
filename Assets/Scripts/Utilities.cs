@@ -93,7 +93,7 @@ public static class Utilities
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
-        ApplicationState.logs.Add(new LogMessage()
+        ApplicationState.Logs.Add(new LogMessage()
         {
             location = stackTrace.Split('\n')[1],
             timestamp = Utilities.GetEpochTime(),
@@ -101,7 +101,7 @@ public static class Utilities
             raw_data = logString.Split('|')[1]
         });
 
-        if (ApplicationState.logs.Count >= 5)
+        if (ApplicationState.Logs.Count >= 5)
             ApplicationState.SendLogs();
     }
 

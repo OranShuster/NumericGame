@@ -52,7 +52,7 @@ public class UserStatistics : IEnumerable
         }
         if (getReq.isNetworkError || getReq.responseCode > 204)
         {
-            Debug.LogError(String.Format("1009|{0}",getReq.error));
+            Debug.LogError(string.Format("1009|{0}",getReq.error));
         }
         var dl = getReq.downloadHandler;
         var jsonString = Encoding.ASCII.GetString(dl.data);
@@ -98,7 +98,7 @@ public class UserStatistics : IEnumerable
             return GetTimeSpanToDateTime(SystemTime.Now().Date.AddHours(8));
         var t = TimeSpan.FromSeconds(nextPlayDate.SessionInterval -
                                      (Utilities.GetEpochTime() - nextPlayDate.LastSessionsEndTime));
-        return String.Format("{0:D2}:{1:D2}:{2:D2}",
+        return string.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
             t.Seconds);
@@ -107,7 +107,7 @@ public class UserStatistics : IEnumerable
     public static string GetTimeSpanToDateTime(DateTime to)
     {
         var t = to.Subtract(SystemTime.Now());
-        return String.Format("{0:D2}:{1:D2}:{2:D2}",
+        return string.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
             t.Seconds);
@@ -137,10 +137,10 @@ public class UserStatistics : IEnumerable
         }
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime, today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
-        Debug.Log(String.Format("1011|Adding {0} play time to {1}.{2} session time left", length, thisTime, today.SessionLength - today.CurrentSessionTimeSecs));
+        Debug.Log(string.Format("1011|Adding {0} play time to {1}.{2} session time left", length, thisTime, today.SessionLength - today.CurrentSessionTimeSecs));
         if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {
-            Debug.Log(String.Format("1012|Incrementing session. seesion interval is {0}",today.SessionInterval));
+            Debug.Log(string.Format("1012|Incrementing session. seesion interval is {0}",today.SessionInterval));
             today.CurrentSessionTimeSecs = today.SessionLength;
             today.LastSessionsEndTime = Utilities.GetEpochTime();
         }

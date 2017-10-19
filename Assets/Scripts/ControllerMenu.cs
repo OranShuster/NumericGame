@@ -179,9 +179,9 @@ public class ControllerMenu : MonoBehaviour
         var curSessionTime = go.transform.Find("CurrentSessionTime").gameObject.GetComponent<Text>();
         var dateStatus = go.transform.Find("DateStatus").gameObject.GetComponent<Image>();
         dateString.text = date.DateObject.ToString(Constants.DateFormatOutput);
-        sessionsString.text = String.Format("{0}/{1}", Math.Min(date.CurrentSession, date.NumberOfSessions),
+        sessionsString.text = string.Format("{0}/{1}", Math.Min(date.CurrentSession, date.NumberOfSessions),
             date.NumberOfSessions);
-        curSessionTime.text = String.Format("{0}", date.GetRemainingSessionTimeText());
+        curSessionTime.text = string.Format("{0}", date.GetRemainingSessionTimeText());
         var playDate = date.DateObject;
         if (DateTime.Today == playDate)
             dateStatus.sprite = (date.CurrentSession <= date.NumberOfSessions) ? null : DateStatisOkImage;

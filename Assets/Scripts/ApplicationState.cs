@@ -17,7 +17,7 @@ public class ApplicationState
     public static void SendLogs()
     {
         var logString = JsonConvert.SerializeObject(Logs);
-        var request = UnityWebRequest.Post(String.Format("{0}/{1}", Constants.LogUrl, ApplicationState.UserStatistics.UserLocalData.UserCode), logString);
+        var request = UnityWebRequest.Post(string.Format("{0}/{1}", Constants.LogUrl, ApplicationState.UserStatistics.UserLocalData.UserCode), logString);
         request.SendWebRequest();
         Logs.Clear();
     }

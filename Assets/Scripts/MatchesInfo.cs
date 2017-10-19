@@ -49,7 +49,7 @@ public class MatchesInfo
             numbers += "," + cell.GetComponent<NumberCell>().Value;
         }
         var totalScore = this.AddedScore.ToString();
-        return String.Format("numbers - {0} Score - {1}",numbers,totalScore);
+        return string.Format("numbers - {0} Score - {1}",numbers,totalScore);
     }
 
     public void CombineMatchesInfo(MatchesInfo other, bool control, bool withScore=false)

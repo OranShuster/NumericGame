@@ -37,7 +37,7 @@ public class NumberCell : MonoBehaviour
     private void OnDrawGizmos()
     {
         #if UNITY_EDITOR
-        Handles.Label(transform.position, String.Format("({0},{1}",Row,Column));
+        Handles.Label(transform.position, string.Format("({0},{1}",Row,Column));
         Handles.color = Color.black;
         #endif
     }

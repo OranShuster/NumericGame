@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -31,7 +32,7 @@ public static class Utilities
 
     public static string PrintArray<T>(T[] arr)
     {
-        var ret = String.Join(",", Array.ConvertAll<T, String>(arr, i => i.ToString()));
+        var ret = string.Join(",", Array.ConvertAll<T, string>(arr, i => i.ToString()));
         return ret;
     }
 
@@ -107,10 +108,12 @@ public static class Utilities
 
     public static UnityWebRequest CreatePostUnityWebRequest(string url, string body)
     {
-        var request = new UnityWebRequest(url);
-        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.method = UnityWebRequest.kHttpVerbPOST;
+        var request = new UnityWebRequest(url)
+        {
+            uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
+            downloadHandler = new DownloadHandlerBuffer(),
+            method = UnityWebRequest.kHttpVerbPOST
+        };
         request.uploadHandler.contentType = "application/json";
         request.SetRequestHeader("content-type", "application/json");
         return request;
@@ -187,14 +190,14 @@ public static class DebugUtilities
             + hitGo.GetComponent<NumberCell>().Column + "-"
             + hitGo2.GetComponent<NumberCell>().Row + "-"
             + hitGo2.GetComponent<NumberCell>().Column;
-        Debug.Log(String.Format("1017|{0}",lala));
+        Debug.Log(string.Format("1017|{0}",lala));
 
     }
 
     public static void ShowArray(ShapesMatrix shapes, int size)
     {
 
-        Debug.Log(String.Format("1018|{0}", GetArrayContents(shapes, size)));
+        Debug.Log(string.Format("1018|{0}", GetArrayContents(shapes, size)));
     }
 
     public static string GetArrayContents(ShapesMatrix shapes, int size)

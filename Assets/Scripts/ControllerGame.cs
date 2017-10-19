@@ -263,12 +263,12 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         var scoreGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/Score").gameObject;
         var timeGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/TimePlayed").gameObject;
         scoreGameObject.GetComponent<Text>().text =
-            String.Format("{1} - {0}", Utilities.LoadStringFromFile("Score"), Math.Max(Score, 0));
-        timeGameObject.GetComponent<Text>().text = String.Format("{1} - {0}",
+            string.Format("{1} - {0}", Utilities.LoadStringFromFile("Score"), Math.Max(Score, 0));
+        timeGameObject.GetComponent<Text>().text = string.Format("{1} - {0}",
             Utilities.LoadStringFromFile("Round_Length"), Rounds.GetRoundLengthText(Time));
         var MessageTitleGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/MessageTitle")
             .gameObject;
-        MessageTitleGameObject.GetComponent<Text>().text = String.Format(Utilities.LoadStringFromFile(header));
+        MessageTitleGameObject.GetComponent<Text>().text = string.Format(Utilities.LoadStringFromFile(header));
         yield return new WaitForSeconds(0.4f);
     }
 
@@ -286,7 +286,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         canvasGroup.blocksRaycasts = true;
         var header = LevelupTutorial_instance.transform.Find("OverlayBackground/LevelupTutorialHeader").gameObject;
         header.GetComponent<Text>().text =
-            String.Format("{0} {1}", level, Utilities.LoadStringFromFile("LevelUpMessage"));
+            string.Format("{0} {1}", level, Utilities.LoadStringFromFile("LevelUpMessage"));
     }
 
     public bool IsPaused()

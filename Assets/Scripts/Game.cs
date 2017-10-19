@@ -201,7 +201,7 @@ public class Game : MonoBehaviour
             }
             if (!quickMode)
             {
-                Debug.Log(String.Format("02061724|{0}", totalMatches.PrintMatches()));
+                Debug.Log(string.Format("02061724|{0}", totalMatches.PrintMatches()));
                 _soundManager.PlayCrincle();
                 yield return new WaitForSeconds(0.75f);
             }

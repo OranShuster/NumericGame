@@ -167,18 +167,18 @@ public class UserStatistics : IEnumerable
         if (_scoreReportsToBeSent.Count <= 0) yield break;
         var reportsCount = _scoreReportsToBeSent.Count;
         var jsonString = JsonConvert.SerializeObject(_scoreReportsToBeSent);
-        Debug.Log(String.Format("1013|Sent {0} score reports to server - {1}", reportsCount,
-            Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
         _scoreReportsToBeSent.Clear();
-        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
+        var url = Constants.BaseUrl + string.Format("{0}/{1}/", UserLocalData.UserCode,
                       GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         yield return request.SendWebRequest();
+        Debug.Log(string.Format("1013|Sent {0} score reports to {1} - {2}", reportsCount,url,
+            Utilities.PrintArray(_scoreReportsToBeSent.ToArray())));
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) yield break;
         if (request.responseCode == Constants.InvalidPlayerCode)
             DisablePlayer();
         ApplicationState.ConnectionError = true;
-        Debug.LogWarning(String.Format("1014|{0}",request.error));
+        Debug.LogWarning(string.Format("1014|{0}",request.error));
     }
 
     public void DisablePlayer()
@@ -192,18 +192,19 @@ public class UserStatistics : IEnumerable
         if (_scoreReportsToBeSent.Count <= 0) return;
         var reportsCount = _scoreReportsToBeSent.Count;
         var jsonString = JsonConvert.SerializeObject(_scoreReportsToBeSent);
-        Debug.Log(String.Format("1015|Sent {0} score reports to server - {1}", reportsCount,
-            Utilities.PrintArray<ScoreReports>(_scoreReportsToBeSent.ToArray())));
+
         _scoreReportsToBeSent.Clear();
-        var url = Constants.BaseUrl + String.Format("/{0}/{1}/", UserLocalData.UserCode,
+        var url = Constants.BaseUrl + string.Format("{0}/{1}/", UserLocalData.UserCode,
                       GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         request.SendWebRequest();
+        Debug.Log(string.Format("1015|Sent {0} score reports to {1} - {2}", reportsCount,url,
+            Utilities.PrintArray(_scoreReportsToBeSent.ToArray())));
         while (!request.isDone)
             Thread.Sleep(250);
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) return;
         ApplicationState.ConnectionError = true;
-        Debug.LogWarning(String.Format("1016|{0}",request.error));
+        Debug.LogWarning(string.Format("1016|{0}",request.error));
 
     }
 
@@ -219,7 +220,7 @@ public class UserStatistics : IEnumerable
 
     public bool IsControlSession()
     {
-        return GetPlayDateByDateTime(DateTime.Today).Control == 2;
+        return GetPlayDateByDateTime(DateTime.Today).Control == Constants.IsControlSession;
     }
 
     public void ClearScoreReports()

@@ -94,13 +94,23 @@ public static class Utilities
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
-        ApplicationState.Logs.Add(new LogMessage()
+        try
         {
-            location = stackTrace.Split('\n')[1],
-            timestamp = Utilities.GetEpochTime(),
-            log_id = int.Parse(logString.Split('|')[0]),
-            raw_data = logString.Split('|')[1]
-        });
+            if (ApplicationState.UserStatistics.IsTestUser())
+                return;
+            ApplicationState.Logs.Add(new LogMessage
+            {
+                location = stackTrace.Split('\n')[1],
+                timestamp = GetEpochTime(),
+                log_id = int.Parse(logString.Split('|')[0]),
+                raw_data = logString.Split('|')[1]
+            });
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
 
         if (ApplicationState.Logs.Count >= 5)
             ApplicationState.SendLogs();

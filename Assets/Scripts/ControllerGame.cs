@@ -71,7 +71,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             IncreaseScore(0);
             StartCoroutine(UserInfo.SendUserInfoToServer());
         }
-        Debug.Log("1002|Game Started");
+        Debug.LogWarning("1002|Game Started");
     }
 
     // Update is called once per frame
@@ -224,7 +224,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         }
         finally
         {
-            Debug.Log("1004|Game Ended");
+            Debug.LogWarning("1004|Game Ended");
             SceneManager.LoadScene("UserRegistration");
         }
     }

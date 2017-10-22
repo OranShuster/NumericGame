@@ -137,7 +137,7 @@ public class UserStatistics : IEnumerable
         }
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime, today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
-        Debug.Log(string.Format("1011|Adding {0} play time to {1}.{2} session time left", length, thisTime, today.SessionLength - today.CurrentSessionTimeSecs));
+        Debug.LogWarning(string.Format("1011|Adding {0} play time to {1}.{2} session time left", length, thisTime, today.SessionLength - today.CurrentSessionTimeSecs));
         if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {
             Debug.Log(string.Format("1012|Incrementing session. seesion interval is {0}",today.SessionInterval));

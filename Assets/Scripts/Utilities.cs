@@ -94,6 +94,8 @@ public static class Utilities
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
+        if (type == LogType.Log)
+            return;
         try
         {
             if (ApplicationState.UserStatistics.IsTestUser())

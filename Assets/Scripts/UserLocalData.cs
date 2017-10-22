@@ -136,7 +136,7 @@ public class UserLocalData
 
     public static void Save(UserLocalData userLocalData)
     {
-        Debug.Log(string.Format("1005|Saving user data from {0}", UserStatistics.UserDataPath));
+        Debug.LogWarning(string.Format("1005|Saving user data from {0}", UserStatistics.UserDataPath));
         IFormatter formatter = new BinaryFormatter();
         Stream stream = null;
         try
@@ -158,7 +158,7 @@ public class UserLocalData
 
     public static UserLocalData Load()
     {
-        Debug.Log(string.Format("1007|Loading user data from {0}", UserStatistics.UserDataPath));
+        Debug.LogWarning(string.Format("1007|Loading user data from {0}", UserStatistics.UserDataPath));
         IFormatter formatter = new BinaryFormatter();
         Stream stream = null;
         try

@@ -38,7 +38,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         }
         TutorialText.text = Utilities.LoadStringFromFile(tutorialHeaderStringName, 35);
         MenuButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
-        Debug.Log("1003|Tutorial started");
+        Debug.LogWarning("1003|Tutorial started");
     }
 
     public void StartGame()

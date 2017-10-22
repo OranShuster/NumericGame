@@ -9,7 +9,6 @@ using Random = System.Random;
 
 public class UserStatisticsTest
 {
-
     public static int SessionLength = 10 * 60;
     public static int SessionInterval = 1 * 60 * 60;
     public static int SessionNum = 3;
@@ -30,7 +29,6 @@ public class UserStatisticsTest
                 Code = control == 1 ? "desiree2" : "desiree",
                 SessionInterval = SessionInterval,
                 Email = "oranshuster@gmail.com"
-
             };
         var userLocalData = new UserLocalData(mockDates, control == 1 ? "desiree2" : "desiree");
         UserLocalData.Save(userLocalData);
@@ -53,7 +51,7 @@ public class UserStatisticsTest
         UserStatistics.SystemTime.SetDateTime(DateTime.Today.AddDays(-1).AddHours(8).AddSeconds(1));
         Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());
         var expectedTimeSpan = UserStatistics.GetTimeSpanToDateTime(DateTime.Today.AddHours(8));
-        Assert.AreEqual(expectedTimeSpan,userStatistics.TimeToNextSession());
+        Assert.AreEqual(expectedTimeSpan, userStatistics.TimeToNextSession());
     }
 
     [Test]
@@ -64,7 +62,7 @@ public class UserStatisticsTest
         UserStatistics.SystemTime.SetDateTime(DateTime.Today.AddDays(-1).AddHours(7).AddMinutes(30));
         Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());
         var expectedTimeSpan = UserStatistics.GetTimeSpanToDateTime(DateTime.Today.AddHours(8));
-        Assert.AreEqual(expectedTimeSpan,userStatistics.TimeToNextSession());
+        Assert.AreEqual(expectedTimeSpan, userStatistics.TimeToNextSession());
     }
 
     [Test]
@@ -79,7 +77,7 @@ public class UserStatisticsTest
         Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());
         var expectedTimeSpan =
             UserStatistics.GetTimeSpanToDateTime(DateTime.Today.AddDays(1).AddHours(8));
-        Assert.AreEqual(expectedTimeSpan,userStatistics.TimeToNextSession());
+        Assert.AreEqual(expectedTimeSpan, userStatistics.TimeToNextSession());
     }
 
     [Test]
@@ -112,6 +110,7 @@ public class UserStatisticsTest
         UserStatistics.SystemTime.SetDateTime(DateTime.Today.AddDays(1).AddHours(8).AddSeconds(1));
         Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots, userStatistics.CanPlay());
     }
+
     [Test]
     public void AfterAllPlayDatesPre8Am()
     {
@@ -120,6 +119,7 @@ public class UserStatisticsTest
         UserStatistics.SystemTime.SetDateTime(DateTime.Today.AddDays(PlayDatesNum).AddHours(8).AddSeconds(1));
         Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots, userStatistics.CanPlay());
     }
+
     [Test]
     public void AfterAllPlayDatesAfter8Am()
     {
@@ -146,7 +146,7 @@ public class UserStatisticsTest
         Assert.IsNotNull(userStatistics.UserLocalData);
         userStatistics.DisablePlayer();
         UserStatistics.SystemTime.SetDateTime(DateTime.Today.AddDays(PlayDatesNum).AddHours(8).AddSeconds(-1));
-        Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots,userStatistics.CanPlay());
+        Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots, userStatistics.CanPlay());
     }
 
     [Test]
@@ -167,18 +167,22 @@ public class UserStatisticsTest
             Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
             userStatistics.AddPlayTime(SessionLength / 2, 500);
             Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
-            userStatistics.AddPlayTime(SessionLength / 2 +1, 500);
+            userStatistics.AddPlayTime(SessionLength / 2 + 1, 500);
             Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());
             expectedTimeSpan =
-                UserStatistics.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime).AddSeconds(SessionInterval));
+                UserStatistics.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime)
+                    .AddSeconds(SessionInterval));
             Assert.AreEqual(expectedTimeSpan, userStatistics.TimeToNextSession());
-            UserStatistics.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime).AddSeconds(SessionInterval));
+            UserStatistics.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime)
+                .AddSeconds(SessionInterval));
             Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
             userStatistics.AddPlayTime(SessionLength, 2500);
             Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());
-            expectedTimeSpan = UserStatistics.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime).AddSeconds(SessionInterval * 2));
+            expectedTimeSpan = UserStatistics.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex)
+                .AddHours(firstSessionGameTime).AddSeconds(SessionInterval * 2));
             Assert.AreEqual(expectedTimeSpan, userStatistics.TimeToNextSession());
-            UserStatistics.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime).AddSeconds(SessionInterval * 2));
+            UserStatistics.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime)
+                .AddSeconds(SessionInterval * 2));
             userStatistics.AddPlayTime(SessionLength / 3, 2500);
             Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
             userStatistics.AddPlayTime(SessionLength / 3, 2500);
@@ -193,20 +197,9 @@ public class UserStatisticsTest
             }
             else
             {
-                Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots,userStatistics.CanPlay());
+                Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots, userStatistics.CanPlay());
             }
         }
-        
-        
-
-
-
-
-
-
-
-
-
     }
 
     [TearDown]

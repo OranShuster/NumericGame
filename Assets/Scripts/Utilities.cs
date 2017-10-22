@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -11,7 +9,7 @@ public static class Utilities
 {
     public static int GetEpochTime()
     {
-        return (int) UserStatistics.SystemTime.Now().ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        return (int) UserInformation.SystemTime.Now().ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
     }
 
     public static bool AreNeighbors(NumberCell s1, NumberCell s2)
@@ -44,9 +42,9 @@ public static class Utilities
 
     public static void CreateMockUserData(int control)
     {
-        int SessionLength = 10 * 60;
-        int SessionInterval = 1 * 60 * 60;
-        int SessionNum = 3;
+        const int SessionLength = 10 * 60;
+        const int SessionInterval = 1 * 60 * 60;
+        const int SessionNum = 3;
         var mockDates = new PlayDate[3];
         mockDates[0] = new PlayDate
         {
@@ -94,28 +92,22 @@ public static class Utilities
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
-        if (type == LogType.Log)
+        if (ApplicationState.UserInformation == null)
             return;
-        try
+        if (ApplicationState.UserInformation.IsTestUser())
+            return;
+        var priority = logString.Split('|')[0];
+        if (priority == "DEBUG")
+            return;
+        ApplicationState.UserInformation.Logs.Add(new LogMessage
         {
-            if (ApplicationState.UserStatistics.IsTestUser())
-                return;
-            ApplicationState.Logs.Add(new LogMessage
-            {
-                location = stackTrace.Split('\n')[1],
-                timestamp = GetEpochTime(),
-                log_id = int.Parse(logString.Split('|')[0]),
-                raw_data = logString.Split('|')[1]
-            });
-        }
-        catch (Exception)
-        {
-            // ignored
-        }
-
-
-        if (ApplicationState.Logs.Count >= 5)
-            ApplicationState.SendLogs();
+            priority = priority,
+            timestamp = GetEpochTime(),
+            log_id = logString.Split('|')[1],
+            raw_data = logString.Split('|')[2]
+        });
+        if (ApplicationState.UserInformation.Logs.Count >= 2)
+            ApplicationState.UserInformation.SendLogs(); 
     }
 
     public static UnityWebRequest CreatePostUnityWebRequest(string url, string body)
@@ -165,7 +157,7 @@ public static class Utilities
 public class LogMessage
 {
     public int timestamp;
-    public int log_id;
+    public string log_id;
     public string priority;
     public string location;
     public string raw_data;
@@ -202,14 +194,14 @@ public static class DebugUtilities
             + hitGo.GetComponent<NumberCell>().Column + "-"
             + hitGo2.GetComponent<NumberCell>().Row + "-"
             + hitGo2.GetComponent<NumberCell>().Column;
-        Debug.Log(string.Format("1017|{0}",lala));
+        Debug.Log(string.Format("DEBUG|2017102215|{0}",lala));
 
     }
 
     public static void ShowArray(ShapesMatrix shapes, int size)
     {
 
-        Debug.Log(string.Format("1018|{0}", GetArrayContents(shapes, size)));
+        Debug.Log(string.Format("DEBUG|201710221545|{0}", GetArrayContents(shapes, size)));
     }
 
     public static string GetArrayContents(ShapesMatrix shapes, int size)

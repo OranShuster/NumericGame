@@ -20,7 +20,12 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     private ITween<float> _warningOverlayTween;
     private bool _gamePaused = false;
 
-    public UserStatistics UserInfo { get; set; }
+    public UserInformation UserInfo
+    {
+        get { return ApplicationState.UserInformation; }
+        set { ApplicationState.UserInformation = value; }
+    }
+
     public Text ScoreText;
     public Text TimeHeaderText;
     public Text ScoreHeaderText;
@@ -48,7 +53,6 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         ZestKit.enableBabysitter = true;
         ZestKit.removeAllTweensOnLevelLoad = true;
         _mainGame = GameField.GetComponent<Game>();
-        UserInfo = ApplicationState.UserStatistics;
         _warningOverlayTween = TimerWarningOverlay.ZKalphaTo(1, 1f).setFrom(0).setLoops(LoopType.PingPong, 1000)
             .setRecycleTween(false);
         InvokeRepeating("SendUserInfoToServer", Constants.ScoreReportingInterval, Constants.ScoreReportingInterval);
@@ -71,7 +75,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             IncreaseScore(0);
             StartCoroutine(UserInfo.SendUserInfoToServer());
         }
-        Debug.LogWarning("1002|Game Started");
+        Debug.Log("INFO|201710221540|Game Started");
     }
 
     // Update is called once per frame
@@ -139,7 +143,6 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         GameTimerBar.rectTransform.localScale = new Vector3(Math.Min(gameTimerRelative, 1), 1, 1);
 
         GameTimerWarning();
-
     }
 
     private void GameTimerWarning()
@@ -160,7 +163,6 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     private void ShowScore()
     {
-
         ScoreText.text = Math.Max(0, Score).ToString();
     }
 
@@ -224,7 +226,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         }
         finally
         {
-            Debug.LogWarning("1004|Game Ended");
+            Debug.Log("INFO|201710221541|Game Ended");
             SceneManager.LoadScene("UserRegistration");
         }
     }
@@ -307,6 +309,5 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     public void QuitGame()
     {
-
     }
 }

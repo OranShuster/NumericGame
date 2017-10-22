@@ -13,7 +13,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     public Button SkipButton;
     public Image GameField;
     public Button MenuButton;
-    private UserStatistics _userStatistics = ApplicationState.UserStatistics;
+    private UserInformation _userInformation = ApplicationState.UserInformation;
     private bool _gamePaused=false;
     private Game _mainGame;
     private float _totalTimePlayed
@@ -32,13 +32,13 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         SkipButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Tutorial",4);
         TutorialText.ZKalphaTo(1, 0.5f).start();
         var tutorialHeaderStringName = "TutorialHeaderControl";
-        if (!_userStatistics.IsControlSession())
+        if (!_userInformation.IsControlSession())
         {
             tutorialHeaderStringName = string.Format("TutorialHeader{0}", ApplicationState.SeriesDelta);
         }
         TutorialText.text = Utilities.LoadStringFromFile(tutorialHeaderStringName, 35);
         MenuButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
-        Debug.LogWarning("1003|Tutorial started");
+        Debug.Log("INFO|201710221539|Tutorial started");
     }
 
     public void StartGame()
@@ -115,8 +115,8 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         try
         {
             if (ApplicationState.SeriesDelta == 0) return;
-            _userStatistics.AddPlayTime((int) ApplicationState.TotalTimePlayed, Score);
-            _userStatistics.SendUserInfoToServerBlocking();
+            _userInformation.AddPlayTime((int) ApplicationState.TotalTimePlayed, Score);
+            _userInformation.SendUserInfoToServerBlocking();
         }
         finally
         {

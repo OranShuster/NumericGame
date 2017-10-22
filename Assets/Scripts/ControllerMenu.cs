@@ -19,9 +19,9 @@ public class ControllerMenu : MonoBehaviour
     public GameObject DayStatsPrefab;         //Information line per day 
     public GameObject RoundStatsPrefab;       //Information line per round
 
-    private UserStatistics _userStatistics
+    private UserInformation UserInformation
     {
-        get { return ApplicationState.UserStatistics; }
+        get { return ApplicationState.UserInformation; }
     }
 
     public Sprite DateStatusBadImage; 
@@ -37,7 +37,7 @@ public class ControllerMenu : MonoBehaviour
         ShowStatisticsButtonText.text = Utilities.LoadStringFromFile("StatisticsButton");
         InstructionsButtonText.text = Utilities.LoadStringFromFile("Instructions");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
-        foreach (PlayDate date in _userStatistics)
+        foreach (PlayDate date in UserInformation)
         {
             AddDateHeaderToScrollView();
             AddDateToScrollView(date);
@@ -53,7 +53,7 @@ public class ControllerMenu : MonoBehaviour
 
     void Update()
     {
-        var canPlayStatus = _userStatistics.CanPlay();
+        var canPlayStatus = UserInformation.CanPlay();
         switch (canPlayStatus)
         {
             case CanPlayStatus.NoMoreTimeSlots:
@@ -62,7 +62,7 @@ public class ControllerMenu : MonoBehaviour
                 return;
             case CanPlayStatus.HasNextTimeslot:
                 StartGameButton.interactable = false;
-                StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30), _userStatistics.TimeToNextSession());
+                StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30), UserInformation.TimeToNextSession());
                 return;
             default:
                 StartGameButton.interactable = true;
@@ -76,21 +76,21 @@ public class ControllerMenu : MonoBehaviour
         ApplicationState.SeriesDelta = 0;
         ApplicationState.Score = 0;
         ApplicationState.TotalTimePlayed = 0;
-        ApplicationState.UserStatistics.ClearScoreReports();
-        if (ApplicationState.UserStatistics.GetToday().CurrentSession == 0)
-            ApplicationState.UserStatistics.GetToday().CurrentSession = 1;
+        ApplicationState.UserInformation.ClearScoreReports();
+        if (ApplicationState.UserInformation.GetToday().CurrentSession == 0)
+            ApplicationState.UserInformation.GetToday().CurrentSession = 1;
         else
         {
-            if (ApplicationState.UserStatistics.GetToday().CurrentSessionTimeSecs >=
-                ApplicationState.UserStatistics.GetToday().SessionLength)
+            if (ApplicationState.UserInformation.GetToday().CurrentSessionTimeSecs >=
+                ApplicationState.UserInformation.GetToday().SessionLength)
             {
-                ApplicationState.UserStatistics.GetToday().CurrentSessionTimeSecs = 0;
-                ApplicationState.UserStatistics.GetToday().CurrentSession++;
+                ApplicationState.UserInformation.GetToday().CurrentSessionTimeSecs = 0;
+                ApplicationState.UserInformation.GetToday().CurrentSession++;
             }
 
         }
-        int sessionId = _userStatistics.GetToday().CurrentSession;
-        ApplicationState.GameId = _userStatistics.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
+        int sessionId = UserInformation.GetToday().CurrentSession;
+        ApplicationState.GameId = UserInformation.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
         SceneManager.LoadScene("Tutorial");
     }
 

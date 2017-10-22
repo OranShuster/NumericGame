@@ -136,12 +136,12 @@ public class UserLocalData
 
     public static void Save(UserLocalData userLocalData)
     {
-        Debug.LogWarning(string.Format("1005|Saving user data from {0}", UserStatistics.UserDataPath));
+        Debug.Log(string.Format("INFO|201710221543|Saving user data from {0}", UserInformation.UserDataPath));
         IFormatter formatter = new BinaryFormatter();
         Stream stream = null;
         try
         {
-            stream = new FileStream(UserStatistics.UserDataPath, FileMode.Create, FileAccess.Write, FileShare.None);
+            stream = new FileStream(UserInformation.UserDataPath, FileMode.Create, FileAccess.Write, FileShare.None);
             formatter.Serialize(stream, userLocalData);
         }
         catch (Exception e)
@@ -158,12 +158,12 @@ public class UserLocalData
 
     public static UserLocalData Load()
     {
-        Debug.LogWarning(string.Format("1007|Loading user data from {0}", UserStatistics.UserDataPath));
+        Debug.Log(string.Format("INFO|201710221544|Loading user data from {0}", UserInformation.UserDataPath));
         IFormatter formatter = new BinaryFormatter();
         Stream stream = null;
         try
         {
-            stream = new FileStream(UserStatistics.UserDataPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            stream = new FileStream(UserInformation.UserDataPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             UserLocalData obj = (UserLocalData) formatter.Deserialize(stream);
             return obj;
         }
@@ -181,20 +181,20 @@ public class UserLocalData
 
     public static bool PlayerDataValid()
     {
-        if (!File.Exists(UserStatistics.UserDataPath))
+        if (!File.Exists(UserInformation.UserDataPath))
             return false;
         try
         {
-            var userStats = new UserStatistics();
+            var userStats = new UserInformation();
             if (userStats.UserLocalData == null)
             {
-                File.Delete(UserStatistics.UserDataPath);
+                File.Delete(UserInformation.UserDataPath);
                 return false;
             }
         }
         catch
         {
-            File.Delete(UserStatistics.UserDataPath);
+            File.Delete(UserInformation.UserDataPath);
             return false;
         }
         return true;

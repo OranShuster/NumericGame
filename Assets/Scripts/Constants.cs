@@ -54,6 +54,8 @@ public static class Constants
     public static string DateFormatOutput = "dd/MM/yyyy";
     public static string BaseUrl = "https://cnl.bgu.ac.il/numeric_game/playrpc/";
     public static string LogUrl = "https://cnl.bgu.ac.il/numeric_game/logrpc/";
+    public static long RequestNetworkErrorResponse = -1;
+    public static long RequestHttpErrorMin = 400;
 
     public const string TestCode = "desiree";
     public const string TestCode2 = "desiree2";

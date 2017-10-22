@@ -8,13 +8,14 @@ using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class UserStatistics : IEnumerable
+public class UserInformation : IEnumerable
 {
     public UserLocalData UserLocalData;
     private List<ScoreReports> _scoreReportsToBeSent = new List<ScoreReports>();
     public static string UserDataPath = Application.persistentDataPath + "/userData.cjd";
+    public List<LogMessage> Logs = new List<LogMessage>();
 
-    public UserStatistics(string userCode)
+    public UserInformation(string userCode)
     {
         var control = Utilities.IsTestCode(userCode);
         if (control > 0)
@@ -37,7 +38,7 @@ public class UserStatistics : IEnumerable
         }
     }
 
-    public UserStatistics()
+    public UserInformation()
     {
         UserLocalData = UserLocalData.Load();
     }
@@ -52,11 +53,11 @@ public class UserStatistics : IEnumerable
         }
         if (getReq.isNetworkError || getReq.responseCode > 204)
         {
-            Debug.LogError(string.Format("1009|{0}",getReq.error));
+            Debug.LogError(string.Format("1009|{0}", getReq.error));
         }
         var dl = getReq.downloadHandler;
         var jsonString = Encoding.ASCII.GetString(dl.data);
-        Debug.Log("1010|Got user json " + jsonString);
+        Debug.Log("INFO|201710221542|Got user json " + jsonString);
         return jsonString;
     }
 
@@ -76,7 +77,9 @@ public class UserStatistics : IEnumerable
         if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
             return CanPlayStatus.HasNextTimeslot;
         var today = GetToday();
-        return Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval ? CanPlayStatus.HasNextTimeslot : CanPlayStatus.CanPlay;
+        return Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval
+            ? CanPlayStatus.HasNextTimeslot
+            : CanPlayStatus.CanPlay;
     }
 
     private bool DateExists(DateTime datetime)
@@ -137,10 +140,11 @@ public class UserStatistics : IEnumerable
         }
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime, today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
-        Debug.LogWarning(string.Format("1011|Adding {0} play time to {1}.{2} session time left", length, thisTime, today.SessionLength - today.CurrentSessionTimeSecs));
+        Debug.Log(string.Format("INFO|201710221545|Adding {0} play time to {1}.{2} session time left", length, thisTime,
+            today.SessionLength - today.CurrentSessionTimeSecs));
         if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {
-            Debug.Log(string.Format("1012|Incrementing session. seesion interval is {0}",today.SessionInterval));
+            Debug.Log(string.Format("INFO|201710221546|Incrementing session. seesion interval is {0}", today.SessionInterval));
             today.CurrentSessionTimeSecs = today.SessionLength;
             today.LastSessionsEndTime = Utilities.GetEpochTime();
         }
@@ -172,20 +176,13 @@ public class UserStatistics : IEnumerable
                       GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         yield return request.SendWebRequest();
-        Debug.Log(string.Format("1013|Sent {0} score reports to {1} - {2}", reportsCount,url,
+        Debug.Log(string.Format("DEBUG|201710221547|Sent {0} score reports to {1}:\n{2}", reportsCount, url,
             Utilities.PrintArray(_scoreReportsToBeSent.ToArray())));
         if (request.responseCode == Constants.InvalidPlayerCode)
             DisablePlayer();
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) yield break;
         ApplicationState.ConnectionError = true;
-        Debug.LogWarning(string.Format("1014|{0}",request.error));
-    }
-
-    public void DisablePlayer()
-    {
-        foreach (var playdate in UserLocalData.PlayDates.Where(playDate => playDate.DateObject >= DateTime.Today))
-            playdate.DateObject = playdate.DateObject.Date.AddYears(-1);
-        UserLocalData.Save(UserLocalData);
+        Debug.Log(string.Format("ERROR|201710221548|{0}", request.error));
     }
 
     public void SendUserInfoToServerBlocking()
@@ -199,19 +196,48 @@ public class UserStatistics : IEnumerable
                       GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         request.SendWebRequest();
-        Debug.Log(string.Format("1015|Sent {0} score reports to {1} - {2}", reportsCount,url,
+        Debug.Log(string.Format("INFO|201710221549|Sent {0} score reports to {1} - {2}", reportsCount, url,
             Utilities.PrintArray(_scoreReportsToBeSent.ToArray())));
         while (!request.isDone)
             Thread.Sleep(250);
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) return;
         ApplicationState.ConnectionError = true;
-        Debug.LogWarning(string.Format("1016|{0}",request.error));
+        Debug.Log(string.Format("ERROR|201710221550|{0}", request.error));
+    }
 
+    public void SendLogs()
+    {
+        var logString = JsonConvert.SerializeObject(Logs);
+        var logUrl = string.Format("{0}{1}", Constants.LogUrl, UserLocalData.UserCode);
+        var response = Utilities.CreatePostUnityWebRequest(logUrl, logString);
+        response.SendWebRequest();
+        while (!response.isDone)
+            Thread.Sleep(100);
+        if (response.isNetworkError)
+            Debug.LogError(string.Format("201722101453|Log POST request to {0} failed with error -\n{1}", logUrl,
+                response.error));
+        if (response.isHttpError)
+            Debug.LogError(string.Format("201722101454|Log POST request to {0} failed with response code -\n{1}",
+                logUrl, response.responseCode));
+        if (response.isHttpError || response.isNetworkError)
+            return;
+        Debug.Log(string.Format("DEBUG|201722101155|Sent log reports to {0}", logUrl));
+        var dl = response.downloadHandler;
+        var jsonString = Encoding.ASCII.GetString(dl.data);
+        Debug.Log(jsonString);
+        Logs.Clear();
+    }
+
+    public void DisablePlayer()
+    {
+        foreach (var playdate in UserLocalData.PlayDates.Where(playDate => playDate.DateObject >= DateTime.Today))
+            playdate.DateObject = playdate.DateObject.Date.AddYears(-1);
+        UserLocalData.Save(UserLocalData);
     }
 
     public void AddScoreReport(ScoreReports scoreReport)
     {
-        if (ApplicationState.UserStatistics.IsTestUser())
+        if (ApplicationState.UserInformation.IsTestUser())
             return;
         _scoreReportsToBeSent.Add(scoreReport);
     }

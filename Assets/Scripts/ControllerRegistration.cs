@@ -29,8 +29,8 @@ public class ControllerRegistration : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         try
         {
-            ApplicationState.UserStatistics = new UserStatistics(usercode);
-            if (ApplicationState.UserStatistics.UserLocalData != null)
+            ApplicationState.UserInformation = new UserInformation(usercode);
+            if (ApplicationState.UserInformation.UserLocalData != null)
             {
                 SceneManager.LoadScene("MainMenu");
                 yield break;
@@ -60,7 +60,7 @@ public class ControllerRegistration : MonoBehaviour
         DontDestroyOnLoad(CrashGameObject);
         Application.logMessageReceived += Utilities.LoggerCallback;
         if (!UserLocalData.PlayerDataValid()) return;
-        ApplicationState.UserStatistics = new UserStatistics();
+        ApplicationState.UserInformation = new UserInformation();
         SceneManager.LoadScene("MainMenu");
     }
     void Start()

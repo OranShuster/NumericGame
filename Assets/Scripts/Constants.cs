@@ -57,7 +57,7 @@ public static class Constants
 
     public const string TestCode = "desiree";
     public const string TestCode2 = "desiree2";
-    public static int InvalidPlayerCode = 400;
+    public static int InvalidPlayerCode = 401;
     public static int IsControlSession = 1;
 }
 

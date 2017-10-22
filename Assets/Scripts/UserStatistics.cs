@@ -10,7 +10,7 @@ using UnityEngine.Networking;
 
 public class UserStatistics : IEnumerable
 {
-    public UserLocalData UserLocalData = null;
+    public UserLocalData UserLocalData;
     private List<ScoreReports> _scoreReportsToBeSent = new List<ScoreReports>();
     public static string UserDataPath = Application.persistentDataPath + "/userData.cjd";
 
@@ -174,9 +174,9 @@ public class UserStatistics : IEnumerable
         yield return request.SendWebRequest();
         Debug.Log(string.Format("1013|Sent {0} score reports to {1} - {2}", reportsCount,url,
             Utilities.PrintArray(_scoreReportsToBeSent.ToArray())));
-        if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) yield break;
         if (request.responseCode == Constants.InvalidPlayerCode)
             DisablePlayer();
+        if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) yield break;
         ApplicationState.ConnectionError = true;
         Debug.LogWarning(string.Format("1014|{0}",request.error));
     }
@@ -185,6 +185,7 @@ public class UserStatistics : IEnumerable
     {
         foreach (var playdate in UserLocalData.PlayDates.Where(playDate => playDate.DateObject >= DateTime.Today))
             playdate.DateObject = playdate.DateObject.Date.AddYears(-1);
+        UserLocalData.Save(UserLocalData);
     }
 
     public void SendUserInfoToServerBlocking()

@@ -223,9 +223,6 @@ public class UserInformation : IEnumerable
         if (response.isHttpError || response.isNetworkError)
             return;
         Debug.Log(string.Format("DEBUG|201722101155|Sent log reports to {0}", logUrl));
-        var dl = response.downloadHandler;
-        var jsonString = Encoding.ASCII.GetString(dl.data);
-        Debug.Log(jsonString);
         Logs.Clear();
     }
 

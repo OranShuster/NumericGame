@@ -30,7 +30,7 @@ public static class Utilities
 
     public static string PrintArray<T>(T[] arr)
     {
-        var ret = string.Join(",", Array.ConvertAll<T, string>(arr, i => i.ToString()));
+        var ret = string.Join(",", Array.ConvertAll(arr, i => i.ToString()));
         return ret;
     }
 
@@ -88,18 +88,25 @@ public static class Utilities
             return;
         if (ApplicationState.UserInformation.IsTestUser())
             return;
-        var priority = logString.Split('|')[0];
-        if (priority == "DEBUG")
-            return;
-        ApplicationState.UserInformation.Logs.Add(new LogMessage
+        try
         {
-            priority = priority,
-            timestamp = GetEpochTime(),
-            log_id = logString.Split('|')[1],
-            raw_data = logString.Split('|')[2]
-        });
-        if (ApplicationState.UserInformation.Logs.Count >= 2)
-            ApplicationState.UserInformation.SendLogs(); 
+            var priority = logString.Split('|')[0];
+            if (priority == "DEBUG")
+                return;
+            ApplicationState.UserInformation.Logs.Add(new LogMessage
+            {
+                priority = priority,
+                timestamp = GetEpochTime(),
+                log_id = logString.Split('|')[1],
+                raw_data = logString.Split('|')[2]
+            });
+            if (ApplicationState.UserInformation.Logs.Count >= 2)
+                ApplicationState.UserInformation.SendLogs();
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
     }
 
     public static UnityWebRequest CreatePostUnityWebRequest(string url, string body)

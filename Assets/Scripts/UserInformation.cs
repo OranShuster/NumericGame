@@ -249,7 +249,7 @@ public class UserInformation : IEnumerable
 
     public bool IsControlSession()
     {
-        return GetPlayDateByDateTime(DateTime.Today).Control == Constants.IsControlSession;
+        return GetPlayDateByDateTime(DateTime.Today).Control == Constants.ControlSessionFlag;
     }
 
     public void ClearScoreReports()

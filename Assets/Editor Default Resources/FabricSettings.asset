@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: FabricSettings
   m_EditorClassIdentifier: 
   email: thristle666@gmail.com
-  rawToken: '{"access_token":"da5c7a351c6c52c091f0733aac17e0c2d495f07ab10b75afa62c92a3d3972c64","refresh_token":"d245f8469ea90555272a7a8f88de0952fcb1ca384cabbc4bfa1e098849432c0f","token_type":"bearer","expires_in":86400}'
+  rawToken: '{"access_token":"1ad7eaece599ffaf79fa0c823145fa5f8ba6f72dcd119a593fe289596beaa13f","refresh_token":"fbad70ccd672eb378037dea47d2eae65d428d6d5bb24d113c26f7b8994bc4be8","token_type":"bearer","expires_in":86400}'
   organization:
     Name: Oran Shuster
     Id: 59161a928b15da23a900000d
@@ -31,8 +31,8 @@ MonoBehaviour:
     Enabled: 1
     Meta:
     - Key: ConfiguredTimestamp
-      Value: 1496449956
+      Value: 1508777405
       Platform: 
     - Key: Dependencies
-      Value: '[{"name":"Crashlytics-Android","version":"2.6.3"},{"name":"Crashlytics-Core-Android","version":"2.3.12"},{"name":"Fabric-Android","version":"1.3.14"},{"name":"Answers-Android","version":"1.3.10"},{"name":"Beta-Android","version":"1.1.4"},{"name":"Crashlytics-iOS","version":"3.8.3"},{"name":"Crashlytics-Wrapper-iOS","version":"0.0.0"},{"name":"Crashlytics-Wrapper-Android","version":"0.0.0"}]'
+      Value: '[{"name":"Crashlytics-Android","version":"2.6.8"},{"name":"Crashlytics-Core-Android","version":"2.3.17"},{"name":"Fabric-Android","version":"1.3.17"},{"name":"Answers-Android","version":"1.3.13"},{"name":"Beta-Android","version":"1.2.5"},{"name":"Crashlytics-iOS","version":"3.8.3"},{"name":"Crashlytics-Wrapper-iOS","version":"0.0.0"},{"name":"Crashlytics-Wrapper-Android","version":"0.0.0"}]'
       Platform: 

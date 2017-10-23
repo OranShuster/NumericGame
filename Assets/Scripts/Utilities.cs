@@ -84,7 +84,7 @@ public static class Utilities
             case Constants.TestCode:
                 return 1;
             case Constants.TestCode2:
-                return 2;
+                return 1;
             default:
                 return 0;
         }

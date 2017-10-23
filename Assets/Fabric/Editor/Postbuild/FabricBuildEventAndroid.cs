@@ -70,7 +70,7 @@
 			} else if (string.IsNullOrEmpty(www.error)) {
 				Utils.Log ("Build information sent");
 			} else {
-				Utils.Error ("Could not send build event. Error: " + www.error);
+				Utils.Warn ("Could not send build event. Error: " + www.error);
 			}
 		}
 

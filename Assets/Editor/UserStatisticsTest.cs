@@ -157,7 +157,7 @@ public class UserStatisticsTest
         Assert.IsNotNull(userStatistics.UserLocalData);
         for (var dayIndex = 0; dayIndex < PlayDatesNum; dayIndex++)
         {
-            Debug.Log("=====Starting Day " + dayIndex + "=====");
+            Debug.Log("DEBUG|1111|=====Starting Day " + dayIndex + "=====");
             UserInformation.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(rand.Next(0, 7)));
             Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());
             var expectedTimeSpan = UserInformation.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex).AddHours(8));
@@ -210,7 +210,7 @@ public class UserStatisticsTest
             File.Delete(UserInformation.UserDataPath);
         else
         {
-            Debug.LogWarning("Save file was not created");
+            Debug.LogWarning("DEBUG|2222|Save file was not created");
         }
     }
 }

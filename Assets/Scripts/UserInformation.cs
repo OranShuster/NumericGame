@@ -17,8 +17,9 @@ public class UserInformation : IEnumerable
 
     public UserInformation(string userCode)
     {
-        var control = Utilities.IsTestCode(userCode);
-        if (control > 0)
+        var control = Utilities.IsControlCode(userCode);
+        var test = Utilities.IsTestCode(userCode);
+        if (test)
         {
             Utilities.CreateMockUserData(control);
             UserLocalData = UserLocalData.Load();
@@ -244,7 +245,7 @@ public class UserInformation : IEnumerable
 
     public bool IsTestUser()
     {
-        return Utilities.IsTestCode(UserLocalData.UserCode) > 0;
+        return Utilities.IsTestCode(UserLocalData.UserCode);
     }
 
     public bool IsControlSession()

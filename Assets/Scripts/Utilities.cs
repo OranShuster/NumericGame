@@ -40,7 +40,7 @@ public static class Utilities
         return Mathf.Clamp(ret, from2, to2);
     }
 
-    public static void CreateMockUserData(int control)
+    public static void CreateMockUserData(bool control)
     {
         const int SessionLength = 10 * 60;
         const int SessionInterval = 1 * 60 * 60;
@@ -51,8 +51,8 @@ public static class Utilities
             SessionLength = SessionLength,
             NumberOfSessions = SessionNum,
             DateObject = DateTime.Today,
-            Control = control,
-            Code = control == 1 ? "desiree2" : "desiree",
+            Control = control ? 1 : 0 ,
+            Code = control  ? "desiree2" : "desiree",
             SessionInterval = SessionInterval
         };
         mockDates[1] = new PlayDate
@@ -60,8 +60,8 @@ public static class Utilities
             SessionLength = SessionLength,
             NumberOfSessions = SessionNum,
             DateObject = DateTime.Today.AddDays(1),
-            Control = control,
-            Code = control == 1 ? "desiree2" : "desiree",
+            Control = control ? 1 : 0 ,
+            Code = control  ? "desiree2" : "desiree",
             SessionInterval = SessionInterval
         };
         mockDates[2] = new PlayDate
@@ -69,25 +69,17 @@ public static class Utilities
             SessionLength = SessionLength,
             NumberOfSessions = SessionNum,
             DateObject = DateTime.Today.AddDays(2),
-            Control = control,
-            Code = control == 1 ? "desiree2" : "desiree",
+            Control = control ? 1 : 0 ,
+            Code = control  ? "desiree2" : "desiree",
             SessionInterval = SessionInterval
         };
-        var userLocalData = new UserLocalData(mockDates, control == 1 ? "desiree2" : "desiree");
+        var userLocalData = new UserLocalData(mockDates, control ? "desiree2" : "desiree");
         UserLocalData.Save(userLocalData);
     }
 
-    public static int IsTestCode(string usercode)
+    public static bool IsTestCode(string usercode)
     {
-        switch (usercode)
-        {
-            case Constants.TestCode:
-                return 1;
-            case Constants.TestCode2:
-                return 1;
-            default:
-                return 0;
-        }
+        return Constants.TestCode == usercode || Constants.TestCodeControl == usercode;
     }
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
@@ -151,6 +143,11 @@ public static class Utilities
         var charArray = s.ToCharArray();
         Array.Reverse(charArray);
         return new string(charArray);
+    }
+
+    public static bool IsControlCode(string userCode)
+    {
+        return userCode == Constants.TestCodeControl;
     }
 }
 

@@ -58,7 +58,7 @@ public static class Constants
     public static long RequestHttpErrorMin = 400;
 
     public const string TestCode = "desiree";
-    public const string TestCode2 = "desiree2";
+    public const string TestCodeControl = "desiree2";
     public static int InvalidPlayerCode = 401;
     public static int ControlSessionFlag = 1;
 }

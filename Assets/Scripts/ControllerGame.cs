@@ -12,8 +12,8 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     private float _totalTimePlayed
     {
-        get { return ApplicationState.TotalTimePlayed; }
-        set { ApplicationState.TotalTimePlayed = value; }
+        get { return GameMaster.TotalTimePlayed; }
+        set { GameMaster.TotalTimePlayed = value; }
     }
 
     private Game _mainGame;
@@ -22,8 +22,8 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     public UserInformation UserInfo
     {
-        get { return ApplicationState.UserInformation; }
-        set { ApplicationState.UserInformation = value; }
+        get { return GameMaster.UserInformation; }
+        set { GameMaster.UserInformation = value; }
     }
 
     public Text ScoreText;
@@ -36,8 +36,8 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     private int Score
     {
-        get { return ApplicationState.Score; }
-        set { ApplicationState.Score = value; }
+        get { return GameMaster.Score; }
+        set { GameMaster.Score = value; }
     }
 
     public Image GameField;
@@ -65,12 +65,12 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     {
         ShowScore();
         _gameTimer = Constants.StartingGameTimer;
-        LevelNumText.text = ApplicationState.SeriesDelta.ToString();
+        LevelNumText.text = GameMaster.SeriesDelta.ToString();
         TimeHeaderText.text = Utilities.LoadStringFromFile("Timer");
         ScoreHeaderText.text = Utilities.LoadStringFromFile("Score");
         LevelHeaderText.text = Utilities.LoadStringFromFile("Level");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
-        if (ApplicationState.SeriesDelta == 0)
+        if (GameMaster.SeriesDelta == 0)
         {
             IncreaseScore(0);
             StartCoroutine(UserInfo.SendUserInfoToServer());
@@ -88,12 +88,12 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             if (Input.GetKeyDown(KeyCode.Escape))
                 PauseGame();
         }
-        if (ApplicationState.ConnectionError)
+        if (GameMaster.ConnectionError)
         {
-            ApplicationState.ConnectionError = false;
+            GameMaster.ConnectionError = false;
             _gamePaused = true;
-            StartCoroutine(ShowMessage("Connection_Error", ApplicationState.Score,
-                Mathf.CeilToInt(ApplicationState.TotalTimePlayed), false));
+            StartCoroutine(ShowMessage("Connection_Error", GameMaster.Score,
+                Mathf.CeilToInt(GameMaster.TotalTimePlayed), false));
         }
     }
 
@@ -104,12 +104,14 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             HideMessage("MessageOverlay");
             MenuButton.interactable = true;
             _gamePaused = false;
+            Debug.Log("INFO|201711021136|Game resumed");
         }
         else
         {
             _gamePaused = true;
             MenuButton.interactable = false;
             StartCoroutine(ShowMessage("Pause", Score, (int) _totalTimePlayed, true));
+            Debug.Log("INFO|201711021137|Game Paused");
         }
         _mainGame.ToggleBoard();
     }
@@ -181,7 +183,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             score = Mathf.Max(amount),
             timestamp = Utilities.GetEpochTime(),
             session_id = UserInfo.GetToday().CurrentSession,
-            game_id = ApplicationState.GameId
+            game_id = GameMaster.GameId
         });
         ShowScore();
     }
@@ -213,7 +215,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     public void LevelUp(int level)
     {
-        ShowLevelupMessage(ApplicationState.SeriesDelta);
+        ShowLevelupMessage(GameMaster.SeriesDelta);
         MenuButton.interactable = false;
         _gamePaused = true;
     }

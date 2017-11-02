@@ -84,24 +84,22 @@ public static class Utilities
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
-        if (ApplicationState.UserInformation == null)
+        if (GameMaster.UserInformation == null)
             return;
-        if (ApplicationState.UserInformation.IsTestUser())
+        if (GameMaster.UserInformation.IsTestUser())
             return;
         try
         {
             var priority = logString.Split('|')[0];
             if (priority == "DEBUG")
                 return;
-            ApplicationState.UserInformation.Logs.Add(new LogMessage
+            GameMaster.GM.SendLogs(new LogMessage
             {
                 priority = priority,
                 timestamp = GetEpochTime(),
                 log_id = logString.Split('|')[1],
                 raw_data = logString.Split('|')[2]
             });
-            if (ApplicationState.UserInformation.Logs.Count > 0)
-                ApplicationState.UserInformation.SendLogs();
         }
         catch (Exception)
         {

@@ -24,32 +24,32 @@ public class ControllerRegistration : MonoBehaviour
 
     private IEnumerator SendUserCode(string usercode)
     {
-        SubmitButton.GetComponentInChildren<Button>().interactable=false;
+        SubmitButton.GetComponentInChildren<Button>().interactable = false;
         SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("SentRequest");
         yield return new WaitForSeconds(0.2f);
         try
         {
-            ApplicationState.UserInformation = new UserInformation(usercode);
-            if (ApplicationState.UserInformation.UserLocalData != null)
+            GameMaster.UserInformation = new UserInformation(usercode);
+            if (GameMaster.UserInformation.UserLocalData != null)
             {
                 SceneManager.LoadScene("MainMenu");
                 yield break;
             }
             ShowRegistrationErrorMessage();
-            SubmitButton.GetComponentInChildren<Button>().interactable=true;
+            SubmitButton.GetComponentInChildren<Button>().interactable = true;
             SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
         }
         catch
         {
             ShowRegistrationErrorMessage();
-            SubmitButton.GetComponentInChildren<Button>().interactable=true;
+            SubmitButton.GetComponentInChildren<Button>().interactable = true;
             SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
         }
     }
 
     private void ShowRegistrationErrorMessage()
     {
-        RegistrationErrorText.text = Utilities.LoadStringFromFile("RegistrationErrorMessage",50);
+        RegistrationErrorText.text = Utilities.LoadStringFromFile("RegistrationErrorMessage", 50);
     }
 
     void Awake()
@@ -60,16 +60,17 @@ public class ControllerRegistration : MonoBehaviour
         DontDestroyOnLoad(CrashGameObject);
         Application.logMessageReceived += Utilities.LoggerCallback;
         if (!UserLocalData.PlayerDataValid()) return;
-        ApplicationState.UserInformation = new UserInformation();
+        if (GameMaster.UserInformation == null)
+            GameMaster.UserInformation = new UserInformation();
         SceneManager.LoadScene("MainMenu");
     }
+
     void Start()
     {
         RegistrationHeader.text = Utilities.LoadStringFromFile("UserRegistrationHeader");
         SubmitButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("ConfirmText");
         RegistrationCodeInputPlaceholderText.text = Utilities.LoadStringFromFile("RegistrationCodeInputPlaceholder");
         MenuButtonGameObject.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
-
     }
 
     public void QuitGame()

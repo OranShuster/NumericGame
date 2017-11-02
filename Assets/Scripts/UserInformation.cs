@@ -13,7 +13,6 @@ public class UserInformation : IEnumerable
     public UserLocalData UserLocalData;
     private List<ScoreReports> _scoreReportsToBeSent = new List<ScoreReports>();
     public static string UserDataPath = Application.persistentDataPath + "/userData.cjd";
-    public List<LogMessage> Logs = new List<LogMessage>();
 
     public UserInformation(string userCode)
     {
@@ -41,6 +40,7 @@ public class UserInformation : IEnumerable
 
     public UserInformation()
     {
+        Debug.Log(string.Format("DEBUG|201710221544|Loading user data from {0}", UserDataPath));
         UserLocalData = UserLocalData.Load();
     }
 
@@ -64,19 +64,29 @@ public class UserInformation : IEnumerable
 
     public CanPlayStatus CanPlay()
     {
+        Debug.Log("DEBUG|201711021421|Checking CanPlay statu for " + SystemTime.Now());
         //Check past days
         if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
         {
             return CanPlayStatus.NoMoreTimeSlots;
         }
+
         //Check Today
         if (!DateExistsAndHasSessions(SystemTime.Now().Date))
             return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
+        var today = GetToday();
+        var timeRemainingInDay = SystemTime.Now().Date.AddDays(1) - SystemTime.Now();
+        var minTimeToFinishDay = today.NumberOfSessions * today.SessionLength + (today.NumberOfSessions - 1) * today.SessionInterval;
+        Debug.Log("DEBUG|201711021422|MinTimeToFinishDay = " + minTimeToFinishDay);
+        Debug.Log("DEBUG|201711021423|timeRemainingInDay = " + (int)timeRemainingInDay.TotalSeconds);
+        //Check if the sessions can be finished
+        if ( (int)timeRemainingInDay.TotalSeconds < minTimeToFinishDay)
+            return CanPlayStatus.NoMoreTimeSlots;
         //Check if you are after 8:00AM
         if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
             return CanPlayStatus.HasNextTimeslot;
-        var today = GetToday();
+
         return Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval
             ? CanPlayStatus.HasNextTimeslot
             : CanPlayStatus.CanPlay;
@@ -140,11 +150,13 @@ public class UserInformation : IEnumerable
         }
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime, today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
-        Debug.Log(string.Format("INFO|201710221545|Adding {0} play time to {1}.{2} session time left", length, thisTime,
+        Debug.Log(string.Format("INFO|201710221545|Adding {0} play time to {1}. {2} session time left", length,
+            thisTime,
             today.SessionLength - today.CurrentSessionTimeSecs));
         if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {
-            Debug.Log(string.Format("INFO|201710221546|Incrementing session. seesion interval is {0}", today.SessionInterval));
+            Debug.Log(string.Format("INFO|201710221546|Incrementing session. seesion interval is {0}",
+                today.SessionInterval));
             today.CurrentSessionTimeSecs = today.SessionLength;
             today.LastSessionsEndTime = Utilities.GetEpochTime();
         }
@@ -181,7 +193,7 @@ public class UserInformation : IEnumerable
         if (request.responseCode == Constants.InvalidPlayerCode)
             DisablePlayer();
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) yield break;
-        ApplicationState.ConnectionError = true;
+        GameMaster.ConnectionError = true;
         Debug.Log(string.Format("ERROR|201710221548|{0}", request.error));
     }
 
@@ -201,18 +213,16 @@ public class UserInformation : IEnumerable
         while (!request.isDone)
             Thread.Sleep(250);
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) return;
-        ApplicationState.ConnectionError = true;
+        GameMaster.ConnectionError = true;
         Debug.Log(string.Format("ERROR|201710221550|{0}", request.error));
     }
 
-    public void SendLogs()
+    public IEnumerator SendLogs(LogMessage msg)
     {
-        var logString = JsonConvert.SerializeObject(Logs);
+        var logString = JsonConvert.SerializeObject(new[] {msg});
         var logUrl = string.Format("{0}{1}", Constants.LogUrl, UserLocalData.UserCode);
         var response = Utilities.CreatePostUnityWebRequest(logUrl, logString);
-        response.SendWebRequest();
-        while (!response.isDone)
-            Thread.Sleep(100);
+        yield return response.SendWebRequest();
         if (response.isNetworkError)
             Debug.LogError(string.Format("ERROR|201722101453|Log POST request to {0} failed with error -\n{1}", logUrl,
                 response.error));
@@ -220,9 +230,8 @@ public class UserInformation : IEnumerable
             Debug.LogError(string.Format("ERROR|201722101454|Log POST request to {0} failed with response code -\n{1}",
                 logUrl, response.responseCode));
         if (response.isHttpError || response.isNetworkError)
-            return;
+            yield break;
         Debug.Log(string.Format("DEBUG|201722101155|Sent log reports to {0}", logUrl));
-        Logs.Clear();
     }
 
     public void DisablePlayer()
@@ -234,7 +243,7 @@ public class UserInformation : IEnumerable
 
     public void AddScoreReport(ScoreReports scoreReport)
     {
-        if (ApplicationState.UserInformation.IsTestUser())
+        if (GameMaster.UserInformation.IsTestUser())
             return;
         _scoreReportsToBeSent.Add(scoreReport);
     }

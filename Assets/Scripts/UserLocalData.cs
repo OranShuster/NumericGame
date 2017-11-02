@@ -136,7 +136,7 @@ public class UserLocalData
 
     public static void Save(UserLocalData userLocalData)
     {
-        Debug.Log(string.Format("INFO|201710221543|Saving user data from {0}", UserInformation.UserDataPath));
+        Debug.Log(string.Format("DEBUG|201710221543|Saving user data from {0}", UserInformation.UserDataPath));
         IFormatter formatter = new BinaryFormatter();
         Stream stream = null;
         try
@@ -146,7 +146,7 @@ public class UserLocalData
         }
         catch (Exception e)
         {
-            Debug.LogError(string.Format("1006|{0}",e.Message));
+            Debug.LogError(string.Format("ERROR|201711021207|{0}",e.Message));
         }
         finally
         {
@@ -158,7 +158,6 @@ public class UserLocalData
 
     public static UserLocalData Load()
     {
-        Debug.Log(string.Format("INFO|201710221544|Loading user data from {0}", UserInformation.UserDataPath));
         IFormatter formatter = new BinaryFormatter();
         Stream stream = null;
         try
@@ -169,7 +168,7 @@ public class UserLocalData
         }
         catch (Exception e)
         {
-            Debug.LogError(string.Format("1008|{0}",e.InnerException));
+            Debug.LogError(string.Format("ERROR|201711021206|{0}",e.InnerException));
             return null;
         }
         finally

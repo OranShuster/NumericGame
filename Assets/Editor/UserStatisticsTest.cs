@@ -9,8 +9,8 @@ using Random = System.Random;
 
 public class UserStatisticsTest
 {
-    public static int SessionLength = 10 * 60;
-    public static int SessionInterval = 1 * 60 * 60;
+    public static int SessionLength = 10 * 60; //600
+    public static int SessionInterval = 1 * 60 * 60; //3600
     public static int SessionNum = 3;
     public static int PlayDatesNum = 3;
 
@@ -146,6 +146,35 @@ public class UserStatisticsTest
         Assert.IsNotNull(userStatistics.UserLocalData);
         userStatistics.DisablePlayer();
         UserInformation.SystemTime.SetDateTime(DateTime.Today.AddDays(PlayDatesNum).AddHours(8).AddSeconds(-1));
+        Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots, userStatistics.CanPlay());
+    }
+    
+    [Test]
+    public void NoMoreTimeInDay()
+    {
+        var userStatistics = new UserInformation();
+        Assert.IsNotNull(userStatistics.UserLocalData);
+        UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(23).AddMinutes(30));
+        Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots, userStatistics.CanPlay());
+    }
+    
+    [Test]
+    public void MoreTimeInDayPrecise()
+    {
+        var userStatistics = new UserInformation();
+        Assert.IsNotNull(userStatistics.UserLocalData);
+        var total_play_time = SessionNum * SessionLength + (SessionNum - 1) * SessionInterval;
+        UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(24).AddSeconds(-1 * total_play_time));
+        Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
+    }
+    
+        [Test]
+    public void NoMoreTimeInDayPrecise()
+    {
+        var userStatistics = new UserInformation();
+        Assert.IsNotNull(userStatistics.UserLocalData);
+        var totalPlayTime = SessionNum * SessionLength + (SessionNum - 1) * SessionInterval;
+        UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(24).AddSeconds(-1 * totalPlayTime).AddSeconds(1));
         Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots, userStatistics.CanPlay());
     }
 

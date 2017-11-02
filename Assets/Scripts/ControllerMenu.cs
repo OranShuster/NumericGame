@@ -21,7 +21,7 @@ public class ControllerMenu : MonoBehaviour
 
     private UserInformation UserInformation
     {
-        get { return ApplicationState.UserInformation; }
+        get { return GameMaster.UserInformation; }
     }
 
     public Sprite DateStatusBadImage; 
@@ -73,24 +73,24 @@ public class ControllerMenu : MonoBehaviour
 
     public void StartGame()
     {
-        ApplicationState.SeriesDelta = 0;
-        ApplicationState.Score = 0;
-        ApplicationState.TotalTimePlayed = 0;
-        ApplicationState.UserInformation.ClearScoreReports();
-        if (ApplicationState.UserInformation.GetToday().CurrentSession == 0)
-            ApplicationState.UserInformation.GetToday().CurrentSession = 1;
+        GameMaster.SeriesDelta = 0;
+        GameMaster.Score = 0;
+        GameMaster.TotalTimePlayed = 0;
+        GameMaster.UserInformation.ClearScoreReports();
+        if (GameMaster.UserInformation.GetToday().CurrentSession == 0)
+            GameMaster.UserInformation.GetToday().CurrentSession = 1;
         else
         {
-            if (ApplicationState.UserInformation.GetToday().CurrentSessionTimeSecs >=
-                ApplicationState.UserInformation.GetToday().SessionLength)
+            if (GameMaster.UserInformation.GetToday().CurrentSessionTimeSecs >=
+                GameMaster.UserInformation.GetToday().SessionLength)
             {
-                ApplicationState.UserInformation.GetToday().CurrentSessionTimeSecs = 0;
-                ApplicationState.UserInformation.GetToday().CurrentSession++;
+                GameMaster.UserInformation.GetToday().CurrentSessionTimeSecs = 0;
+                GameMaster.UserInformation.GetToday().CurrentSession++;
             }
 
         }
         int sessionId = UserInformation.GetToday().CurrentSession;
-        ApplicationState.GameId = UserInformation.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
+        GameMaster.GameId = UserInformation.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
         SceneManager.LoadScene("Tutorial");
     }
 

@@ -124,8 +124,9 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     private void UpdateTimers()
     {
-        _gameTimer -= Time.deltaTime;
-        _totalTimePlayed += Time.deltaTime;
+        var deltaTime = Time.deltaTime;
+        _gameTimer -= deltaTime;
+        _totalTimePlayed += deltaTime;
         TimerText.text = Mathf.CeilToInt(_gameTimer).ToString();
 
         var sessionTimeLeft = UserInfo.GetToday().SessionLength - UserInfo.GetToday().CurrentSessionTimeSecs;
@@ -136,9 +137,9 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
         var gameTimerRelative = _gameTimer / Constants.TimerMax * 100;
         GameTimerBar.color = Constants.ColorOkGreen;
-        if (gameTimerRelative < 50)
+        if (gameTimerRelative < Constants.GameTimerWarning)
             GameTimerBar.color = Constants.ColorWarningOrange;
-        if (gameTimerRelative < 25)
+        if (gameTimerRelative < Constants.GameTimerDanger)
             GameTimerBar.color = Constants.ColorDangerRed;
         GameTimerBar.rectTransform.localScale = new Vector3(Math.Min(gameTimerRelative, 1), 1, 1);
 

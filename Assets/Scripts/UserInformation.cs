@@ -54,7 +54,7 @@ public class UserInformation : IEnumerable
         }
         if (getReq.isNetworkError || getReq.responseCode > 204)
         {
-            Debug.LogError(string.Format("1009|{0}", getReq.error));
+            Debug.LogError(string.Format("ERROR|201711021017|{0}", getReq.error));
         }
         var dl = getReq.downloadHandler;
         var jsonString = Encoding.ASCII.GetString(dl.data);
@@ -68,7 +68,6 @@ public class UserInformation : IEnumerable
         if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
         {
-            Console.WriteLine("Past days bad");
             return CanPlayStatus.NoMoreTimeSlots;
         }
         //Check Today
@@ -215,10 +214,10 @@ public class UserInformation : IEnumerable
         while (!response.isDone)
             Thread.Sleep(100);
         if (response.isNetworkError)
-            Debug.LogError(string.Format("201722101453|Log POST request to {0} failed with error -\n{1}", logUrl,
+            Debug.LogError(string.Format("ERROR|201722101453|Log POST request to {0} failed with error -\n{1}", logUrl,
                 response.error));
         if (response.isHttpError)
-            Debug.LogError(string.Format("201722101454|Log POST request to {0} failed with response code -\n{1}",
+            Debug.LogError(string.Format("ERROR|201722101454|Log POST request to {0} failed with response code -\n{1}",
                 logUrl, response.responseCode));
         if (response.isHttpError || response.isNetworkError)
             return;

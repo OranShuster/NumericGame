@@ -3,16 +3,9 @@
 public static class Constants
 {
     public static readonly float AnimationDuration = 0.2f;
-
     public static readonly float MoveAnimationMinDuration = 0.05f;
 
-    public static readonly float ExplosionDuration = 0.3f;
-
-    public static readonly float WaitBeforePotentialMatchesCheck = 2f;
-    public static readonly float OpacityAnimationFrameDelay = 0.05f;
-
     public static readonly int MinimumMatches = 3;
-
 
     public static Color32 ColorSelected = new Color32(100, 181, 246, 255);
     public static Color32 ColorMatched = new Color32(21, 101, 192, 255);
@@ -20,8 +13,7 @@ public static class Constants
     public static Color32 ColorWarningOrange = new Color32(255, 136, 0, 255);
     public static Color32 ColorOkGreen = new Color32(0, 126, 51, 255);
 
-    public static Color32[] ControlSelectedColors = new[]
-    {
+    public static Color32[] ControlSelectedColors = {
         new Color32(229, 115, 115, 255),
         new Color32(255, 183, 77, 255),
         new Color32(129, 199, 132, 255),
@@ -31,8 +23,7 @@ public static class Constants
         new Color32(186, 104, 200, 255)
     };
 
-    public static Color32[] ControlMatchedColors = new[]
-    {
+    public static Color32[] ControlMatchedColors = {
         new Color32(229, 57, 53, 255),
         new Color32(251, 140, 0, 255),
         new Color32(67, 160, 71, 255),
@@ -47,8 +38,8 @@ public static class Constants
     public static float TimerMax = 90;
     public static float TimerLow = 10;
     public static int ScoreReportingInterval = 10;
-    public static float IdleTimerSeconds = 30;
-    public static float IdleTimerLow = 10;
+    public static int GameTimerWarning = 50;
+    public static int GameTimerDanger = 25;
 
     public static string DateFormat = "yyyy-MM-dd";
     public static string DateFormatOutput = "dd/MM/yyyy";

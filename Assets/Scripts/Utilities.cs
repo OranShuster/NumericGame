@@ -100,7 +100,7 @@ public static class Utilities
                 log_id = logString.Split('|')[1],
                 raw_data = logString.Split('|')[2]
             });
-            if (ApplicationState.UserInformation.Logs.Count >= 2)
+            if (ApplicationState.UserInformation.Logs.Count > 0)
                 ApplicationState.UserInformation.SendLogs();
         }
         catch (Exception)

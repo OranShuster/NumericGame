@@ -57,7 +57,6 @@ public class ControllerRegistration : MonoBehaviour
         ZestKit.enableBabysitter = true;
         ZestKit.removeAllTweensOnLevelLoad = true;
         DontDestroyOnLoad(FabricGameObject);
-        DontDestroyOnLoad(CrashGameObject);
         Application.logMessageReceived += Utilities.LoggerCallback;
         if (!UserLocalData.PlayerDataValid()) return;
         if (GameMaster.UserInformation == null)

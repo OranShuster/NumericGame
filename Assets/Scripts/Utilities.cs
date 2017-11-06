@@ -101,9 +101,9 @@ public static class Utilities
                 raw_data = logString.Split('|')[2]
             });
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            // ignored
+            Console.WriteLine(e);
         }
     }
 

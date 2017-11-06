@@ -117,7 +117,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     public void BackToMenu()
     {
         try
-        {
+            {
             if (GameMaster.SeriesDelta == 0) return;
             _userInformation.AddPlayTime((int) GameMaster.TotalTimePlayed, Score);
             _userInformation.SendUserInfoToServerBlocking();

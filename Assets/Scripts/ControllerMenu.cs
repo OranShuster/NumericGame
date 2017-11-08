@@ -19,6 +19,8 @@ public class ControllerMenu : MonoBehaviour
     public GameObject DayStatsPrefab;         //Information line per day 
     public GameObject RoundStatsPrefab;       //Information line per round
 
+    public GameObject DebugPanel;
+
     private UserInformation UserInformation
     {
         get { return GameMaster.UserInformation; }
@@ -37,22 +39,13 @@ public class ControllerMenu : MonoBehaviour
         ShowStatisticsButtonText.text = Utilities.LoadStringFromFile("StatisticsButton");
         InstructionsButtonText.text = Utilities.LoadStringFromFile("Instructions");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
-        foreach (PlayDate date in UserInformation)
-        {
-            AddDateHeaderToScrollView();
-            AddDateToScrollView(date);
-            if (date.GameRounds.Count > 0)
-            {
-                AddRoundHeaderToScrollView();
-                foreach (var run in date.GameRounds)
-                    AddRoundToScrollView(run);
-            }
-            AddEmptyLineToScrollView();
-        }
+        UpdateStatisticsScrollView();
+        DebugPanel.SetActive(Debug.isDebugBuild);            
     }
 
     void Update()
     {
+        
         var canPlayStatus = UserInformation.CanPlay();
         switch (canPlayStatus)
         {
@@ -89,7 +82,7 @@ public class ControllerMenu : MonoBehaviour
             }
 
         }
-        int sessionId = UserInformation.GetToday().CurrentSession;
+        var sessionId = UserInformation.GetToday().CurrentSession;
         GameMaster.GameId = UserInformation.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
         SceneManager.LoadScene("Tutorial");
     }
@@ -107,6 +100,66 @@ public class ControllerMenu : MonoBehaviour
 
     }
 
+    public void AddGameTime()
+    {
+        var minutesInputField = DebugPanel.transform.Find("AddScoreText/MinutesInputField").gameObject
+            .GetComponent<InputField>();
+        var secondsInputField = DebugPanel.transform.Find("AddScoreText/SecondsInputField").gameObject
+            .GetComponent<InputField>();
+        var scoreInputField = DebugPanel.transform.Find("AddScoreText/ScoreInputField").gameObject
+            .GetComponent<InputField>();
+        try
+        {
+            var minutesToAdd = int.Parse(minutesInputField.text);
+            var secondsToAdd = int.Parse(secondsInputField.text);
+            var scoreToAdd = int.Parse(scoreInputField.text);
+            var timeToAdd = minutesToAdd * 60 + secondsToAdd;
+            UserInformation.AddPlayTime(timeToAdd, scoreToAdd);
+            UpdateStatisticsScrollView();    
+        }
+        catch (Exception e)
+        {
+            //IGNORE
+        }
+    
+    }
+    
+    public void ChangeTimeHour(int amount)
+    {
+        UserInformation.SystemTime.SetDateTime(UserInformation.SystemTime.Now().AddHours(amount));
+    }
+
+    public void ChangeTimeDay(int amount)
+    {
+        UserInformation.SystemTime.SetDateTime(UserInformation.SystemTime.Now().AddDays(amount));
+    }
+
+    private void UpdateStatisticsScrollView()
+    {
+        ClearScrollView();
+        foreach (PlayDate date in UserInformation)
+        {
+            AddDateHeaderToScrollView();
+            AddDateToScrollView(date);
+            if (date.GameRounds.Count > 0)
+            {
+                AddRoundHeaderToScrollView();
+                foreach (var run in date.GameRounds)
+                    AddRoundToScrollView(run);
+            }
+            AddEmptyLineToScrollView();
+        }
+    }
+    
+    private void ClearScrollView()
+    {
+        foreach(Transform child in PlayStatsViewContent.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        PlayStatsViewContent.transform.DetachChildren();
+    }
+    
     private void AddEmptyLineToScrollView()
     {
         var go = new GameObject("EmptyRow");

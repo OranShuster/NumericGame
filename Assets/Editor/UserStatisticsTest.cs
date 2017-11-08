@@ -150,7 +150,7 @@ public class UserStatisticsTest
     }
     
     [Test]
-    public void NoMoreTimeInDay()
+    public void NoMoreTimeInDayFirstSession()
     {
         var userStatistics = new UserInformation();
         Assert.IsNotNull(userStatistics.UserLocalData);
@@ -159,7 +159,21 @@ public class UserStatisticsTest
     }
     
     [Test]
-    public void MoreTimeInDayPrecise()
+    public void NoMoreTimeInDayLastSession()
+    {
+        var userStatistics = new UserInformation();
+        Assert.IsNotNull(userStatistics.UserLocalData);
+        for (var sessionIndex = 0; sessionIndex < SessionNum - 1; sessionIndex++)
+        {
+            userStatistics.AddPlayTime(SessionLength, 100);
+        }        
+        userStatistics.AddPlayTime(1,100);
+        UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(24).AddSeconds(-1 * (SessionLength - 10)));
+        Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots, userStatistics.CanPlay());
+    }
+    
+    [Test]
+    public void MoreTimeInDayPreciseFirstSession()
     {
         var userStatistics = new UserInformation();
         Assert.IsNotNull(userStatistics.UserLocalData);
@@ -168,8 +182,22 @@ public class UserStatisticsTest
         Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
     }
     
-        [Test]
-    public void NoMoreTimeInDayPrecise()
+    [Test]
+    public void MoreTimeInDayPreciseLastSession()
+    {
+        var userStatistics = new UserInformation();
+        Assert.IsNotNull(userStatistics.UserLocalData);
+        for (var sessionIndex = 0; sessionIndex < SessionNum - 1; sessionIndex++)
+        {
+            userStatistics.AddPlayTime(SessionLength, 100);
+        }
+        userStatistics.AddPlayTime(1,100);
+        UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(24).AddSeconds(-1 * (SessionLength+1)));
+        Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
+    }
+    
+    [Test]
+    public void NoMoreTimeInDayPreciseFirstSession()
     {
         var userStatistics = new UserInformation();
         Assert.IsNotNull(userStatistics.UserLocalData);

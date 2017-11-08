@@ -17,5 +17,18 @@ public class BuildScript
                 options = BuildOptions.None
             };
         BuildPipeline.BuildPlayer(buildPlayerOptions);
+        BuildPlayerOptions buildPlayerOptions_dev =
+            new BuildPlayerOptions
+            {
+                scenes = new[]
+                {
+                    "Assets/Scenes/UserRegistration.unity", "Assets/Scenes/MainMenu.unity",
+                    "Assets/Scenes/Tutorial.unity", "Assets/Scenes/mainGame.unity"
+                },
+                locationPathName = "apk/numerical_game_dev.apk",
+                target = BuildTarget.Android,
+                options = BuildOptions.Development
+            };
+        BuildPipeline.BuildPlayer(buildPlayerOptions_dev);
     }
 }

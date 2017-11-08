@@ -16,14 +16,19 @@ public class Rounds
     public int RoundScore;
     public string RoundTime;
     public int SessionInd;
-    public Rounds(int length, int score, string time,int sessionInd)
+
+    public Rounds(int length, int score, string time, int sessionInd)
     {
         RoundLength = length;
         RoundScore = score;
         RoundTime = time;
         SessionInd = sessionInd;
     }
-    public Rounds() { }
+
+    public Rounds()
+    {
+    }
+
     public string GetRoundLengthText()
     {
         TimeSpan t = TimeSpan.FromSeconds(RoundLength);
@@ -32,6 +37,7 @@ public class Rounds
             t.Minutes,
             t.Seconds);
     }
+
     public static string GetRoundLengthText(int time)
     {
         TimeSpan t = TimeSpan.FromSeconds(time);
@@ -48,6 +54,7 @@ public class ScoreReports
     public int timestamp;
     public int session_id;
     public int game_id;
+
     public override string ToString()
     {
         return string.Format("score = {0}, timestamp = {1}, session_id = {2}, game_id = {3}", score, timestamp,
@@ -66,7 +73,7 @@ public class PlayDate : IComparable<PlayDate>
     public int SessionLength { get; set; }
     public int SessionInterval { get; set; }
     public int Control { get; set; }
-    public int CurrentSession = 0;
+    public int CurrentSession = 1;
     public int CurrentSessionTimeSecs = 0;
     public int LastSessionsEndTime = 0;
     public List<Rounds> GameRounds = new List<Rounds>();
@@ -77,9 +84,9 @@ public class PlayDate : IComparable<PlayDate>
     {
         Code = code;
         SessionLength = session_length * 60;
-        SessionInterval = (int)(session_interval * 60 * 60);
+        SessionInterval = (int) (session_interval * 60 * 60);
         Control = control;
-        DateObject = DateTime.ParseExact(start_date,Constants.DateFormat,CultureInfo.InvariantCulture);
+        DateObject = DateTime.ParseExact(start_date, Constants.DateFormat, CultureInfo.InvariantCulture);
         NumberOfSessions = num_of_sessions;
         Email = email;
         SessionId = id;
@@ -91,13 +98,14 @@ public class PlayDate : IComparable<PlayDate>
 
     public string GetRemainingSessionTimeText()
     {
-        TimeSpan t = TimeSpan.FromSeconds(SessionLength-CurrentSessionTimeSecs);
+        TimeSpan t = TimeSpan.FromSeconds(SessionLength - CurrentSessionTimeSecs);
 
         return string.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
             t.Seconds);
     }
+
     int IComparable<PlayDate>.CompareTo(PlayDate other)
     {
         if (other.DateObject > DateObject)
@@ -107,7 +115,8 @@ public class PlayDate : IComparable<PlayDate>
 
     public override string ToString()
     {
-        return string.Format("{0} - {1} sessions", DateObject.Date, NumberOfSessions);
+        return string.Format("{0} - {1} sessions {2} current session {3} current session time {4} interval {5} session length",
+            DateObject.Date, NumberOfSessions, CurrentSession, CurrentSessionTimeSecs, SessionInterval, SessionLength);
     }
 }
 
@@ -146,14 +155,13 @@ public class UserLocalData
         }
         catch (Exception e)
         {
-            Debug.LogError(string.Format("ERROR|201711021207|{0}",e.Message));
+            Debug.LogError(string.Format("ERROR|201711021207|{0}", e.Message));
         }
         finally
         {
             if (stream != null)
                 stream.Close();
         }
-
     }
 
     public static UserLocalData Load()
@@ -168,7 +176,7 @@ public class UserLocalData
         }
         catch (Exception e)
         {
-            Debug.LogError(string.Format("ERROR|201711021206|{0}",e.InnerException));
+            Debug.LogError(string.Format("ERROR|201711021206|{0}", e.InnerException));
             return null;
         }
         finally

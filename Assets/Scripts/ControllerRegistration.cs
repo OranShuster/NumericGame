@@ -12,8 +12,6 @@ public class ControllerRegistration : MonoBehaviour
     public Text RegistrationCodeInputPlaceholderText;
     public Text RegistrationErrorText;
     public GameObject MenuButtonGameObject;
-    public GameObject FabricGameObject;
-    public GameObject CrashGameObject;
 
     public void CodeSubmitButtonClick()
     {
@@ -56,7 +54,6 @@ public class ControllerRegistration : MonoBehaviour
     {
         ZestKit.enableBabysitter = true;
         ZestKit.removeAllTweensOnLevelLoad = true;
-        DontDestroyOnLoad(FabricGameObject);
         Application.logMessageReceived += Utilities.LoggerCallback;
         if (!UserLocalData.PlayerDataValid()) return;
         if (GameMaster.UserInformation == null)

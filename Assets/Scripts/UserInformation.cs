@@ -62,9 +62,23 @@ public class UserInformation : IEnumerable
         return jsonString;
     }
 
+    public int CalculateRemainingPlayTime()
+    {
+        var today = GetToday();
+        var elapsedTime = (today.CurrentSession - 1) * today.SessionLength + today.CurrentSessionTimeSecs;
+        elapsedTime += (today.CurrentSession - 1) * today.SessionInterval;
+        var totalPlayTime = today.NumberOfSessions * today.SessionLength +
+                            (today.NumberOfSessions - 1) * today.SessionInterval;
+        var timeLeft = totalPlayTime - elapsedTime;
+        //Debug.Log("DEBUG|201711021422|elapsedTime = " + elapsedTime);
+        //Debug.Log("DEBUG|201711072040|totalTime " + totalPlayTime);
+        //Debug.Log("DEBUG|201711072029|" + today);
+        return timeLeft;
+    }
+
     public CanPlayStatus CanPlay()
     {
-        Debug.Log("DEBUG|201711021421|Checking CanPlay statu for " + SystemTime.Now());
+        //Debug.Log("DEBUG|201711021421|Checking CanPlay statu for " + SystemTime.Now());
         //Check past days
         if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
@@ -75,18 +89,16 @@ public class UserInformation : IEnumerable
         //Check Today
         if (!DateExistsAndHasSessions(SystemTime.Now().Date))
             return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
-        var today = GetToday();
+        var remainingGameTime = CalculateRemainingPlayTime();
         var timeRemainingInDay = SystemTime.Now().Date.AddDays(1) - SystemTime.Now();
-        var minTimeToFinishDay = today.NumberOfSessions * today.SessionLength + (today.NumberOfSessions - 1) * today.SessionInterval;
-        Debug.Log("DEBUG|201711021422|MinTimeToFinishDay = " + minTimeToFinishDay);
-        Debug.Log("DEBUG|201711021423|timeRemainingInDay = " + (int)timeRemainingInDay.TotalSeconds);
+        //Debug.Log("DEBUG|201711021423|timeRemainingInDay = " + (int) timeRemainingInDay.TotalSeconds);
         //Check if the sessions can be finished
-        if ( (int)timeRemainingInDay.TotalSeconds < minTimeToFinishDay)
+        if ((int) timeRemainingInDay.TotalSeconds < remainingGameTime)
             return CanPlayStatus.NoMoreTimeSlots;
         //Check if you are after 8:00AM
         if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
             return CanPlayStatus.HasNextTimeslot;
-
+        var today = GetToday();
         return Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval
             ? CanPlayStatus.HasNextTimeslot
             : CanPlayStatus.CanPlay;

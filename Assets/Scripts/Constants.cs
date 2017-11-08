@@ -43,6 +43,7 @@ public static class Constants
 
     public static string DateFormat = "yyyy-MM-dd";
     public static string DateFormatOutput = "dd/MM/yyyy";
+    public static string DateFormatDebug = "dd/MM/yyyy HH:MM";
     public static string BaseUrl = "https://cnl.bgu.ac.il/numeric_game/playrpc/";
     public static string LogUrl = "https://cnl.bgu.ac.il/numeric_game/logrpc/";
     public static long RequestNetworkErrorResponse = -1;

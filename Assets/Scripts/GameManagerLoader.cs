@@ -2,12 +2,12 @@
 
 public class GameManagerLoader : MonoBehaviour 
 {
-	public GameObject GameManager;
+	public GameObject Instance;
         
         
 	void Awake ()
 	{
-		if (global::GameManager.Instance== null)
-			Instantiate(GameManager);
+		if (GameManager.Instance== null)
+			Instantiate(Instance);
 	}
 }

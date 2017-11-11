@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using Prime31.ZestKit;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -52,10 +51,6 @@ public class ControllerRegistration : MonoBehaviour
 
     void Awake()
     {
-        ZestKit.enableBabysitter = true;
-        ZestKit.removeAllTweensOnLevelLoad = true;
-        Application.logMessageReceived += Utilities.LoggerCallback;
-        Application.targetFrameRate = 60;
         if (!UserLocalData.PlayerDataValid()) return;
         if (GameManager.UserInformation == null)
             GameManager.UserInformation = new UserInformation();

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Prime31.ZestKit;
+using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,7 +17,11 @@ public class GameManager : MonoBehaviour
             Instance = this;
         else if (Instance != this)
             Destroy(gameObject);
-
+        
+        ZestKit.enableBabysitter = true;
+        ZestKit.removeAllTweensOnLevelLoad = true;
+        Application.logMessageReceived += Utilities.LoggerCallback;
+        Application.targetFrameRate = 60;
         DontDestroyOnLoad(gameObject);
     }
 

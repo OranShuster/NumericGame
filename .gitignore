@@ -33,3 +33,4 @@ sysinfo.txt
 *.unitypackage
 
 /.idea/
+./Assets/Fabric/Editor/Prebuild/AndroidBuildPropertiesManager.cs

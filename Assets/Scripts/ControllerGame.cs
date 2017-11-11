@@ -45,7 +45,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     public GameObject MessagesOverlay;
     public Image TimerWarningOverlay;
     public GameObject LevelupTutorial;
-    public Button MenuButton; 
+    public Button MenuButton;
 
 
     void Awake()
@@ -76,13 +76,14 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             IncreaseScore(0);
             StartCoroutine(UserInfo.SendUserInfoToServer());
         }
-        Debug.Log("INFO|201710221540|Game Started");
+        Debug.Log(string.Format("INFO|201710221540|Level {0} Started", GameManager.SeriesDelta));
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (_mainGame.GetState() == GameState.Playing || _mainGame.GetState() == GameState.SelectionStarted)
+        if (_mainGame.GetState() == GameState.Playing || _mainGame.GetState() == GameState.SelectionStarted ||
+            _mainGame.GetState() == GameState.Animating)
         {
             if (!_gamePaused)
                 UpdateTimers();
@@ -206,7 +207,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         StartCoroutine(ShowMessage(headerMsg, Score, (int) TotalTimePlayed));
     }
 
-    public void LevelUp(int level)
+    public void LevelUp()
     {
         MenuButton.interactable = false;
         _gamePaused = true;

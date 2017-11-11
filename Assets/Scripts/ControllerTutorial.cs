@@ -7,23 +7,27 @@ using UnityEngine.SceneManagement;
 
 public class ControllerTutorial : MonoBehaviour, IControllerInterface
 {
-    public int Score { get; set; }
+    private int Score { get; set; }
     public GameObject MessagesOverlay;
     public Text TutorialText;
     public Button SkipButton;
     public Image GameField;
     public Button MenuButton;
-    private UserInformation _userInformation    
+    private UserInformation UserInformation    
     {
         get { return GameManager.UserInformation; }
-        set { GameManager.UserInformation = value; }
     }
-    private bool _gamePaused=false;
+    private bool _gamePaused;
     private Game _mainGame;
-    private float _totalTimePlayed
+
+    public ControllerTutorial(int score)
+    {
+        Score = score;
+    }
+
+    private float TotalTimePlayed
     {
         get { return GameManager.TotalTimePlayed; }
-        set { GameManager.TotalTimePlayed = value; }
     }
 
     void Start()
@@ -36,13 +40,13 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         SkipButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Tutorial",4);
         TutorialText.ZKalphaTo(1, 0.5f).start();
         var tutorialHeaderStringName = "TutorialHeaderControl";
-        if (!_userInformation.IsControlSession())
+        if (!UserInformation.IsControlSession())
         {
             tutorialHeaderStringName = string.Format("TutorialHeader{0}", GameManager.SeriesDelta);
         }
         TutorialText.text = Utilities.LoadStringFromFile(tutorialHeaderStringName, 35);
         MenuButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
-        Debug.Log("INFO|201710221539|Tutorial started");
+        Debug.Log(string.Format("INFO|201710221539|Level {0} Tutorial started",GameManager.SeriesDelta));
     }
 
     public void StartGame()
@@ -105,7 +109,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         {
             _gamePaused = true;
             MenuButton.interactable = false;
-            StartCoroutine(ShowMessage("Pause", Score, (int)_totalTimePlayed, true));
+            StartCoroutine(ShowMessage("Pause", Score, (int)TotalTimePlayed, true));
         }
         _mainGame.ToggleBoard();
     }
@@ -119,8 +123,8 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         try
             {
             if (GameManager.SeriesDelta == 0) return;
-            _userInformation.AddPlayTime((int) GameManager.TotalTimePlayed, Score);
-            _userInformation.SendUserInfoToServerBlocking();
+            UserInformation.AddPlayTime((int) GameManager.TotalTimePlayed, Score);
+            UserInformation.SendUserInfoToServerBlocking();
         }
         finally
         {
@@ -150,7 +154,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     {
     }
 
-    public void LevelUp(int level)
+    public void LevelUp()
     {
     }
     public void QuitGame()

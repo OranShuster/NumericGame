@@ -11,7 +11,7 @@ public class Game : MonoBehaviour
 {
     private Vector2[] _spawnPositions;
 
-    private int SeriesDelta
+    private int Level
     {
         get { return GameManager.SeriesDelta; }
         set { GameManager.SeriesDelta=value; }
@@ -41,7 +41,7 @@ public class Game : MonoBehaviour
 
     void Awake()
     {
-        _state = GameState.Animating;
+        _state = GameState.PreGame;
         _controllerScript = Manager.GetComponent<IControllerInterface>();
         _soundManager = GetComponent<SoundManager>();
     }
@@ -148,7 +148,7 @@ public class Game : MonoBehaviour
 
     public IEnumerator InitializeCellAndSpawnPositions()
     {
-        _state = GameState.Animating;
+        _state = GameState.PreGame;
         _shapes = new ShapesMatrix(_rows, _columns, _maxNumber);
         _spawnPositions = new Vector2[_columns];
         for (var row = 0; row < _rows; row++)
@@ -167,7 +167,7 @@ public class Game : MonoBehaviour
 
     public IEnumerator ClearBoardMatches()
     {
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, GameManager.UserInformation.IsControlSession(), false);
+        var totalMatches = _shapes.GetMatches(_maxNumber, Level, GameManager.UserInformation.IsControlSession(), false);
         var sameMatches = _shapes.GetMatches(_maxNumber, 0, GameManager.UserInformation.IsControlSession(), false);
         totalMatches.CombineMatchesInfo(sameMatches,false);
         yield return StartCoroutine(HandleMatches(totalMatches, false, false, true));
@@ -203,7 +203,7 @@ public class Game : MonoBehaviour
             {
                 //Debug.Log(string.Format("DEBUG|201706021724|{0}", totalMatches.PrintMatches()));
                 _soundManager.PlayCrincle();
-                yield return new WaitForSeconds(0.75f);
+                yield return new WaitForSeconds(0.5f);
             }
 
             foreach (var item in totalMatches.MatchedCells.Distinct())
@@ -229,21 +229,21 @@ public class Game : MonoBehaviour
             //will wait for both of the above animations
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
-            if (GameManager.Score >= NextLevelScore[SeriesDelta])
+            if (GameManager.Score >= NextLevelScore[Level])
                 break;
 
             //Check for new matches with new tiles
-            totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, GameManager.UserInformation.IsControlSession(), withScore);
+            totalMatches = _shapes.GetMatches(_maxNumber, Level, GameManager.UserInformation.IsControlSession(), withScore);
 
             //Search identical matches 
-            if (SeriesDelta == 0) continue;
+            if (Level == 0) continue;
             var sameMatches = _shapes.GetMatches(_maxNumber, 0, GameManager.UserInformation.IsControlSession(), false);
             totalMatches.CombineMatchesInfo(sameMatches, GameManager.UserInformation.IsControlSession());
         }
-        if (GameManager.Score >= NextLevelScore[SeriesDelta])
+        if (GameManager.Score >= NextLevelScore[Level])
         {
             LevelUp();
-            _controllerScript.LevelUp(SeriesDelta);
+            _controllerScript.LevelUp();
         }
         _state = GameState.Playing;
     }
@@ -266,9 +266,9 @@ public class Game : MonoBehaviour
         SetTileColorBase(_hitGo);
 
         //Find matches
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, GameManager.UserInformation.IsControlSession(), true);
+        var totalMatches = _shapes.GetMatches(_maxNumber, Level, GameManager.UserInformation.IsControlSession(), true);
         //Find identical strings with no score
-        if (SeriesDelta != 0)
+        if (Level != 0)
         {
             var sameMatches = _shapes.GetMatches(_maxNumber, 0, false,false);
             totalMatches.CombineMatchesInfo(sameMatches, GameManager.UserInformation.IsControlSession());
@@ -328,8 +328,8 @@ public class Game : MonoBehaviour
 
     public void LevelUp()
     {
-        _state = GameState.Animating;
-        SeriesDelta += 1;
+        _state = GameState.PreGame;
+        Level += 1;
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = false;
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = 0;
 		ZestKit.instance.stopAllTweens();
@@ -345,7 +345,7 @@ public class Game : MonoBehaviour
         foreach (var item in movedGameObjects)
         {
             var location = Calculate_cell_location(item.GetComponent<NumberCell>().Row, item.GetComponent<NumberCell>().Column);
-            var itemRectTransform = item.GetComponent<RectTransform>() as RectTransform;
+            var itemRectTransform = item.GetComponent<RectTransform>();
             itemRectTransform.ZKanchoredPositionTo(new Vector2(location[0], -location[1]), duration * distance).start();
         }
     }
@@ -408,8 +408,8 @@ public class Game : MonoBehaviour
     public void SetNextLevelScore(int score, int level)
     {
         NextLevelScore[level] = score;
-        if (GameManager.Score < NextLevelScore[SeriesDelta]) return;
+        if (GameManager.Score < NextLevelScore[Level]) return;
         LevelUp();
-        _controllerScript.LevelUp(SeriesDelta);
+        _controllerScript.LevelUp();
     }
 }

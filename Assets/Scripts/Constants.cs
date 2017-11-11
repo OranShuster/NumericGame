@@ -4,10 +4,10 @@ using UnityEngine;
 public static class Constants
 {
     public static readonly float AnimationDuration = 0.2f;
-    public static readonly float MoveAnimationMinDuration = 0.05f;
+    public static readonly float MoveAnimationMinDuration = 0.035f;
 
     public static readonly int MinimumMatches = 3;
-    public static int[] LevelUpScores = {100, 1500, 2147483647};
+    public static int[] LevelUpScores = {500, 1500, 2147483647};
 
     public static Color32 ColorSelected = new Color32(100, 181, 246, 255);
     public static Color32 ColorMatched = new Color32(21, 101, 192, 255);
@@ -58,6 +58,7 @@ public static class Constants
 [System.Flags]
 public enum GameState
 {
+    PreGame,
     Playing,
     SelectionStarted,
     Animating,

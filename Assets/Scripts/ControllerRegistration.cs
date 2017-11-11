@@ -55,6 +55,7 @@ public class ControllerRegistration : MonoBehaviour
         ZestKit.enableBabysitter = true;
         ZestKit.removeAllTweensOnLevelLoad = true;
         Application.logMessageReceived += Utilities.LoggerCallback;
+        Application.targetFrameRate = 60;
         if (!UserLocalData.PlayerDataValid()) return;
         if (GameMaster.UserInformation == null)
             GameMaster.UserInformation = new UserInformation();

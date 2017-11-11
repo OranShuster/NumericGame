@@ -121,7 +121,16 @@ public class ControllerMenu : MonoBehaviour
         {
             //IGNORE
         }
+    }
+
+    public void ResetTime()
+    {
+        UserInformation.SystemTime.ResetDateTime();
+    }
     
+    public void ChangeTimeMinute(int amount)
+    {
+        UserInformation.SystemTime.SetDateTime(UserInformation.SystemTime.Now().AddMinutes(amount));
     }
     
     public void ChangeTimeHour(int amount)

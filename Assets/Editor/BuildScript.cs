@@ -12,7 +12,7 @@ public class BuildScript
                     "Assets/Scenes/UserRegistration.unity", "Assets/Scenes/MainMenu.unity",
                     "Assets/Scenes/Tutorial.unity", "Assets/Scenes/mainGame.unity"
                 },
-                locationPathName = "apk/numerical_game.apk",
+                locationPathName = "bin/numerical_game.apk",
                 target = BuildTarget.Android,
                 options = BuildOptions.None
             };
@@ -25,7 +25,7 @@ public class BuildScript
                     "Assets/Scenes/UserRegistration.unity", "Assets/Scenes/MainMenu.unity",
                     "Assets/Scenes/Tutorial.unity", "Assets/Scenes/mainGame.unity"
                 },
-                locationPathName = "apk/numerical_game_dev.apk",
+                locationPathName = "bin/numerical_game_dev.apk",
                 target = BuildTarget.Android,
                 options = BuildOptions.Development
             };

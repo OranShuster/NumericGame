@@ -1,143 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<test-run id="2" testcasecount="17" result="Passed" total="17" passed="17" failed="0" inconclusive="0" skipped="0" asserts="74" engine-version="3.5.0.0" clr-version="2.0.50727.1433" start-time="2017-11-11 18:56:36Z" end-time="2017-11-11 18:56:37Z" duration="0.579691">
-  <test-suite type="TestSuite" id="1020" name="Numerical Game" fullname="Numerical Game" runstate="Runnable" testcasecount="17" result="Passed" start-time="2017-11-11 18:56:36Z" end-time="2017-11-11 18:56:37Z" duration="0.579691" total="17" passed="17" failed="0" inconclusive="0" skipped="0" asserts="74">
-    <test-suite type="Assembly" id="1039" name="Assembly-CSharp-Editor.dll" fullname="/Users/oranshus/CandyCrushPsycho/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="17" result="Passed" start-time="2017-11-11 18:56:36Z" end-time="2017-11-11 18:56:37Z" duration="0.517882" total="17" passed="17" failed="0" inconclusive="0" skipped="0" asserts="74">
+<test-run id="2" testcasecount="17" result="Failed(Child)" total="17" passed="16" failed="1" inconclusive="0" skipped="0" asserts="74" engine-version="3.5.0.0" clr-version="2.0.50727.1433" start-time="2017-11-11 21:39:23Z" end-time="2017-11-11 21:39:24Z" duration="0.625766">
+  <test-suite type="TestSuite" id="1020" name="Numerical Game" fullname="Numerical Game" runstate="Runnable" testcasecount="17" result="Failed" site="Child" start-time="2017-11-11 21:39:23Z" end-time="2017-11-11 21:39:24Z" duration="0.625766" total="17" passed="16" failed="1" inconclusive="0" skipped="0" asserts="74">
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1039" name="Assembly-CSharp-Editor.dll" fullname="/Users/oranshus/CandyCrushPsycho/Library/ScriptAssemblies/Assembly-CSharp-Editor.dll" runstate="Runnable" testcasecount="17" result="Failed" site="Child" start-time="2017-11-11 21:39:23Z" end-time="2017-11-11 21:39:24Z" duration="0.561015" total="17" passed="16" failed="1" inconclusive="0" skipped="0" asserts="74">
       <properties>
-        <property name="_PID" value="41344" />
+        <property name="_PID" value="45372" />
         <property name="_APPDOMAIN" value="Unity Child Domain" />
       </properties>
-      <test-suite type="TestFixture" id="1021" name="UserStatisticsTest" fullname="UserStatisticsTest" classname="UserStatisticsTest" runstate="Runnable" testcasecount="17" result="Passed" start-time="2017-11-11 18:56:36Z" end-time="2017-11-11 18:56:37Z" duration="0.509568" total="17" passed="17" failed="0" inconclusive="0" skipped="0" asserts="74">
-        <test-case id="1030" name="AfterAllPlayDatesAfter8Am" fullname="UserStatisticsTest.AfterAllPlayDatesAfter8Am" methodname="AfterAllPlayDatesAfter8Am" classname="UserStatisticsTest" runstate="Runnable" seed="2044627596" result="Passed" start-time="2017-11-11 18:56:36Z" end-time="2017-11-11 18:56:37Z" duration="0.069138" asserts="2">
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1021" name="UserStatisticsTest" fullname="UserStatisticsTest" classname="UserStatisticsTest" runstate="Runnable" testcasecount="17" result="Failed" site="Child" start-time="2017-11-11 21:39:23Z" end-time="2017-11-11 21:39:24Z" duration="0.553855" total="17" passed="16" failed="1" inconclusive="0" skipped="0" asserts="74">
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1030" name="AfterAllPlayDatesAfter8Am" fullname="UserStatisticsTest.AfterAllPlayDatesAfter8Am" methodname="AfterAllPlayDatesAfter8Am" classname="UserStatisticsTest" runstate="Runnable" seed="1447852491" result="Passed" start-time="2017-11-11 21:39:23Z" end-time="2017-11-11 21:39:24Z" duration="0.073857" asserts="2">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1029" name="AfterAllPlayDatesPre8Am" fullname="UserStatisticsTest.AfterAllPlayDatesPre8Am" methodname="AfterAllPlayDatesPre8Am" classname="UserStatisticsTest" runstate="Runnable" seed="416044055" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.012500" asserts="2">
+        <test-case id="1029" name="AfterAllPlayDatesPre8Am" fullname="UserStatisticsTest.AfterAllPlayDatesPre8Am" methodname="AfterAllPlayDatesPre8Am" classname="UserStatisticsTest" runstate="Runnable" seed="1058571524" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.011938" asserts="2">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1031" name="BannedPlayerAfter8Am" fullname="UserStatisticsTest.BannedPlayerAfter8Am" methodname="BannedPlayerAfter8Am" classname="UserStatisticsTest" runstate="Runnable" seed="83550680" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.016404" asserts="2">
+        <test-case id="1031" name="BannedPlayerAfter8Am" fullname="UserStatisticsTest.BannedPlayerAfter8Am" methodname="BannedPlayerAfter8Am" classname="UserStatisticsTest" runstate="Runnable" seed="585125924" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.016356" asserts="2">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1032" name="BannedPlayerBefore8Am" fullname="UserStatisticsTest.BannedPlayerBefore8Am" methodname="BannedPlayerBefore8Am" classname="UserStatisticsTest" runstate="Runnable" seed="268661466" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.016451" asserts="2">
+        <test-case id="1032" name="BannedPlayerBefore8Am" fullname="UserStatisticsTest.BannedPlayerBefore8Am" methodname="BannedPlayerBefore8Am" classname="UserStatisticsTest" runstate="Runnable" seed="1549393379" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.016514" asserts="2">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1028" name="DayAfterAfter8Am" fullname="UserStatisticsTest.DayAfterAfter8Am" methodname="DayAfterAfter8Am" classname="UserStatisticsTest" runstate="Runnable" seed="2128900780" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.012132" asserts="2">
+        <test-case id="1028" name="DayAfterAfter8Am" fullname="UserStatisticsTest.DayAfterAfter8Am" methodname="DayAfterAfter8Am" classname="UserStatisticsTest" runstate="Runnable" seed="29391895" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.012314" asserts="2">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1026" name="DayAfterAfter8AmCanPlay" fullname="UserStatisticsTest.DayAfterAfter8AmCanPlay" methodname="DayAfterAfter8AmCanPlay" classname="UserStatisticsTest" runstate="Runnable" seed="952094902" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.024133" asserts="2">
+        <test-case id="1026" name="DayAfterAfter8AmCanPlay" fullname="UserStatisticsTest.DayAfterAfter8AmCanPlay" methodname="DayAfterAfter8AmCanPlay" classname="UserStatisticsTest" runstate="Runnable" seed="1080107302" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.028091" asserts="2">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
 INFO|201710221546|Incrementing session. seesion interval is 3600
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
 INFO|201710221546|Incrementing session. seesion interval is 3600
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
-INFO|201710221546|Incrementing session. seesion interval is 3600
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-]]></output>
-        </test-case>
-        <test-case id="1027" name="DayAfterPre8Am" fullname="UserStatisticsTest.DayAfterPre8Am" methodname="DayAfterPre8Am" classname="UserStatisticsTest" runstate="Runnable" seed="1801348437" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.012018" asserts="2">
-          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-]]></output>
-        </test-case>
-        <test-case id="1025" name="DayAfterPre8AmCanPlay" fullname="UserStatisticsTest.DayAfterPre8AmCanPlay" methodname="DayAfterPre8AmCanPlay" classname="UserStatisticsTest" runstate="Runnable" seed="581910142" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.024031" asserts="3">
-          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
-INFO|201710221546|Incrementing session. seesion interval is 3600
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
-INFO|201710221546|Incrementing session. seesion interval is 3600
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
 INFO|201710221546|Incrementing session. seesion interval is 3600
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1023" name="DayBeforeAfter8Am" fullname="UserStatisticsTest.DayBeforeAfter8Am" methodname="DayBeforeAfter8Am" classname="UserStatisticsTest" runstate="Runnable" seed="1858189941" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.011968" asserts="3">
+        <test-case id="1027" name="DayAfterPre8Am" fullname="UserStatisticsTest.DayAfterPre8Am" methodname="DayAfterPre8Am" classname="UserStatisticsTest" runstate="Runnable" seed="926148059" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.012037" asserts="2">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1024" name="DayBeforePre8Am" fullname="UserStatisticsTest.DayBeforePre8Am" methodname="DayBeforePre8Am" classname="UserStatisticsTest" runstate="Runnable" seed="2076143152" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.011963" asserts="3">
+        <test-case id="1025" name="DayAfterPre8AmCanPlay" fullname="UserStatisticsTest.DayAfterPre8AmCanPlay" methodname="DayAfterPre8AmCanPlay" classname="UserStatisticsTest" runstate="Runnable" seed="1350376075" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.024377" asserts="3">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-]]></output>
-        </test-case>
-        <test-case id="1035" name="MoreTimeInDayPreciseFirstSession" fullname="UserStatisticsTest.MoreTimeInDayPreciseFirstSession" methodname="MoreTimeInDayPreciseFirstSession" classname="UserStatisticsTest" runstate="Runnable" seed="1869502441" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.011987" asserts="2">
-          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-]]></output>
-        </test-case>
-        <test-case id="1036" name="MoreTimeInDayPreciseLastSession" fullname="UserStatisticsTest.MoreTimeInDayPreciseLastSession" methodname="MoreTimeInDayPreciseLastSession" classname="UserStatisticsTest" runstate="Runnable" seed="1980104723" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.019784" asserts="2">
-          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
 INFO|201710221546|Incrementing session. seesion interval is 3600
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
 INFO|201710221546|Incrementing session. seesion interval is 3600
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 1 play time to 20:56. 599 session time left
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
+INFO|201710221546|Incrementing session. seesion interval is 3600
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1033" name="NoMoreTimeInDayFirstSession" fullname="UserStatisticsTest.NoMoreTimeInDayFirstSession" methodname="NoMoreTimeInDayFirstSession" classname="UserStatisticsTest" runstate="Runnable" seed="1357801937" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.012170" asserts="2">
+        <test-case id="1023" name="DayBeforeAfter8Am" fullname="UserStatisticsTest.DayBeforeAfter8Am" methodname="DayBeforeAfter8Am" classname="UserStatisticsTest" runstate="Runnable" seed="799630598" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.011978" asserts="3">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1034" name="NoMoreTimeInDayLastSession" fullname="UserStatisticsTest.NoMoreTimeInDayLastSession" methodname="NoMoreTimeInDayLastSession" classname="UserStatisticsTest" runstate="Runnable" seed="1531728242" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.028199" asserts="2">
-          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
-INFO|201710221546|Incrementing session. seesion interval is 3600
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 20:56. 0 session time left
-INFO|201710221546|Incrementing session. seesion interval is 3600
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 1 play time to 20:56. 599 session time left
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-]]></output>
-        </test-case>
-        <test-case id="1037" name="NoMoreTimeInDayPreciseFirstSession" fullname="UserStatisticsTest.NoMoreTimeInDayPreciseFirstSession" methodname="NoMoreTimeInDayPreciseFirstSession" classname="UserStatisticsTest" runstate="Runnable" seed="1774167073" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.012081" asserts="2">
+        <test-case id="1024" name="DayBeforePre8Am" fullname="UserStatisticsTest.DayBeforePre8Am" methodname="DayBeforePre8Am" classname="UserStatisticsTest" runstate="Runnable" seed="649853948" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.011944" asserts="3">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1038" name="PlayerFullFlow" fullname="UserStatisticsTest.PlayerFullFlow" methodname="PlayerFullFlow" classname="UserStatisticsTest" runstate="Runnable" seed="1566623030" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.056089" asserts="39">
+        <test-case id="1035" name="MoreTimeInDayPreciseFirstSession" fullname="UserStatisticsTest.MoreTimeInDayPreciseFirstSession" methodname="MoreTimeInDayPreciseFirstSession" classname="UserStatisticsTest" runstate="Runnable" seed="105839011" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.012260" asserts="2">
+          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+]]></output>
+        </test-case>
+        <test-case id="1036" name="MoreTimeInDayPreciseLastSession" fullname="UserStatisticsTest.MoreTimeInDayPreciseLastSession" methodname="MoreTimeInDayPreciseLastSession" classname="UserStatisticsTest" runstate="Runnable" seed="83881144" result="Failed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.024487" asserts="2">
+          <failure>
+            <message><![CDATA[  Expected: CanPlay
+  But was:  HasNextTimeslot
+]]></message>
+            <stack-trace><![CDATA[at UserStatisticsTest.MoreTimeInDayPreciseLastSession () [0x00080] in /Users/oranshus/CandyCrushPsycho/Assets/Editor/UserStatisticsTest.cs:196
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
+INFO|201710221546|Incrementing session. seesion interval is 3600
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
+INFO|201710221546|Incrementing session. seesion interval is 3600
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 1 play time to 23:39. 599 session time left
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+]]></output>
+        </test-case>
+        <test-case id="1033" name="NoMoreTimeInDayFirstSession" fullname="UserStatisticsTest.NoMoreTimeInDayFirstSession" methodname="NoMoreTimeInDayFirstSession" classname="UserStatisticsTest" runstate="Runnable" seed="1282045083" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.012926" asserts="2">
+          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+]]></output>
+        </test-case>
+        <test-case id="1034" name="NoMoreTimeInDayLastSession" fullname="UserStatisticsTest.NoMoreTimeInDayLastSession" methodname="NoMoreTimeInDayLastSession" classname="UserStatisticsTest" runstate="Runnable" seed="91683464" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.020518" asserts="2">
+          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
+INFO|201710221546|Incrementing session. seesion interval is 3600
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 600 play time to 23:39. 0 session time left
+INFO|201710221546|Incrementing session. seesion interval is 3600
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 1 play time to 23:39. 599 session time left
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+]]></output>
+        </test-case>
+        <test-case id="1037" name="NoMoreTimeInDayPreciseFirstSession" fullname="UserStatisticsTest.NoMoreTimeInDayPreciseFirstSession" methodname="NoMoreTimeInDayPreciseFirstSession" classname="UserStatisticsTest" runstate="Runnable" seed="860984776" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.012015" asserts="2">
+          <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+]]></output>
+        </test-case>
+        <test-case id="1038" name="PlayerFullFlow" fullname="UserStatisticsTest.PlayerFullFlow" methodname="PlayerFullFlow" classname="UserStatisticsTest" runstate="Runnable" seed="695362160" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.068718" asserts="39">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|1111|=====Starting Day 0=====
-INFO|201710221545|Adding 300 play time to 11:00. 300 session time left
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 301 play time to 11:00. -1 session time left
-INFO|201710221546|Incrementing session. seesion interval is 3600
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 600 play time to 12:00. 0 session time left
-INFO|201710221546|Incrementing session. seesion interval is 3600
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 200 play time to 13:00. 400 session time left
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 200 play time to 13:00. 200 session time left
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-INFO|201710221545|Adding 200 play time to 13:00. 0 session time left
-INFO|201710221546|Incrementing session. seesion interval is 3600
-DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
-DEBUG|1111|=====Starting Day 1=====
 INFO|201710221545|Adding 300 play time to 09:00. 300 session time left
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 INFO|201710221545|Adding 301 play time to 09:00. -1 session time left
@@ -151,6 +151,22 @@ DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Sup
 INFO|201710221545|Adding 200 play time to 11:00. 200 session time left
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 INFO|201710221545|Adding 200 play time to 11:00. 0 session time left
+INFO|201710221546|Incrementing session. seesion interval is 3600
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+DEBUG|1111|=====Starting Day 1=====
+INFO|201710221545|Adding 300 play time to 11:00. 300 session time left
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 301 play time to 11:00. -1 session time left
+INFO|201710221546|Incrementing session. seesion interval is 3600
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 600 play time to 12:00. 0 session time left
+INFO|201710221546|Incrementing session. seesion interval is 3600
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 200 play time to 13:00. 400 session time left
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 200 play time to 13:00. 200 session time left
+DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
+INFO|201710221545|Adding 200 play time to 13:00. 0 session time left
 INFO|201710221546|Incrementing session. seesion interval is 3600
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|1111|=====Starting Day 2=====
@@ -171,7 +187,7 @@ INFO|201710221546|Incrementing session. seesion interval is 3600
 DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>
         </test-case>
-        <test-case id="1022" name="Sanity" fullname="UserStatisticsTest.Sanity" methodname="Sanity" classname="UserStatisticsTest" runstate="Runnable" seed="128768030" result="Passed" start-time="2017-11-11 18:56:37Z" end-time="2017-11-11 18:56:37Z" duration="0.012022" asserts="2">
+        <test-case id="1022" name="Sanity" fullname="UserStatisticsTest.Sanity" methodname="Sanity" classname="UserStatisticsTest" runstate="Runnable" seed="1684409638" result="Passed" start-time="2017-11-11 21:39:24Z" end-time="2017-11-11 21:39:24Z" duration="0.012088" asserts="2">
           <output><![CDATA[DEBUG|201710221543|Saving user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 DEBUG|201710221544|Loading user data from /Users/oranshus/Library/Application Support/BGU/Numerical Game/userData.cjd
 ]]></output>

@@ -58,7 +58,7 @@ public class UserInformation : IEnumerable
         }
         var dl = getReq.downloadHandler;
         var jsonString = Encoding.ASCII.GetString(dl.data);
-        Debug.Log("INFO|201710221542|Got user json " + jsonString);
+        Debug.Log("DEBUG|201710221542|Got user json " + jsonString);
         return jsonString;
     }
 
@@ -70,15 +70,13 @@ public class UserInformation : IEnumerable
         var totalPlayTime = today.NumberOfSessions * today.SessionLength +
                             (today.NumberOfSessions - 1) * today.SessionInterval;
         var timeLeft = totalPlayTime - elapsedTime;
-        //Debug.Log("DEBUG|201711021422|elapsedTime = " + elapsedTime);
-        //Debug.Log("DEBUG|201711072040|totalTime " + totalPlayTime);
-        //Debug.Log("DEBUG|201711072029|" + today);
+//        Debug.Log("DEBUG|201711072029|" + today);
         return timeLeft;
     }
 
     public CanPlayStatus CanPlay()
     {
-        //Debug.Log("DEBUG|201711021421|Checking CanPlay statu for " + SystemTime.Now());
+//        Debug.Log("DEBUG|201711021421|Checking CanPlay statu for " + SystemTime.Now());
         //Check past days
         if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
@@ -90,10 +88,10 @@ public class UserInformation : IEnumerable
         if (!DateExistsAndHasSessions(SystemTime.Now().Date))
             return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
         var remainingGameTime = CalculateRemainingPlayTime();
-        var timeRemainingInDay = SystemTime.Now().Date.AddDays(1) - SystemTime.Now();
-        //Debug.Log("DEBUG|201711021423|timeRemainingInDay = " + (int) timeRemainingInDay.TotalSeconds);
+        var timeRemainingInDay = (int) (SystemTime.Now().Date.AddDays(1) - SystemTime.Now()).TotalSeconds;
+        //Debug.Log("DEBUG|201711021423|timeRemainingInDay = " + timeRemainingInDay);
         //Check if the sessions can be finished
-        if ((int) timeRemainingInDay.TotalSeconds < remainingGameTime)
+        if (timeRemainingInDay < remainingGameTime)
             return CanPlayStatus.NoMoreTimeSlots;
         //Check if you are after 8:00AM
         if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
@@ -220,7 +218,7 @@ public class UserInformation : IEnumerable
                       GetPlayDateByDateTime(DateTime.Today).SessionId);
         var request = Utilities.CreatePostUnityWebRequest(url, jsonString);
         request.SendWebRequest();
-        Debug.Log(string.Format("INFO|201710221549|Sent {0} score reports to {1} - {2}", reportsCount, url,
+        Debug.Log(string.Format("DEBUG|201710221549|Sent {0} score reports to {1} - {2}", reportsCount, url,
             Utilities.PrintArray(_scoreReportsToBeSent.ToArray())));
         while (!request.isDone)
             Thread.Sleep(250);

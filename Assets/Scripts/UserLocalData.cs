@@ -110,7 +110,7 @@ public class PlayDate : IComparable<PlayDate>
 
     public override string ToString()
     {
-        return string.Format("{0} - {1} sessions {2} current session {3} current session time {4} interval {5} session length",
+        return string.Format("{0} - sessions = {1} | current session={2} | current session time = {3} | interval = {4} | session length = {5}",
             DateObject.Date, NumberOfSessions, CurrentSession, CurrentSessionTimeSecs, SessionInterval, SessionLength);
     }
 }

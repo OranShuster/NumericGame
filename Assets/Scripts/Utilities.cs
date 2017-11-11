@@ -209,8 +209,6 @@ public static class DebugUtilities
             + hitGo.GetComponent<NumberCell>().Column + "-"
             + hitGo2.GetComponent<NumberCell>().Row + "-"
             + hitGo2.GetComponent<NumberCell>().Column;
-        Debug.Log(string.Format("DEBUG|2017102215|{0}",lala));
-
     }
 
     public static void ShowArray(ShapesMatrix shapes, int size)

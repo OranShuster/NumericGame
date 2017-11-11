@@ -32,6 +32,7 @@ public class UserStatisticsTest
             };
         var userLocalData = new UserLocalData(mockDates, control == 1 ? "desiree2" : "desiree");
         UserLocalData.Save(userLocalData);
+        UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(8));
     }
 
     [Test]
@@ -192,7 +193,8 @@ public class UserStatisticsTest
             userStatistics.AddPlayTime(SessionLength, 100);
         }
         userStatistics.AddPlayTime(1,100);
-        UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(24).AddSeconds(-1 * (SessionLength+1)));
+        
+        UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(24).AddSeconds(-1 * (SessionLength + 1)));
         Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
     }
     

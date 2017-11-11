@@ -23,7 +23,7 @@ public class ControllerMenu : MonoBehaviour
 
     private UserInformation UserInformation
     {
-        get { return GameMaster.UserInformation; }
+        get { return GameManager.UserInformation; }
     }
 
     public Sprite DateStatusBadImage; 
@@ -66,24 +66,24 @@ public class ControllerMenu : MonoBehaviour
 
     public void StartGame()
     {
-        GameMaster.SeriesDelta = 0;
-        GameMaster.Score = 0;
-        GameMaster.TotalTimePlayed = 0;
-        GameMaster.UserInformation.ClearScoreReports();
-        if (GameMaster.UserInformation.GetToday().CurrentSession == 0)
-            GameMaster.UserInformation.GetToday().CurrentSession = 1;
+        GameManager.SeriesDelta = 0;
+        GameManager.Score = 0;
+        GameManager.TotalTimePlayed = 0;
+        GameManager.UserInformation.ClearScoreReports();
+        if (GameManager.UserInformation.GetToday().CurrentSession == 0)
+            GameManager.UserInformation.GetToday().CurrentSession = 1;
         else
         {
-            if (GameMaster.UserInformation.GetToday().CurrentSessionTimeSecs >=
-                GameMaster.UserInformation.GetToday().SessionLength)
+            if (GameManager.UserInformation.GetToday().CurrentSessionTimeSecs >=
+                GameManager.UserInformation.GetToday().SessionLength)
             {
-                GameMaster.UserInformation.GetToday().CurrentSessionTimeSecs = 0;
-                GameMaster.UserInformation.GetToday().CurrentSession++;
+                GameManager.UserInformation.GetToday().CurrentSessionTimeSecs = 0;
+                GameManager.UserInformation.GetToday().CurrentSession++;
             }
 
         }
         var sessionId = UserInformation.GetToday().CurrentSession;
-        GameMaster.GameId = UserInformation.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
+        GameManager.GameId = UserInformation.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
         SceneManager.LoadScene("Tutorial");
     }
 

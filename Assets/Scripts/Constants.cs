@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public static class Constants
 {
@@ -6,6 +7,7 @@ public static class Constants
     public static readonly float MoveAnimationMinDuration = 0.05f;
 
     public static readonly int MinimumMatches = 3;
+    public static int[] LevelUpScores = {100, 1500, 2147483647};
 
     public static Color32 ColorSelected = new Color32(100, 181, 246, 255);
     public static Color32 ColorMatched = new Color32(21, 101, 192, 255);
@@ -37,9 +39,7 @@ public static class Constants
     public static readonly float StartingGameTimer = 60;
     public static float TimerMax = 90;
     public static float TimerLow = 10;
-    public static int ScoreReportingInterval = 10;
-    public static int GameTimerWarning = 50;
-    public static int GameTimerDanger = 25;
+    public static int ScoreReportingInterval = 3;
 
     public static string DateFormat = "yyyy-MM-dd";
     public static string DateFormatOutput = "dd/MM/yyyy";

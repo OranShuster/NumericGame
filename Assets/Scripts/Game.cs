@@ -13,12 +13,12 @@ public class Game : MonoBehaviour
 
     private int SeriesDelta
     {
-        get { return GameMaster.SeriesDelta; }
-        set { GameMaster.SeriesDelta=value; }
+        get { return GameManager.SeriesDelta; }
+        set { GameManager.SeriesDelta=value; }
     }
 
     private Vector2 _cellSize;
-    private GameObject _hitGo = null;
+    private GameObject _hitGo;
     private Sprite[] _numberSquareSprites;
     private GameState _state;
     private int _maxNumber;
@@ -30,9 +30,11 @@ public class Game : MonoBehaviour
     public GameObject NumberSquarePrefab;
     public GameObject Manager;
     public Image GameField;
-    public int[] NextLevelScore;
-    public Text DebugText;
-    public bool DebugMode;
+
+    private int[] NextLevelScore
+    {
+        get {return Constants.LevelUpScores;}
+    } 
 
     private SoundManager _soundManager;
     private string _tileImagesFolder;
@@ -46,7 +48,7 @@ public class Game : MonoBehaviour
 
     void Start()
     {
-        _tileImagesFolder = GameMaster.UserInformation.IsControlSession() ? "Images/Control" : "Images/Numbers";
+        _tileImagesFolder = GameManager.UserInformation.IsControlSession() ? "Images/Control" : "Images/Numbers";
         _numberSquareSprites = Resources.LoadAll<Sprite>(_tileImagesFolder).OrderBy(t => Convert.ToInt32(t.name)).ToArray();
         _maxNumber = _numberSquareSprites.Length;
         _rows = _maxNumber;
@@ -61,8 +63,6 @@ public class Game : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (DebugMode && DebugText!=null)
-            DebugText.text = DebugUtilities.GetArrayContents(_shapes,_maxNumber);
         if (!Input.GetMouseButtonDown(0) || _controllerScript.IsPaused()) return;
         var cursor = new PointerEventData(EventSystem.current) { position = Input.mousePosition };
         var objectsHit = new List<RaycastResult>();
@@ -109,7 +109,7 @@ public class Game : MonoBehaviour
     {
         var numberImage = go.transform.Find("NumberImage").gameObject;
         numberImage.GetComponent<Image>().color = Color.white;
-        if (!GameMaster.UserInformation.IsControlSession()) return;
+        if (!GameManager.UserInformation.IsControlSession()) return;
         numberImage.GetComponent<Outline>().effectDistance = new Vector2(0, 0);
         numberImage.GetComponent<Outline>().effectColor =
             new Color(1,1,1,0);
@@ -120,10 +120,10 @@ public class Game : MonoBehaviour
     private static void SetTileColorSelected(GameObject go)
     {
         var numberImage = go.transform.Find("NumberImage").gameObject;
-        numberImage.GetComponent<Image>().color = GameMaster.UserInformation.IsControlSession()
+        numberImage.GetComponent<Image>().color = GameManager.UserInformation.IsControlSession()
             ? Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorSelected;
-        if (!GameMaster.UserInformation.IsControlSession()) return;
+        if (!GameManager.UserInformation.IsControlSession()) return;
         numberImage.GetComponent<Outline>().effectDistance = new Vector2(5f, 5f);
         numberImage.GetComponent<Outline>().effectColor =
             Constants.ControlSelectedColors[go.GetComponent<NumberCell>().Value - 1];
@@ -134,10 +134,10 @@ public class Game : MonoBehaviour
     private static void SetTileColorMatched(GameObject go)
     {
         var numberImage = go.transform.Find("NumberImage").gameObject;
-        numberImage.GetComponent<Image>().color = GameMaster.UserInformation.IsControlSession()
+        numberImage.GetComponent<Image>().color = GameManager.UserInformation.IsControlSession()
             ? Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1]
             : Constants.ColorMatched;
-        if (!GameMaster.UserInformation.IsControlSession()) return;
+        if (!GameManager.UserInformation.IsControlSession()) return;
         numberImage.GetComponent<Outline>().effectDistance = new Vector2(5f, 5f);
         numberImage.GetComponent<Outline>().effectColor =
             Constants.ControlMatchedColors[go.GetComponent<NumberCell>().Value - 1];
@@ -167,8 +167,8 @@ public class Game : MonoBehaviour
 
     public IEnumerator ClearBoardMatches()
     {
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, GameMaster.UserInformation.IsControlSession(), false);
-        var sameMatches = _shapes.GetMatches(_maxNumber, 0, GameMaster.UserInformation.IsControlSession(), false);
+        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, GameManager.UserInformation.IsControlSession(), false);
+        var sameMatches = _shapes.GetMatches(_maxNumber, 0, GameManager.UserInformation.IsControlSession(), false);
         totalMatches.CombineMatchesInfo(sameMatches,false);
         yield return StartCoroutine(HandleMatches(totalMatches, false, false, true));
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = true;
@@ -201,7 +201,7 @@ public class Game : MonoBehaviour
             }
             if (!quickMode)
             {
-                Debug.Log(string.Format("DEBUG|201706021724|{0}", totalMatches.PrintMatches()));
+                //Debug.Log(string.Format("DEBUG|201706021724|{0}", totalMatches.PrintMatches()));
                 _soundManager.PlayCrincle();
                 yield return new WaitForSeconds(0.75f);
             }
@@ -229,18 +229,18 @@ public class Game : MonoBehaviour
             //will wait for both of the above animations
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
-            if (GameMaster.Score >= NextLevelScore[SeriesDelta])
+            if (GameManager.Score >= NextLevelScore[SeriesDelta])
                 break;
 
             //Check for new matches with new tiles
-            totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, GameMaster.UserInformation.IsControlSession(), withScore);
+            totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, GameManager.UserInformation.IsControlSession(), withScore);
 
             //Search identical matches 
             if (SeriesDelta == 0) continue;
-            var sameMatches = _shapes.GetMatches(_maxNumber, 0, GameMaster.UserInformation.IsControlSession(), false);
-            totalMatches.CombineMatchesInfo(sameMatches, GameMaster.UserInformation.IsControlSession());
+            var sameMatches = _shapes.GetMatches(_maxNumber, 0, GameManager.UserInformation.IsControlSession(), false);
+            totalMatches.CombineMatchesInfo(sameMatches, GameManager.UserInformation.IsControlSession());
         }
-        if (GameMaster.Score >= NextLevelScore[SeriesDelta])
+        if (GameManager.Score >= NextLevelScore[SeriesDelta])
         {
             LevelUp();
             _controllerScript.LevelUp(SeriesDelta);
@@ -266,18 +266,18 @@ public class Game : MonoBehaviour
         SetTileColorBase(_hitGo);
 
         //Find matches
-        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, GameMaster.UserInformation.IsControlSession(), true);
+        var totalMatches = _shapes.GetMatches(_maxNumber, SeriesDelta, GameManager.UserInformation.IsControlSession(), true);
         //Find identical strings with no score
         if (SeriesDelta != 0)
         {
             var sameMatches = _shapes.GetMatches(_maxNumber, 0, false,false);
-            totalMatches.CombineMatchesInfo(sameMatches, GameMaster.UserInformation.IsControlSession());
+            totalMatches.CombineMatchesInfo(sameMatches, GameManager.UserInformation.IsControlSession());
         }
         if (totalMatches.NumberOfMatches>0)
             yield return StartCoroutine(HandleMatches(totalMatches));
         else
             _controllerScript.IncreaseScore(-5);
-        if (GameMaster.Score >= 0)
+        if (GameManager.Score >= 0)
         {
             _state = GameState.Playing;
             yield break;
@@ -408,7 +408,7 @@ public class Game : MonoBehaviour
     public void SetNextLevelScore(int score, int level)
     {
         NextLevelScore[level] = score;
-        if (GameMaster.Score < NextLevelScore[SeriesDelta]) return;
+        if (GameManager.Score < NextLevelScore[SeriesDelta]) return;
         LevelUp();
         _controllerScript.LevelUp(SeriesDelta);
     }

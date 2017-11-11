@@ -84,16 +84,16 @@ public static class Utilities
 
     public static void LoggerCallback(string logString, string stackTrace, LogType type)
     {
-        if (GameMaster.UserInformation == null)
+        if (GameManager.UserInformation == null)
             return;
-        if (GameMaster.UserInformation.IsTestUser())
+        if (GameManager.UserInformation.IsTestUser())
             return;
         try
         {
             var priority = logString.Split('|')[0];
             if (priority == "DEBUG")
                 return;
-            GameMaster.GM.SendLogs(new LogMessage
+            GameManager.Instance.SendLogs(new LogMessage
             {
                 priority = priority,
                 timestamp = GetEpochTime(),
@@ -153,6 +153,19 @@ public static class Utilities
     public static bool IsControlCode(string userCode)
     {
         return userCode == Constants.TestCodeControl;
+    }
+
+    public static string SecondsToTime(int seconds)
+    {
+        var t = TimeSpan.FromSeconds(seconds);
+        if (t.Hours > 0)
+            return string.Format("{0:D2}:{1:D2}:{2:D2}",
+                t.Hours,
+                t.Minutes,
+                t.Seconds);
+        return string.Format("{0:D2}:{1:D2}",
+            t.Minutes,
+            t.Seconds);
     }
 }
 

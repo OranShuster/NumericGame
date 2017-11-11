@@ -7,46 +7,46 @@ using UnityEngine.UI;
 
 public class ControllerGame : MonoBehaviour, IControllerInterface
 {
-    //private int _numberStyle = 0;
     private float _gameTimer = Constants.StartingGameTimer;
 
-    private float _totalTimePlayed
+    private float TotalTimePlayed
     {
-        get { return GameMaster.TotalTimePlayed; }
-        set { GameMaster.TotalTimePlayed = value; }
+        get { return GameManager.TotalTimePlayed; }
+        set { GameManager.TotalTimePlayed = value; }
     }
 
     private Game _mainGame;
     private ITween<float> _warningOverlayTween;
-    private bool _gamePaused = false;
+    private bool _gamePaused;
 
     public UserInformation UserInfo
     {
-        get { return GameMaster.UserInformation; }
-        set { GameMaster.UserInformation = value; }
+        get { return GameManager.UserInformation; }
+        set { GameManager.UserInformation = value; }
     }
 
     public Text ScoreText;
     public Text TimeHeaderText;
     public Text ScoreHeaderText;
+    public Text PlayTimeHeaderText;
     public Text LevelHeaderText;
     public Text MenuButtonText;
-    public GameObject NumberTilePrefab;
-    public Image GameTimerBar;
 
     private int Score
     {
-        get { return GameMaster.Score; }
-        set { GameMaster.Score = value; }
+        get { return GameManager.Score; }
+        set { GameManager.Score = value; }
     }
 
     public Image GameField;
     public Text LevelNumText;
     public Text TimerText;
+    public Text PlayTimeText;
     public GameObject MessagesOverlay;
     public Image TimerWarningOverlay;
     public GameObject LevelupTutorial;
-    public Button MenuButton;
+    public Button MenuButton; 
+
 
     void Awake()
     {
@@ -65,12 +65,13 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     {
         ShowScore();
         _gameTimer = Constants.StartingGameTimer;
-        LevelNumText.text = GameMaster.SeriesDelta.ToString();
+        LevelNumText.text = GameManager.SeriesDelta.ToString();
         TimeHeaderText.text = Utilities.LoadStringFromFile("Timer");
         ScoreHeaderText.text = Utilities.LoadStringFromFile("Score");
+        PlayTimeHeaderText.text = Utilities.LoadStringFromFile("PlayTime");
         LevelHeaderText.text = Utilities.LoadStringFromFile("Level");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
-        if (GameMaster.SeriesDelta == 0)
+        if (GameManager.SeriesDelta == 0)
         {
             IncreaseScore(0);
             StartCoroutine(UserInfo.SendUserInfoToServer());
@@ -88,12 +89,12 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             if (Input.GetKeyDown(KeyCode.Escape))
                 PauseGame();
         }
-        if (GameMaster.ConnectionError)
+        if (GameManager.ConnectionError)
         {
-            GameMaster.ConnectionError = false;
+            GameManager.ConnectionError = false;
             _gamePaused = true;
-            StartCoroutine(ShowMessage("Connection_Error", GameMaster.Score,
-                Mathf.CeilToInt(GameMaster.TotalTimePlayed), false));
+            StartCoroutine(ShowMessage("Connection_Error", GameManager.Score,
+                Mathf.CeilToInt(GameManager.TotalTimePlayed)));
         }
     }
 
@@ -110,7 +111,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         {
             _gamePaused = true;
             MenuButton.interactable = false;
-            StartCoroutine(ShowMessage("Pause", Score, (int) _totalTimePlayed, true));
+            StartCoroutine(ShowMessage("Pause", Score, (int) TotalTimePlayed, true));
             Debug.Log("INFO|201711021137|Game Paused");
         }
         _mainGame.ToggleBoard();
@@ -128,23 +129,15 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     {
         var deltaTime = Time.deltaTime;
         _gameTimer -= deltaTime;
-        _totalTimePlayed += deltaTime;
-        TimerText.text = Mathf.CeilToInt(_gameTimer).ToString();
+        TotalTimePlayed += deltaTime;
+        TimerText.text = Utilities.SecondsToTime(Mathf.CeilToInt(_gameTimer));
+        PlayTimeText.text = Utilities.SecondsToTime(Mathf.CeilToInt(TotalTimePlayed));
 
         var sessionTimeLeft = UserInfo.GetToday().SessionLength - UserInfo.GetToday().CurrentSessionTimeSecs;
-        if (_totalTimePlayed > sessionTimeLeft)
+        if (TotalTimePlayed > sessionTimeLeft)
             LoseGame(LoseReasons.SessionTime);
         if (_gameTimer <= 0)
             LoseGame(LoseReasons.GameTime);
-
-        var gameTimerRelative = _gameTimer / Constants.TimerMax * 100;
-        GameTimerBar.color = Constants.ColorOkGreen;
-        if (gameTimerRelative < Constants.GameTimerWarning)
-            GameTimerBar.color = Constants.ColorWarningOrange;
-        if (gameTimerRelative < Constants.GameTimerDanger)
-            GameTimerBar.color = Constants.ColorDangerRed;
-        GameTimerBar.rectTransform.localScale = new Vector3(Math.Min(gameTimerRelative, 1), 1, 1);
-
         GameTimerWarning();
     }
 
@@ -183,7 +176,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             score = Mathf.Max(amount),
             timestamp = Utilities.GetEpochTime(),
             session_id = UserInfo.GetToday().CurrentSession,
-            game_id = GameMaster.GameId
+            game_id = GameManager.GameId
         });
         ShowScore();
     }
@@ -210,21 +203,21 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
                 throw new ArgumentOutOfRangeException(reason.ToString(), reason, null);
         }
         MenuButton.interactable = false;
-        StartCoroutine(ShowMessage(headerMsg, Score, (int) _totalTimePlayed));
+        StartCoroutine(ShowMessage(headerMsg, Score, (int) TotalTimePlayed));
     }
 
     public void LevelUp(int level)
     {
-        ShowLevelupMessage(GameMaster.SeriesDelta);
         MenuButton.interactable = false;
         _gamePaused = true;
+        ShowLevelupMessage(GameManager.SeriesDelta);
     }
 
     public void BackToMenu()
     {
         try
         {
-            UserInfo.AddPlayTime((int) _totalTimePlayed, Score);
+            UserInfo.AddPlayTime((int) TotalTimePlayed, Score);
             UserInfo.SendUserInfoToServerBlocking();
         }
         finally
@@ -236,19 +229,19 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     public IEnumerator ShowMessage(string header, int Score, int Time, bool CanGoBack = false)
     {
-        var MessagesOverlay_instance = Instantiate(MessagesOverlay, GameField.transform.parent);
-        MessagesOverlay_instance.transform.name = "MessageOverlay";
+        var messagesOverlayInstance = Instantiate(MessagesOverlay, GameField.transform.parent);
+        messagesOverlayInstance.transform.name = "MessageOverlay";
 
-        var menuButtonCtrl = MessagesOverlay_instance.transform.Find("OverlayBackground/Menu").gameObject
+        var menuButtonCtrl = messagesOverlayInstance.transform.Find("OverlayBackground/Menu").gameObject
             .GetComponent<Button>();
-        var menuButtonText = MessagesOverlay_instance.transform.Find("OverlayBackground/Menu/Text").gameObject
+        var menuButtonText = messagesOverlayInstance.transform.Find("OverlayBackground/Menu/Text").gameObject
             .GetComponent<Text>();
         menuButtonText.text = Utilities.LoadStringFromFile("Menu");
         menuButtonCtrl.onClick.AddListener(() => BackToMenu());
 
-        var cancelButtonCtrl = MessagesOverlay_instance.transform.Find("OverlayBackground/Cancel").gameObject
+        var cancelButtonCtrl = messagesOverlayInstance.transform.Find("OverlayBackground/Cancel").gameObject
             .GetComponent<Button>();
-        var cancelButtonText = MessagesOverlay_instance.transform.Find("OverlayBackground/Cancel/Text").gameObject
+        var cancelButtonText = messagesOverlayInstance.transform.Find("OverlayBackground/Cancel/Text").gameObject
             .GetComponent<Text>();
         if (CanGoBack)
         {
@@ -261,35 +254,35 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             var menuRectTransform = menuButtonCtrl.transform as RectTransform;
             menuRectTransform.transform.localPosition += new Vector3(200, 0, 0);
         }
-        var canvasGroup = MessagesOverlay_instance.GetComponent<CanvasGroup>();
+        var canvasGroup = messagesOverlayInstance.GetComponent<CanvasGroup>();
         canvasGroup.ZKalphaTo(0.75f).setFrom(0).start();
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
-        var scoreGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/Score").gameObject;
-        var timeGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/TimePlayed").gameObject;
+        var scoreGameObject = messagesOverlayInstance.transform.Find("OverlayBackground/Score").gameObject;
+        var timeGameObject = messagesOverlayInstance.transform.Find("OverlayBackground/TimePlayed").gameObject;
         scoreGameObject.GetComponent<Text>().text =
             string.Format("{1} - {0}", Utilities.LoadStringFromFile("Score"), Math.Max(Score, 0));
         timeGameObject.GetComponent<Text>().text = string.Format("{1} - {0}",
             Utilities.LoadStringFromFile("Round_Length"), Rounds.GetRoundLengthText(Time));
-        var MessageTitleGameObject = MessagesOverlay_instance.transform.Find("OverlayBackground/MessageTitle")
+        var messageTitleGameObject = messagesOverlayInstance.transform.Find("OverlayBackground/MessageTitle")
             .gameObject;
-        MessageTitleGameObject.GetComponent<Text>().text = string.Format(Utilities.LoadStringFromFile(header));
+        messageTitleGameObject.GetComponent<Text>().text = string.Format(Utilities.LoadStringFromFile(header));
         yield return new WaitForSeconds(0.4f);
     }
 
     public void ShowLevelupMessage(int level)
     {
-        var LevelupTutorial_instance = Instantiate(LevelupTutorial, GameField.transform.parent);
-        LevelupTutorial_instance.transform.name = "TutorialOverlay";
-        var buttonCtrl = LevelupTutorial_instance.transform.Find("OverlayBackground/Tutorial").gameObject
+        var levelupTutorialInstance = Instantiate(LevelupTutorial, GameField.transform.parent);
+        levelupTutorialInstance.transform.name = "TutorialOverlay";
+        var buttonCtrl = levelupTutorialInstance.transform.Find("OverlayBackground/Tutorial").gameObject
             .GetComponent<Button>();
         buttonCtrl.onClick.AddListener(() => SceneManager.LoadScene("Tutorial"));
         buttonCtrl.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Tutorial");
-        var canvasGroup = LevelupTutorial_instance.GetComponent<CanvasGroup>();
+        var canvasGroup = levelupTutorialInstance.GetComponent<CanvasGroup>();
         canvasGroup.ZKalphaTo(0.75f).setFrom(0).start();
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
-        var header = LevelupTutorial_instance.transform.Find("OverlayBackground/LevelupTutorialHeader").gameObject;
+        var header = levelupTutorialInstance.transform.Find("OverlayBackground/LevelupTutorialHeader").gameObject;
         header.GetComponent<Text>().text =
             string.Format("{0} {1}", level, Utilities.LoadStringFromFile("LevelUpMessage"));
     }

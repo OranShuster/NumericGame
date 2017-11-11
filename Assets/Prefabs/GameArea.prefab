@@ -72,9 +72,6 @@ MonoBehaviour:
     type: 2}
   Manager: {fileID: 0}
   GameField: {fileID: 114951096184592640}
-  NextLevelScore: f4010000e8030000ffffff7f
-  DebugText: {fileID: 0}
-  DebugMode: 0
 --- !u!114 &114951096184592640
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -115,7 +112,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1223480631134122}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 560, y: 0, z: 0}
   m_LocalScale: {x: 0.95, y: 0.95, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -124,7 +121,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 560, y: 0}
-  m_SizeDelta: {x: 1000, y: 0}
+  m_SizeDelta: {x: 800, y: 800}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &225259869619223558
 CanvasGroup:

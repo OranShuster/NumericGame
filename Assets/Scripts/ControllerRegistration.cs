@@ -27,8 +27,8 @@ public class ControllerRegistration : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         try
         {
-            GameMaster.UserInformation = new UserInformation(usercode);
-            if (GameMaster.UserInformation.UserLocalData != null)
+            GameManager.UserInformation = new UserInformation(usercode);
+            if (GameManager.UserInformation.UserLocalData != null)
             {
                 SceneManager.LoadScene("MainMenu");
                 yield break;
@@ -57,8 +57,8 @@ public class ControllerRegistration : MonoBehaviour
         Application.logMessageReceived += Utilities.LoggerCallback;
         Application.targetFrameRate = 60;
         if (!UserLocalData.PlayerDataValid()) return;
-        if (GameMaster.UserInformation == null)
-            GameMaster.UserInformation = new UserInformation();
+        if (GameManager.UserInformation == null)
+            GameManager.UserInformation = new UserInformation();
         SceneManager.LoadScene("MainMenu");
     }
 

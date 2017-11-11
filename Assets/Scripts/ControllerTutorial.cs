@@ -15,15 +15,15 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     public Button MenuButton;
     private UserInformation _userInformation    
     {
-        get { return GameMaster.UserInformation; }
-        set { GameMaster.UserInformation = value; }
+        get { return GameManager.UserInformation; }
+        set { GameManager.UserInformation = value; }
     }
     private bool _gamePaused=false;
     private Game _mainGame;
     private float _totalTimePlayed
     {
-        get { return GameMaster.TotalTimePlayed; }
-        set { GameMaster.TotalTimePlayed = value; }
+        get { return GameManager.TotalTimePlayed; }
+        set { GameManager.TotalTimePlayed = value; }
     }
 
     void Start()
@@ -38,7 +38,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         var tutorialHeaderStringName = "TutorialHeaderControl";
         if (!_userInformation.IsControlSession())
         {
-            tutorialHeaderStringName = string.Format("TutorialHeader{0}", GameMaster.SeriesDelta);
+            tutorialHeaderStringName = string.Format("TutorialHeader{0}", GameManager.SeriesDelta);
         }
         TutorialText.text = Utilities.LoadStringFromFile(tutorialHeaderStringName, 35);
         MenuButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
@@ -118,8 +118,8 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     {
         try
             {
-            if (GameMaster.SeriesDelta == 0) return;
-            _userInformation.AddPlayTime((int) GameMaster.TotalTimePlayed, Score);
+            if (GameManager.SeriesDelta == 0) return;
+            _userInformation.AddPlayTime((int) GameManager.TotalTimePlayed, Score);
             _userInformation.SendUserInfoToServerBlocking();
         }
         finally

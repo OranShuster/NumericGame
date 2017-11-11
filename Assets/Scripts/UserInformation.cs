@@ -205,7 +205,7 @@ public class UserInformation : IEnumerable
         if (request.responseCode == Constants.InvalidPlayerCode)
             DisablePlayer();
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) yield break;
-        GameMaster.ConnectionError = true;
+        GameManager.ConnectionError = true;
         Debug.Log(string.Format("ERROR|201710221548|{0}", request.error));
     }
 
@@ -225,7 +225,7 @@ public class UserInformation : IEnumerable
         while (!request.isDone)
             Thread.Sleep(250);
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) return;
-        GameMaster.ConnectionError = true;
+        GameManager.ConnectionError = true;
         Debug.Log(string.Format("ERROR|201710221550|{0}", request.error));
     }
 
@@ -255,7 +255,7 @@ public class UserInformation : IEnumerable
 
     public void AddScoreReport(ScoreReports scoreReport)
     {
-        if (GameMaster.UserInformation.IsTestUser())
+        if (GameManager.UserInformation.IsTestUser())
             return;
         _scoreReportsToBeSent.Add(scoreReport);
     }

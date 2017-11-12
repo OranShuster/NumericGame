@@ -70,13 +70,14 @@ public class UserInformation : IEnumerable
         var totalPlayTime = today.NumberOfSessions * today.SessionLength +
                             (today.NumberOfSessions - 1) * today.SessionInterval;
         var timeLeft = totalPlayTime - elapsedTime;
+//        Debug.Log(string.Format("DEBUG|201711131017| {0} = {1} - {2}",timeLeft,totalPlayTime,elapsedTime));
 //        Debug.Log("DEBUG|201711072029|" + today);
         return timeLeft;
     }
 
     public CanPlayStatus CanPlay()
     {
-//        Debug.Log("DEBUG|201711021421|Checking CanPlay statu for " + SystemTime.Now());
+        Debug.Log("DEBUG|201711021421|Checking CanPlay status for " + SystemTime.Now());
         //Check past days
         if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
@@ -89,7 +90,7 @@ public class UserInformation : IEnumerable
             return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
         var remainingGameTime = CalculateRemainingPlayTime();
         var timeRemainingInDay = (int) (SystemTime.Now().Date.AddDays(1) - SystemTime.Now()).TotalSeconds;
-        //Debug.Log("DEBUG|201711021423|timeRemainingInDay = " + timeRemainingInDay);
+//        Debug.Log("DEBUG|201711021423|timeRemainingInDay = " + timeRemainingInDay);
         //Check if the sessions can be finished
         if (timeRemainingInDay < remainingGameTime)
             return CanPlayStatus.NoMoreTimeSlots;
@@ -150,7 +151,7 @@ public class UserInformation : IEnumerable
     public void AddPlayTime(int length, int score)
     {
         var today = GetPlayDateByDateTime(SystemTime.Now().Date);
-        var thisTime = SystemTime.Now().ToShortTimeString();
+        var gameStartTime = SystemTime.Now().AddSeconds(-1 * length).ToShortTimeString();
         if (today.CurrentSession == 0)
             today.CurrentSession = 1;
         if (today.CurrentSessionTimeSecs == today.SessionLength)
@@ -158,10 +159,10 @@ public class UserInformation : IEnumerable
             today.CurrentSessionTimeSecs = 0;
             today.CurrentSession++;
         }
-        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), thisTime, today.CurrentSession));
+        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), gameStartTime, today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
         Debug.Log(string.Format("INFO|201710221545|Adding {0} play time to {1}. {2} session time left", length,
-            thisTime,
+            gameStartTime,
             today.SessionLength - today.CurrentSessionTimeSecs));
         if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {

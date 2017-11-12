@@ -103,17 +103,17 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     {
         if (_gamePaused)
         {
-            HideMessage("MessageOverlay");
-            MenuButton.interactable = true;
             _gamePaused = false;
             Debug.Log("INFO|201711021136|Game resumed");
+            HideMessage("MessageOverlay");
+            MenuButton.interactable = true;
         }
         else
         {
             _gamePaused = true;
+            Debug.Log("INFO|201711021137|Game Paused");
             MenuButton.interactable = false;
             StartCoroutine(ShowMessage("Pause", Score, (int) TotalTimePlayed, true));
-            Debug.Log("INFO|201711021137|Game Paused");
         }
         _mainGame.ToggleBoard();
     }
@@ -184,6 +184,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     public void LoseGame(LoseReasons reason)
     {
+        Debug.Log("20171112|INFO|Game Lost");
         _mainGame.StopGame();
         string headerMsg;
         switch (reason)

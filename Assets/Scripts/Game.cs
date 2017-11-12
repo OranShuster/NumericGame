@@ -329,6 +329,7 @@ public class Game : MonoBehaviour
     public void LevelUp()
     {
         _state = GameState.PreGame;
+        Debug.Log(string.Format("INFO|201711121030|Level {0} ended",Level));
         Level += 1;
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = false;
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = 0;

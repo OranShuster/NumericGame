@@ -148,10 +148,9 @@ public class UserInformation : IEnumerable
         return DateExists(date) && !FinishedDay(GetPlayDateByDateTime(date));
     }
 
-    public void AddPlayTime(int length, int score)
+    public void AddPlayTime(int length, int score, string gameStartTime)
     {
         var today = GetPlayDateByDateTime(SystemTime.Now().Date);
-        var gameStartTime = SystemTime.Now().AddSeconds(-1 * length).ToShortTimeString();
         if (today.CurrentSession == 0)
             today.CurrentSession = 1;
         if (today.CurrentSessionTimeSecs == today.SessionLength)

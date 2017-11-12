@@ -73,7 +73,7 @@ public class UserStatisticsTest
         var mockDateTime = DateTime.Today.AddDays(1).AddHours(4);
         Assert.IsNotNull(userStatistics.UserLocalData);
         for (var sessionIndex = 0; sessionIndex < SessionNum; sessionIndex++)
-            userStatistics.AddPlayTime(SessionLength, 100);
+            userStatistics.AddPlayTime(SessionLength, 100, UserInformation.SystemTime.Now().ToShortTimeString());
         UserInformation.SystemTime.SetDateTime(mockDateTime);
         Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());
         var expectedTimeSpan =
@@ -88,7 +88,7 @@ public class UserStatisticsTest
         Assert.IsNotNull(userStatistics.UserLocalData);
         for (var sessionIndex = 0; sessionIndex < SessionNum; sessionIndex++)
         {
-            userStatistics.AddPlayTime(SessionLength, 100);
+            userStatistics.AddPlayTime(SessionLength, 100, UserInformation.SystemTime.Now().ToShortTimeString());
         }
         UserInformation.SystemTime.SetDateTime(DateTime.Today.AddDays(1).AddHours(8).AddSeconds(1));
         Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
@@ -166,9 +166,9 @@ public class UserStatisticsTest
         Assert.IsNotNull(userStatistics.UserLocalData);
         for (var sessionIndex = 0; sessionIndex < SessionNum - 1; sessionIndex++)
         {
-            userStatistics.AddPlayTime(SessionLength, 100);
+            userStatistics.AddPlayTime(SessionLength, 100, UserInformation.SystemTime.Now().ToShortTimeString());
         }        
-        userStatistics.AddPlayTime(1,100);
+        userStatistics.AddPlayTime(1,100, UserInformation.SystemTime.Now().ToShortTimeString());
         UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(24).AddSeconds(-1 * (SessionLength - 10)));
         Assert.AreEqual(CanPlayStatus.NoMoreTimeSlots, userStatistics.CanPlay());
     }
@@ -190,9 +190,9 @@ public class UserStatisticsTest
         Assert.IsNotNull(userStatistics.UserLocalData);
         for (var sessionIndex = 0; sessionIndex < SessionNum - 1; sessionIndex++)
         {
-            userStatistics.AddPlayTime(SessionLength, 100);
+            userStatistics.AddPlayTime(SessionLength, 100, UserInformation.SystemTime.Now().ToShortTimeString());
         }
-        userStatistics.AddPlayTime(1,100);
+        userStatistics.AddPlayTime(1,100, UserInformation.SystemTime.Now().ToShortTimeString());
         
         UserInformation.SystemTime.SetDateTime(DateTime.Today.AddHours(24).AddSeconds(-1 * (SessionLength + 1)));
         Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
@@ -224,9 +224,9 @@ public class UserStatisticsTest
             Assert.AreEqual(expectedTimeSpan, userStatistics.TimeToNextSession());
             UserInformation.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime));
             Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
-            userStatistics.AddPlayTime(SessionLength / 2, 500);
+            userStatistics.AddPlayTime(SessionLength / 2, 500, UserInformation.SystemTime.Now().ToShortTimeString());
             Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
-            userStatistics.AddPlayTime(SessionLength / 2 + 1, 500);
+            userStatistics.AddPlayTime(SessionLength / 2 + 1, 500, UserInformation.SystemTime.Now().ToShortTimeString());
             Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());
             expectedTimeSpan =
                 UserInformation.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime)
@@ -235,18 +235,18 @@ public class UserStatisticsTest
             UserInformation.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime)
                 .AddSeconds(SessionInterval));
             Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
-            userStatistics.AddPlayTime(SessionLength, 2500);
+            userStatistics.AddPlayTime(SessionLength, 2500, UserInformation.SystemTime.Now().ToShortTimeString());
             Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());
             expectedTimeSpan = UserInformation.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex)
                 .AddHours(firstSessionGameTime).AddSeconds(SessionInterval * 2));
             Assert.AreEqual(expectedTimeSpan, userStatistics.TimeToNextSession());
             UserInformation.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime)
                 .AddSeconds(SessionInterval * 2));
-            userStatistics.AddPlayTime(SessionLength / 3, 2500);
+            userStatistics.AddPlayTime(SessionLength / 3, 2500, UserInformation.SystemTime.Now().ToShortTimeString());
             Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
-            userStatistics.AddPlayTime(SessionLength / 3, 2500);
+            userStatistics.AddPlayTime(SessionLength / 3, 2500, UserInformation.SystemTime.Now().ToShortTimeString());
             Assert.AreEqual(CanPlayStatus.CanPlay, userStatistics.CanPlay());
-            userStatistics.AddPlayTime(SessionLength / 3, 2500);
+            userStatistics.AddPlayTime(SessionLength / 3, 2500, UserInformation.SystemTime.Now().ToShortTimeString());
             if (dayIndex < 2)
             {
                 Assert.AreEqual(CanPlayStatus.HasNextTimeslot, userStatistics.CanPlay());

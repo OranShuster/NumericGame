@@ -301,8 +301,11 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     public void OnApplicationPause(bool pause)
     {
-        if (!pause)
-            BackToMenu();
+        BackToMenu();
+    }
+    void OnApplicationQuit()
+    {
+        BackToMenu();
     }
 
     public void QuitGame()

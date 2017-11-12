@@ -135,8 +135,11 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     }
     public void OnApplicationPause(bool pause)
     {
-        if (!pause)
-            BackToMenu();
+        BackToMenu();
+    }
+    void OnApplicationQuit()
+    {
+        BackToMenu();
     }
 
     //Empty methods to comply with interface

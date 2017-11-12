@@ -77,7 +77,7 @@ public class UserInformation : IEnumerable
 
     public CanPlayStatus CanPlay()
     {
-        Debug.Log("DEBUG|201711021421|Checking CanPlay status for " + SystemTime.Now());
+        //Debug.Log("DEBUG|201711021421|Checking CanPlay status for " + SystemTime.Now());
         //Check past days
         if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
@@ -148,7 +148,7 @@ public class UserInformation : IEnumerable
         return DateExists(date) && !FinishedDay(GetPlayDateByDateTime(date));
     }
 
-    public void AddPlayTime(int length, int score, string gameStartTime)
+    public void AddPlayTime(int length, int score)
     {
         var today = GetPlayDateByDateTime(SystemTime.Now().Date);
         if (today.CurrentSession == 0)
@@ -158,11 +158,13 @@ public class UserInformation : IEnumerable
             today.CurrentSessionTimeSecs = 0;
             today.CurrentSession++;
         }
-        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), gameStartTime, today.CurrentSession));
+        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), Utilities.SecondsToTime(GameManager.GameStartTime),
+            today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
-        Debug.Log(string.Format("INFO|201710221545|Adding {0} play time to {1}. {2} session time left", length,
-            gameStartTime,
-            today.SessionLength - today.CurrentSessionTimeSecs));
+        Debug.Log(string.Format(
+            "INFO|201710221545|{{started_time: {0}, total_time:{1}, left_time:{2}, total_points:{3}, game: {4}, session: {5}}}",
+            GameManager.GameStartTime, length, today.SessionLength - today.CurrentSessionTimeSecs, score,
+            GameManager.GameId, today.CurrentSession));
         if (today.CurrentSessionTimeSecs >= today.SessionLength)
         {
             Debug.Log(string.Format("INFO|201710221546|Incrementing session. seesion interval is {0}",

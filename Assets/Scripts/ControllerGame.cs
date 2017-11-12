@@ -219,7 +219,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     {
         try
         {
-            UserInfo.AddPlayTime((int) TotalTimePlayed, Score, GameManager.GameStartTime);
+            UserInfo.AddPlayTime((int) TotalTimePlayed, Score);
             UserInfo.SendUserInfoToServerBlocking();
         }
         finally

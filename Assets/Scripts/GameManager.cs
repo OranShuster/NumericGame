@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     public static float TotalTimePlayed = 0;
     public static bool ConnectionError { get; set; }
     public static int GameId;
-    public static string GameStartTime;
+    public static int GameStartTime;
 
     void Awake()
     {

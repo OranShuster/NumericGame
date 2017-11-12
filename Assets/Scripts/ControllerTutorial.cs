@@ -47,7 +47,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         TutorialText.text = Utilities.LoadStringFromFile(tutorialHeaderStringName, 35);
         MenuButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
         if (GameManager.SeriesDelta == 0)
-            GameManager.GameStartTime = UserInformation.SystemTime.Now().ToShortTimeString();
+            GameManager.GameStartTime = Utilities.GetEpochTime();
         Debug.Log(string.Format("INFO|201710221539|Level {0} Tutorial started",GameManager.SeriesDelta));
     }
 
@@ -125,7 +125,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         try
             {
             if (GameManager.SeriesDelta == 0) return;
-            UserInformation.AddPlayTime((int) GameManager.TotalTimePlayed, Score,GameManager.GameStartTime);
+            UserInformation.AddPlayTime((int) GameManager.TotalTimePlayed, Score);
             UserInformation.SendUserInfoToServerBlocking();
         }
         finally

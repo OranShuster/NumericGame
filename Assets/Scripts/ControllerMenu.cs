@@ -114,7 +114,7 @@ public class ControllerMenu : MonoBehaviour
             var secondsToAdd = int.Parse(secondsInputField.text);
             var scoreToAdd = int.Parse(scoreInputField.text);
             var timeToAdd = minutesToAdd * 60 + secondsToAdd;
-            UserInformation.AddPlayTime(timeToAdd, scoreToAdd,UserInformation.SystemTime.Now().ToShortTimeString());
+            UserInformation.AddPlayTime(timeToAdd, scoreToAdd);
             UpdateStatisticsScrollView();    
         }
         catch (Exception e)

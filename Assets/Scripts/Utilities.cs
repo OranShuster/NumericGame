@@ -9,7 +9,7 @@ public static class Utilities
 {
     public static int GetEpochTime()
     {
-        return (int) UserInformation.SystemTime.Now().ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        return (int) UserInformation.SystemTime.Now().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
     }
 
     public static bool AreNeighbors(NumberCell s1, NumberCell s2)

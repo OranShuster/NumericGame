@@ -301,14 +301,10 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
 
     public void OnApplicationPause(bool pause)
     {
-        BackToMenu();
-    }
-    void OnApplicationQuit()
-    {
-        BackToMenu();
-    }
-
-    public void QuitGame()
-    {
+        if (pause)
+        {
+            Debug.Log("INFO|201711131814|Game OnApplicationPause hit");
+            BackToMenu();
+        }
     }
 }

@@ -67,7 +67,7 @@ public class ControllerMenu : MonoBehaviour
 
     public void StartGame()
     {
-        GameManager.SeriesDelta = 0;
+        GameManager.Levels.CurrentLevel = 0;
         GameManager.Score = 0;
         GameManager.TotalTimePlayed = 0;
         GameManager.UserInformation.ClearScoreReports();

@@ -42,13 +42,13 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         var tutorialHeaderStringName = "TutorialHeaderControl";
         if (!UserInformation.IsControlSession())
         {
-            tutorialHeaderStringName = string.Format("TutorialHeader{0}", GameManager.SeriesDelta);
+            tutorialHeaderStringName = string.Format("TutorialHeader{0}", GameManager.Levels.CurrentLevel);
         }
         TutorialText.text = Utilities.LoadStringFromFile(tutorialHeaderStringName, 35);
         MenuButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
-        if (GameManager.SeriesDelta == 0)
-            GameManager.GameStartTime = UserInformation.SystemTime.Now();
-        Debug.Log(string.Format("INFO|201710221539|Level {0} Tutorial started",GameManager.SeriesDelta));
+        if (GameManager.Levels.CurrentLevel == 0)
+            GameManager.GameStartTime = Utilities.GetEpochTime();
+        Debug.Log(string.Format("INFO|201710221539|Level {0} Tutorial started",GameManager.Levels.CurrentLevel));
     }
 
     public void StartGame()
@@ -124,7 +124,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
     {
         try
             {
-            if (GameManager.SeriesDelta == 0) return;
+            if (GameManager.Levels.CurrentLevel == 0) return;
             UserInformation.AddPlayTime((int) GameManager.TotalTimePlayed, Score);
             UserInformation.SendUserInfoToServerBlocking();
         }

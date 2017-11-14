@@ -65,18 +65,18 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     {
         ShowScore();
         _gameTimer = Constants.StartingGameTimer;
-        LevelNumText.text = GameManager.SeriesDelta.ToString();
+        LevelNumText.text = GameManager.Levels.CurrentLevel.ToString();
         TimeHeaderText.text = Utilities.LoadStringFromFile("Timer");
         ScoreHeaderText.text = Utilities.LoadStringFromFile("Score");
         PlayTimeHeaderText.text = Utilities.LoadStringFromFile("PlayTime");
         LevelHeaderText.text = Utilities.LoadStringFromFile("Level");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
-        if (GameManager.SeriesDelta == 0)
+        if (GameManager.Levels.CurrentLevel == 0)
         {
             IncreaseScore(0);
             StartCoroutine(UserInfo.SendUserInfoToServer());
         }
-        Debug.Log(string.Format("INFO|201710221540|Level {0} Started", GameManager.SeriesDelta));
+        Debug.Log(string.Format("INFO|201710221540|Level {0} Started", GameManager.Levels.CurrentLevel));
     }
 
     // Update is called once per frame
@@ -210,7 +210,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     {
         MenuButton.interactable = false;
         _gamePaused = true;
-        ShowLevelupMessage(GameManager.SeriesDelta);
+        ShowLevelupMessage(GameManager.Levels.CurrentLevel);
     }
 
     public void BackToMenu()

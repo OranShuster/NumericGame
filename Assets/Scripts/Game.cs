@@ -13,8 +13,8 @@ public class Game : MonoBehaviour
 
     private int Level
     {
-        get { return GameManager.SeriesDelta; }
-        set { GameManager.SeriesDelta=value; }
+        get { return GameManager.Levels.CurrentLevel; }
+        set { GameManager.Levels.CurrentLevel=value; }
     }
 
     private Vector2 _cellSize;
@@ -31,9 +31,10 @@ public class Game : MonoBehaviour
     public GameObject Manager;
     public Image GameField;
 
-    private int[] NextLevelScore
+    private int NextLevelScore
     {
-        get {return Constants.LevelUpScores;}
+        get {return GameManager.Levels.NextLevelScore;}
+        set { GameManager.Levels.NextLevelScore = value; }
     } 
 
     private SoundManager _soundManager;
@@ -79,7 +80,7 @@ public class Game : MonoBehaviour
             case GameState.SelectionStarted:
                 if (hit != _hitGo)
                 {
-                    if (!Utilities.AreNeighbors(_hitGo.GetComponent<NumberCell>(), hit.GetComponent<NumberCell>()))
+                    if (!AreNeighbors(_hitGo.GetComponent<NumberCell>(), hit.GetComponent<NumberCell>()))
                     {
                         SetTileColorBase(_hitGo);
                         SetTileColorSelected(hit);
@@ -167,9 +168,7 @@ public class Game : MonoBehaviour
 
     public IEnumerator ClearBoardMatches()
     {
-        var totalMatches = _shapes.GetMatches(_maxNumber, Level, GameManager.UserInformation.IsControlSession(), false);
-        var sameMatches = _shapes.GetMatches(_maxNumber, 0, GameManager.UserInformation.IsControlSession(), false);
-        totalMatches.CombineMatchesInfo(sameMatches,false);
+        var totalMatches = _shapes.GetMatches(_maxNumber, GameManager.UserInformation.IsControlSession(), false);
         yield return StartCoroutine(HandleMatches(totalMatches, false, false, true));
         GameField.gameObject.GetComponent<CanvasGroup>().interactable = true;
         GameField.gameObject.GetComponent<CanvasGroup>().alpha = 1;
@@ -229,18 +228,13 @@ public class Game : MonoBehaviour
             //will wait for both of the above animations
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
-            if (GameManager.Score >= NextLevelScore[Level])
+            if (GameManager.Score >= NextLevelScore)
                 break;
 
             //Check for new matches with new tiles
-            totalMatches = _shapes.GetMatches(_maxNumber, Level, GameManager.UserInformation.IsControlSession(), withScore);
-
-            //Search identical matches 
-            if (Level == 0) continue;
-            var sameMatches = _shapes.GetMatches(_maxNumber, 0, GameManager.UserInformation.IsControlSession(), false);
-            totalMatches.CombineMatchesInfo(sameMatches, GameManager.UserInformation.IsControlSession());
+            totalMatches = _shapes.GetMatches(_maxNumber, GameManager.UserInformation.IsControlSession(), withScore);
         }
-        if (GameManager.Score >= NextLevelScore[Level])
+        if (GameManager.Score >= NextLevelScore)
         {
             LevelUp();
             _controllerScript.LevelUp();
@@ -266,13 +260,7 @@ public class Game : MonoBehaviour
         SetTileColorBase(_hitGo);
 
         //Find matches
-        var totalMatches = _shapes.GetMatches(_maxNumber, Level, GameManager.UserInformation.IsControlSession(), true);
-        //Find identical strings with no score
-        if (Level != 0)
-        {
-            var sameMatches = _shapes.GetMatches(_maxNumber, 0, false,false);
-            totalMatches.CombineMatchesInfo(sameMatches, GameManager.UserInformation.IsControlSession());
-        }
+        var totalMatches = _shapes.GetMatches(_maxNumber, GameManager.UserInformation.IsControlSession(), true);
         if (totalMatches.NumberOfMatches>0)
             yield return StartCoroutine(HandleMatches(totalMatches));
         else
@@ -408,9 +396,16 @@ public class Game : MonoBehaviour
 
     public void SetNextLevelScore(int score, int level)
     {
-        NextLevelScore[level] = score;
-        if (GameManager.Score < NextLevelScore[Level]) return;
+        NextLevelScore = score;
+        if (GameManager.Score < NextLevelScore) return;
         LevelUp();
         _controllerScript.LevelUp();
+    }
+    public static bool AreNeighbors(NumberCell s1, NumberCell s2)
+    {
+        return (s1.Column == s2.Column ||
+                s1.Row == s2.Row)
+               && Mathf.Abs(s1.Column - s2.Column) <= 1
+               && Mathf.Abs(s1.Row - s2.Row) <= 1;
     }
 }

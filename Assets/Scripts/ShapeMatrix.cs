@@ -19,7 +19,7 @@ public class ShapesMatrix
 
     public GameObject this[int row, int column]
     {
-        get { return _shapes[row, column];  }
+        get { return _shapes[row, column]; }
         set
         {
             if (value == null) return;
@@ -35,7 +35,6 @@ public class ShapesMatrix
 
     public void Swap(GameObject g1, GameObject g2)
     {
-
         var g1Shape = g1.GetComponent<NumberCell>();
         var g2Shape = g2.GetComponent<NumberCell>();
 
@@ -54,73 +53,62 @@ public class ShapesMatrix
         _shapes[g2Row, g2Column] = temp;
     }
 
-    public MatchesInfo GetMatches(int boardSize, int seriesDelta, bool control, bool countScore)
+    public MatchesInfo GetMatches(int boardSize, bool control, bool withScore)
     {
         var matchesInfo = new MatchesInfo();
         for (var ind = 0; ind < boardSize; ind++)
         {
-            var rowMatches = GetMatchesOnIndex(ind, seriesDelta, true, control, countScore);
-            matchesInfo.CombineMatchesInfo(rowMatches, control, countScore);
-            var colMatches = GetMatchesOnIndex(ind, seriesDelta, false, control, countScore);
-            matchesInfo.CombineMatchesInfo(colMatches, control, countScore);
+            var rowMatches = GetMatchesOnIndex(ind, true, control);
+            matchesInfo.CombineMatchesInfo(rowMatches, withScore);
+            var colMatches = GetMatchesOnIndex(ind, false, control);
+            matchesInfo.CombineMatchesInfo(colMatches, withScore);
         }
+        if (!withScore)
+            matchesInfo.AddedScore = 0;
         return matchesInfo;
     }
 
-    private MatchesInfo GetMatchesOnIndex(int ind, int delta, bool isRow, bool control, bool countScore)
+    private MatchesInfo GetMatchesOnIndex(int ind, bool isRow, bool control)
     {
         var allMatches = new MatchesInfo();
+        var addedScore = 0;
         var values = ToArray(ind, isRow);
-        int numOfMatches;   
-        //left->right or up->down
-        var seriesIndexes = FindSeries(values, delta, out numOfMatches);
-        allMatches.NumberOfMatches += numOfMatches;
-        if (isRow)
-            foreach (var colIndex in seriesIndexes)
-                allMatches.AddTile(_shapes[ind, colIndex], control, countScore);
-        else
-            foreach (var rowIndex in seriesIndexes)
-                allMatches.AddTile(_shapes[rowIndex, ind], control, countScore);
-        if (delta == 0)
-            return allMatches;
-        //right->left or down->up
-        seriesIndexes = FindSeries(values, -delta, out numOfMatches);
-        allMatches.NumberOfMatches += numOfMatches;
-        if (isRow)
-            foreach (var colIndex in seriesIndexes)
-                allMatches.AddTile(_shapes[ind, colIndex], control, countScore);
-        else
-            foreach (var rowIndex in seriesIndexes)
-                allMatches.AddTile(_shapes[rowIndex, ind], control, countScore);
-        return allMatches;
-    }
-
-    private static List<int> FindSeries(int[] values, int delta, out int numOfMatches)
-    {
-        numOfMatches = 0;
-        var allSeriesIndexes = new List<int>();
-        var curSeriesIndexes = new List<int>();
-        for (var ind = 0; ind < values.Length - 1; ind++)
+        var maxSize = GameManager.Levels.maxSeriesSize;
+        var minSize = GameManager.Levels.minSeriesSize;
+        var usedStartingIndex = values.Length + 1;
+        var usedEndingIndex = -1;
+        var seriesIndexes = new List<int>();
+        for (var subArraySize = maxSize; subArraySize >= minSize; subArraySize--)
         {
-            var curDiff = values[ind + 1] - values[ind];
-            if (curDiff == delta)
+            for (var startIndex = 0; startIndex <= values.Length - subArraySize; startIndex++)
             {
-                if (curSeriesIndexes.Count == 0)
-                    curSeriesIndexes.Add(ind);
-                curSeriesIndexes.Add(ind + 1);
-                continue;
+                var subArray = values.SubArray(startIndex, subArraySize);
+                var endIndex = startIndex + subArraySize - 1;
+                if (startIndex > usedStartingIndex && startIndex < usedEndingIndex && endIndex < usedEndingIndex &&
+                    endIndex > usedStartingIndex)
+                    continue;
+                var seriesInfo = GameManager.Levels.get_series_info(subArray.ToInt()) ??
+                                 GameManager.Levels.get_series_info(subArray.Reverse().ToArray().ToInt());
+                if (seriesInfo == null)
+                    continue;
+                usedStartingIndex = startIndex;
+                usedEndingIndex = endIndex;
+                if (control)
+                    addedScore += Constants.ContrlScorePerMatch;
+                else
+                    addedScore += seriesInfo.Score;
+                allMatches.NumberOfMatches++;
+                seriesIndexes.AddRange(Enumerable.Range(startIndex, subArraySize));
             }
-            if (curSeriesIndexes.Count >= 3)
-            {
-                allSeriesIndexes.AddRange(curSeriesIndexes);
-                numOfMatches++;
-            }
-            curSeriesIndexes.Clear();
         }
-        if (curSeriesIndexes.Count < 3) return allSeriesIndexes;
-        allSeriesIndexes.AddRange(curSeriesIndexes);
-        numOfMatches++;
-        return allSeriesIndexes;
+        if (isRow)
+            foreach (var colIndex in seriesIndexes)
+                allMatches.AddTile(_shapes[ind, colIndex]);
+        else
+            foreach (var rowIndex in seriesIndexes)
+                allMatches.AddTile(_shapes[rowIndex, ind]);
+        allMatches.AddedScore = addedScore;
+        return allMatches;
     }
 
     public void Remove(GameObject item)

@@ -123,7 +123,11 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
+<<<<<<< HEAD
   bundleVersion: 2017.1124.1155
+=======
+  bundleVersion: 2017.1121.1841
+>>>>>>> bfc0840... [APK] New APK with JSON series
   preloadedAssets: []
   metroInputSource: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -155,7 +159,11 @@ PlayerSettings:
     tvOS: com.OranShuster.CandyCrushPsycho
   buildNumber:
     iOS: 0
+<<<<<<< HEAD
   AndroidBundleVersionCode: 1155
+=======
+  AndroidBundleVersionCode: 1841
+>>>>>>> bfc0840... [APK] New APK with JSON series
   AndroidMinSdkVersion: 16
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 1

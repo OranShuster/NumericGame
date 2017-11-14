@@ -6,12 +6,12 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public static UserInformation UserInformation;
-    public static int SeriesDelta = 0;
     public static int Score = 0;
     public static float TotalTimePlayed = 0;
     public static bool ConnectionError { get; set; }
     public static int GameId;
     public static DateTime GameStartTime;
+    public static Levels Levels;
     private static bool _sentCanPlayStatusValue = false;
 
     public static bool SentCanPlayStatus
@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
         ZestKit.removeAllTweensOnLevelLoad = true;
         Application.logMessageReceived += Utilities.LoggerCallback;
         Application.targetFrameRate = 60;
+        Levels = new Levels();
         DontDestroyOnLoad(gameObject);
     }
 

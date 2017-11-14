@@ -12,14 +12,6 @@ public static class Utilities
         return (int) UserInformation.SystemTime.Now().ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
     }
 
-    public static bool AreNeighbors(NumberCell s1, NumberCell s2)
-    {
-        return (s1.Column == s2.Column ||
-                s1.Row == s2.Row)
-               && Mathf.Abs(s1.Column - s2.Column) <= 1
-               && Mathf.Abs(s1.Row - s2.Row) <= 1;
-    }
-
     public static string LoadStringFromFile(string key, int lineLength = 15)
     {
         INIParser ini = new INIParser();
@@ -32,12 +24,6 @@ public static class Utilities
     {
         var ret = string.Join(",", Array.ConvertAll(arr, i => i.ToString()));
         return ret;
-    }
-
-    public static float Remap(this float value, float from1, float to1, float from2, float to2)
-    {
-        var ret = (value - from1) / (to1 - from1) * (to2 - from2) + from2;
-        return Mathf.Clamp(ret, from2, to2);
     }
 
     public static void CreateMockUserData(bool control)
@@ -167,6 +153,17 @@ public static class Utilities
             t.Minutes,
             t.Seconds);
     }
+    public static T[] SubArray<T>(this T[] data, int index, int length)
+    {
+        T[] result = new T[length];
+        Array.Copy(data, index, result, 0, length);
+        return result;
+    }
+
+    public static int ToInt(this int[] data)
+    {
+        return data.Select((t, i) => t * Convert.ToInt32(Math.Pow(10, data.Length - i - 1))).Sum();
+    }
 }
 
 public class LogMessage
@@ -176,28 +173,6 @@ public class LogMessage
     public string priority;
     public string location;
     public string raw_data;
-}
-
-public class CoroutineWithData
-{
-    public Coroutine coroutine { get; private set; }
-    public object result;
-    private IEnumerator target;
-
-    public CoroutineWithData(MonoBehaviour owner, IEnumerator target)
-    {
-        this.target = target;
-        this.coroutine = owner.StartCoroutine(Run());
-    }
-
-    private IEnumerator Run()
-    {
-        while (target.MoveNext())
-        {
-            result = target.Current;
-            yield return result;
-        }
-    }
 }
 
 public static class DebugUtilities
@@ -217,7 +192,7 @@ public static class DebugUtilities
         Debug.Log(string.Format("DEBUG|201710221545|{0}", GetArrayContents(shapes, size)));
     }
 
-    public static string GetArrayContents(ShapesMatrix shapes, int size)
+    private static string GetArrayContents(ShapesMatrix shapes, int size)
     {
         var x = string.Empty;
         for (var row = 0; row < size; row++)
@@ -236,15 +211,5 @@ public static class DebugUtilities
             x += Environment.NewLine;
         }
         return x;
-    }
-
-    public static Color HexToRgb(string hex)
-    {
-        var bigint = Convert.ToUInt32(hex, 16);
-        var r = (bigint >> 16) & 255;
-        var g = (bigint >> 8) & 255;
-        var b = bigint & 255;
-
-        return new Color(r, g, b);
     }
 }

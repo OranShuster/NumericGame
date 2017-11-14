@@ -19,20 +19,15 @@ public class MatchesInfo
         }
     }
 
-    public void AddTile(GameObject go, bool control,bool withScore )
+    public void AddTile(GameObject go)
     {
         _matchedCells.Add(go);
-        if (!withScore) return;
-        if (control)
-            AddedScore += 5;
-        else
-            AddedScore += go.GetComponent<NumberCell>().Value;
     }
 
-    private void AddTiles(IEnumerable<GameObject> gos,bool control, bool withScore=true)
+    private void AddTiles(IEnumerable<GameObject> gos)
     {
         foreach (var item in gos)
-            AddTile(item,control,withScore);
+            AddTile(item);
     }
 
     public MatchesInfo()
@@ -52,10 +47,12 @@ public class MatchesInfo
         return string.Format("numbers - {0} Score - {1}",numbers,totalScore);
     }
 
-    public void CombineMatchesInfo(MatchesInfo other, bool control, bool withScore=false)
+    public void CombineMatchesInfo(MatchesInfo other, bool withScore)
     {
         NumberOfMatches += other.NumberOfMatches;
-        AddTiles(other.MatchedCells,control,withScore);
+        if (withScore)
+            AddedScore += other.AddedScore;
+        AddTiles(other.MatchedCells);
     }
 }
 

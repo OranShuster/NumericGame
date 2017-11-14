@@ -134,13 +134,11 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
             SceneManager.LoadScene("UserRegistration");
         }
     }
-    public void OnApplicationPause(bool pause)
-    {
-        if (pause)
-        {
-            Debug.Log("INFO|201711131815|Tutorial OnApplicationPause hit");
-            BackToMenu();
-        }
+
+    private void OnApplicationQuit()
+    {           
+        Debug.Log("INFO|201711131815|Tutorial OnApplicationQuit hit");
+        BackToMenu();
     }
 
     //Empty methods to comply with interface

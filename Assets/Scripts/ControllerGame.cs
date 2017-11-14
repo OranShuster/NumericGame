@@ -299,12 +299,9 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         StartCoroutine(UserInfo.SendUserInfoToServer());
     }
 
-    public void OnApplicationPause(bool pause)
-    {
-        if (pause)
-        {
-            Debug.Log("INFO|201711131814|Game OnApplicationPause hit");
-            BackToMenu();
-        }
+    private void OnApplicationQuit()
+    {           
+        Debug.Log("INFO|201711131815|Game OnApplicationQuit hit");
+        BackToMenu();
     }
 }

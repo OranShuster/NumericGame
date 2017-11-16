@@ -30,6 +30,12 @@ public class GameManager : MonoBehaviour
     {
         StartCoroutine(UserInformation.SendLogs(msg));
     }
+
+    public void OnApplicationPause(bool pause)
+    {
+        Debug.Log(pause ? "INFO|20171161428|Game minimized" : "INFO|201711161429|Game maximized");
+    }
+    
 }
 
 

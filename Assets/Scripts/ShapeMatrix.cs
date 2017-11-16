@@ -71,7 +71,7 @@ public class ShapesMatrix
     {
         var allMatches = new MatchesInfo();
         var values = ToArray(ind, isRow);
-        int numOfMatches;
+        int numOfMatches;   
         //left->right or up->down
         var seriesIndexes = FindSeries(values, delta, out numOfMatches);
         allMatches.NumberOfMatches += numOfMatches;

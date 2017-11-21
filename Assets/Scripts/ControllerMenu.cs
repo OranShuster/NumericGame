@@ -40,12 +40,12 @@ public class ControllerMenu : MonoBehaviour
         InstructionsButtonText.text = Utilities.LoadStringFromFile("Instructions");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
         UpdateStatisticsScrollView();
-        DebugPanel.SetActive(Debug.isDebugBuild);            
+        DebugPanel.SetActive(Debug.isDebugBuild);   
+        Debug.Log(string.Format("INFO|201711211220|Running version {}",Application.version));
     }
 
     void Update()
     {
-        
         var canPlayStatus = UserInformation.CanPlay();
         switch (canPlayStatus)
         {

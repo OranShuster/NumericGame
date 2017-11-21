@@ -11,6 +11,19 @@ public class GameManager : MonoBehaviour
     public static bool ConnectionError { get; set; }
     public static int GameId;
     public static int GameStartTime;
+    private static bool _sentCanPlayStatusValue = false;
+
+    public static bool SentCanPlayStatus
+    {
+        get { return _sentCanPlayStatusValue; }
+        set
+        {
+            _sentCanPlayStatusValue = value;
+             #if UNITY_EDITOR
+            _sentCanPlayStatusValue = false;
+            #endif
+        }
+    }
 
     void Awake()
     {
@@ -18,7 +31,7 @@ public class GameManager : MonoBehaviour
             Instance = this;
         else if (Instance != this)
             Destroy(gameObject);
-        
+
         ZestKit.enableBabysitter = true;
         ZestKit.removeAllTweensOnLevelLoad = true;
         Application.logMessageReceived += Utilities.LoggerCallback;
@@ -35,7 +48,4 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log(pause ? "INFO|20171161428|Game minimized" : "INFO|201711161429|Game maximized");
     }
-    
 }
-
-

@@ -67,40 +67,76 @@ public class UserInformation : IEnumerable
         var today = GetToday();
         var elapsedTime = (today.CurrentSession - 1) * today.SessionLength + today.CurrentSessionTimeSecs;
         elapsedTime += (today.CurrentSession - 1) * today.SessionInterval;
+        if (today.LastSessionsEndTime != 0)
+            elapsedTime += Utilities.GetEpochTime() - today.LastSessionsEndTime;
         var totalPlayTime = today.NumberOfSessions * today.SessionLength +
                             (today.NumberOfSessions - 1) * today.SessionInterval;
         var timeLeft = totalPlayTime - elapsedTime;
-//        Debug.Log(string.Format("DEBUG|201711131017| {0} = {1} - {2}",timeLeft,totalPlayTime,elapsedTime));
-//        Debug.Log("DEBUG|201711072029|" + today);
+        Debug.Log(string.Format("DEBUG|201711131017| {0} = {1} - {2}",timeLeft,totalPlayTime,elapsedTime));
+        Debug.Log("DEBUG|201711072029|" + today);
         return timeLeft;
     }
 
     public CanPlayStatus CanPlay()
     {
-        //Debug.Log("DEBUG|201711021421|Checking CanPlay status for " + SystemTime.Now());
         //Check past days
         if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
         {
+            if (GameManager.SentCanPlayStatus) return CanPlayStatus.NoMoreTimeSlots;
+            GameManager.SentCanPlayStatus = true;
+            Debug.Log("INFO|201711202241|Past days are not finished");
             return CanPlayStatus.NoMoreTimeSlots;
         }
 
         //Check Today
         if (!DateExistsAndHasSessions(SystemTime.Now().Date))
-            return GetNextPlayDate() == null ? CanPlayStatus.NoMoreTimeSlots : CanPlayStatus.HasNextTimeslot;
+        {
+            if (GetNextPlayDate() == null)
+            {
+                if (GameManager.SentCanPlayStatus) return CanPlayStatus.NoMoreTimeSlots;
+                GameManager.SentCanPlayStatus = true;
+                Debug.Log("INFO|201711202242|No more future time slots");
+                return CanPlayStatus.NoMoreTimeSlots;
+
+            }
+            if (GameManager.SentCanPlayStatus) return CanPlayStatus.HasNextTimeslot;
+            GameManager.SentCanPlayStatus = true;
+            Debug.Log("INFO|201711202242|Has future time slot");
+            return CanPlayStatus.HasNextTimeslot;
+        }
         var remainingGameTime = CalculateRemainingPlayTime();
         var timeRemainingInDay = (int) (SystemTime.Now().Date.AddDays(1) - SystemTime.Now()).TotalSeconds;
-//        Debug.Log("DEBUG|201711021423|timeRemainingInDay = " + timeRemainingInDay);
         //Check if the sessions can be finished
         if (timeRemainingInDay < remainingGameTime)
+        {
+            if (GameManager.SentCanPlayStatus) return CanPlayStatus.NoMoreTimeSlots;
+            GameManager.SentCanPlayStatus = true;
+            Debug.Log(string.Format("INFO|201711202244|Not enough remaining time {0}/{1}", remainingGameTime,
+                timeRemainingInDay));
             return CanPlayStatus.NoMoreTimeSlots;
+        }
         //Check if you are after 8:00AM
         if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
+        {
+            if (GameManager.SentCanPlayStatus) return CanPlayStatus.HasNextTimeslot;
+            GameManager.SentCanPlayStatus = true;
+            Debug.Log("INFO|201711202245|Before 8AM");
             return CanPlayStatus.HasNextTimeslot;
+        }
+        
         var today = GetToday();
-        return Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval
-            ? CanPlayStatus.HasNextTimeslot
-            : CanPlayStatus.CanPlay;
+        if (Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval)
+        {
+            if (GameManager.SentCanPlayStatus) return CanPlayStatus.HasNextTimeslot;
+            GameManager.SentCanPlayStatus = true;
+            Debug.Log("INFO|201711202247|Session interval time not passed");
+            return CanPlayStatus.HasNextTimeslot;
+        }
+        if (GameManager.SentCanPlayStatus) return CanPlayStatus.CanPlay;
+        GameManager.SentCanPlayStatus = true;
+        Debug.Log("INFO|201711202248|Can play");
+        return CanPlayStatus.CanPlay;
     }
 
     private bool DateExists(DateTime datetime)
@@ -157,6 +193,7 @@ public class UserInformation : IEnumerable
         {
             today.CurrentSessionTimeSecs = 0;
             today.CurrentSession++;
+            today.LastSessionsEndTime = 0;
         }
         today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), Utilities.SecondsToTime(GameManager.GameStartTime),
             today.CurrentSession));

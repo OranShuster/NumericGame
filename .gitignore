@@ -34,3 +34,4 @@ sysinfo.txt
 
 /.idea/
 ./Assets/Fabric/Editor/Prebuild/AndroidBuildPropertiesManager.cs
+Test_Results.xml

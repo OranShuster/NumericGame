@@ -299,7 +299,7 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
         StartCoroutine(UserInfo.SendUserInfoToServer());
     }
 
-    private void OnApplicationQuit()
+    public void OnApplicationQuit()
     {           
         Debug.Log("INFO|201711131815|Game OnApplicationQuit hit");
         BackToMenu();

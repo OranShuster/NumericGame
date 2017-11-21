@@ -1,9 +1,28 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 
 public class BuildScript
 {
     static void Build_Android()
     {
+        try
+        {
+            var now = DateTime.Now;
+            var major = int.Parse(now.ToString("yyyy"));
+            var minor = int.Parse(now.ToString("MMdd"));
+            var build = int.Parse(now.ToString("HHmm"));
+            PlayerSettings.bundleVersion = major + "." + minor + "." + build;
+            PlayerSettings.Android.bundleVersionCode = build;
+            UnityEngine.Debug.Log("Finished with bundleversioncode:" + PlayerSettings.Android.bundleVersionCode +
+                                  " and version" + PlayerSettings.bundleVersion);
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogError(e);
+            UnityEngine.Debug.LogError(
+                "AutoIncrementBuildVersion script failed. Make sure your current bundle version is in the format X.X.X (e.g. 1.0.0) and not X.X (1.0) or X (1).");
+            throw;
+        }
         BuildPlayerOptions buildPlayerOptions =
             new BuildPlayerOptions
             {
@@ -17,7 +36,7 @@ public class BuildScript
                 options = BuildOptions.None
             };
         BuildPipeline.BuildPlayer(buildPlayerOptions);
-        BuildPlayerOptions buildPlayerOptions_dev =
+        BuildPlayerOptions buildPlayerOptionsDev =
             new BuildPlayerOptions
             {
                 scenes = new[]
@@ -29,6 +48,6 @@ public class BuildScript
                 target = BuildTarget.Android,
                 options = BuildOptions.Development
             };
-        BuildPipeline.BuildPlayer(buildPlayerOptions_dev);
+        BuildPipeline.BuildPlayer(buildPlayerOptionsDev);
     }
 }

@@ -41,7 +41,7 @@ public class ControllerMenu : MonoBehaviour
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
         UpdateStatisticsScrollView();
         DebugPanel.SetActive(Debug.isDebugBuild);   
-        Debug.Log(string.Format("INFO|201711211220|Running version {}",Application.version));
+        Debug.Log(string.Format("INFO|201711211220|Running version {0}",Application.version));
     }
 
     void Update()

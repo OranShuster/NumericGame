@@ -16,8 +16,8 @@ public class ControllerMenu : MonoBehaviour
 
     public GameObject PlayStats;
     public GameObject PlayStatsViewContent;
-    public GameObject DayStatsPrefab;         //Information line per day 
-    public GameObject RoundStatsPrefab;       //Information line per round
+    public GameObject DayStatsPrefab; //Information line per day 
+    public GameObject RoundStatsPrefab; //Information line per round
 
     public GameObject DebugPanel;
 
@@ -26,7 +26,7 @@ public class ControllerMenu : MonoBehaviour
         get { return GameManager.UserInformation; }
     }
 
-    public Sprite DateStatusBadImage; 
+    public Sprite DateStatusBadImage;
     public Sprite DateStatisOkImage;
 
     public Button StartGameButton;
@@ -40,8 +40,8 @@ public class ControllerMenu : MonoBehaviour
         InstructionsButtonText.text = Utilities.LoadStringFromFile("Instructions");
         MenuButtonText.text = Utilities.LoadStringFromFile("Menu");
         UpdateStatisticsScrollView();
-        DebugPanel.SetActive(Debug.isDebugBuild);   
-        Debug.Log(string.Format("INFO|201711211220|Running version {0}",Application.version));
+        DebugPanel.SetActive(Debug.isDebugBuild);
+        Debug.Log(string.Format("INFO|201711211220|Running version {0}", Application.version));
     }
 
     void Update()
@@ -55,7 +55,8 @@ public class ControllerMenu : MonoBehaviour
                 return;
             case CanPlayStatus.HasNextTimeslot:
                 StartGameButton.interactable = false;
-                StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30), UserInformation.TimeToNextSession());
+                StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30),
+                    UserInformation.TimeToNextSession());
                 return;
             default:
                 StartGameButton.interactable = true;
@@ -80,16 +81,17 @@ public class ControllerMenu : MonoBehaviour
                 GameManager.UserInformation.GetToday().CurrentSessionTimeSecs = 0;
                 GameManager.UserInformation.GetToday().CurrentSession++;
             }
-
         }
         var sessionId = UserInformation.GetToday().CurrentSession;
-        GameManager.GameId = UserInformation.GetToday().GameRounds.Count(round => round.SessionInd == sessionId)+1;
+        GameManager.GameId = UserInformation.GetToday().GameRounds.Count(round => round.SessionInd == sessionId) + 1;
         SceneManager.LoadScene("Tutorial");
     }
 
     public void ShowPlayTimeStatistics()
     {
         PlayStats.SetActive(!PlayStats.activeInHierarchy);
+        if (PlayStats.activeInHierarchy)
+            UpdateStatisticsScrollView();
         GameInstructionsText.SetActive(false);
     }
 
@@ -97,7 +99,6 @@ public class ControllerMenu : MonoBehaviour
     {
         PlayStats.SetActive(false);
         GameInstructionsText.SetActive(!GameInstructionsText.activeInHierarchy);
-
     }
 
     public void AddGameTime()
@@ -115,7 +116,7 @@ public class ControllerMenu : MonoBehaviour
             var scoreToAdd = int.Parse(scoreInputField.text);
             var timeToAdd = minutesToAdd * 60 + secondsToAdd;
             UserInformation.AddPlayTime(timeToAdd, scoreToAdd);
-            UpdateStatisticsScrollView();    
+            UpdateStatisticsScrollView();
         }
         catch (Exception e)
         {
@@ -126,21 +127,25 @@ public class ControllerMenu : MonoBehaviour
     public void ResetTime()
     {
         UserInformation.SystemTime.ResetDateTime();
+        UpdateStatisticsScrollView();
     }
-    
+
     public void ChangeTimeMinute(int amount)
     {
         UserInformation.SystemTime.SetDateTime(UserInformation.SystemTime.Now().AddMinutes(amount));
+        UpdateStatisticsScrollView();
     }
-    
+
     public void ChangeTimeHour(int amount)
     {
         UserInformation.SystemTime.SetDateTime(UserInformation.SystemTime.Now().AddHours(amount));
+        UpdateStatisticsScrollView();
     }
 
     public void ChangeTimeDay(int amount)
     {
         UserInformation.SystemTime.SetDateTime(UserInformation.SystemTime.Now().AddDays(amount));
+        UpdateStatisticsScrollView();
     }
 
     private void UpdateStatisticsScrollView()
@@ -159,16 +164,16 @@ public class ControllerMenu : MonoBehaviour
             AddEmptyLineToScrollView();
         }
     }
-    
+
     private void ClearScrollView()
     {
-        foreach(Transform child in PlayStatsViewContent.transform)
+        foreach (Transform child in PlayStatsViewContent.transform)
         {
             Destroy(child.gameObject);
         }
         PlayStatsViewContent.transform.DetachChildren();
     }
-    
+
     private void AddEmptyLineToScrollView()
     {
         var go = new GameObject("EmptyRow");
@@ -185,8 +190,8 @@ public class ControllerMenu : MonoBehaviour
         var go = Instantiate(RoundStatsPrefab, new Vector2(500, -yLoc), Quaternion.identity);
         go.layer = 5;
         go.transform.SetParent(PlayStatsViewContent.transform, false);
-        var ContentRect = PlayStatsViewContent.transform as RectTransform;
-        ContentRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, yLoc + dateStatsRect.rect.height);
+        var contentRect = PlayStatsViewContent.transform as RectTransform;
+        contentRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, yLoc + dateStatsRect.rect.height);
         return go;
     }
 
@@ -196,10 +201,11 @@ public class ControllerMenu : MonoBehaviour
         var lengthText = go.transform.Find("Length").gameObject.GetComponent<Text>();
         var scoreText = go.transform.Find("Score").gameObject.GetComponent<Text>();
         var timeText = go.transform.Find("Time").gameObject.GetComponent<Text>();
-        lengthText.text = Utilities.LoadStringFromFile("LengthHeader",30);
-        scoreText.text = Utilities.LoadStringFromFile("Score",30);
-        timeText.text = Utilities.LoadStringFromFile("Time",30);
+        lengthText.text = Utilities.LoadStringFromFile("LengthHeader", 30);
+        scoreText.text = Utilities.LoadStringFromFile("Score", 30);
+        timeText.text = Utilities.LoadStringFromFile("Time", 30);
     }
+
     private void AddRoundToScrollView(Rounds round)
     {
         var go = InstantiateRoundRow();
@@ -219,18 +225,18 @@ public class ControllerMenu : MonoBehaviour
         var go = Instantiate(DayStatsPrefab, new Vector2(500, -yLoc), Quaternion.identity);
         go.layer = 5;
         go.transform.SetParent(PlayStatsViewContent.transform, false);
-        return go; 
+        return go;
     }
 
     private void AddDateHeaderToScrollView()
     {
-        var go =InstantiateDateRow();
+        var go = InstantiateDateRow();
         var dateString = go.transform.Find("Date").gameObject.GetComponent<Text>();
         var sessionsString = go.transform.Find("Sessions").gameObject.GetComponent<Text>();
         var curSessionTime = go.transform.Find("CurrentSessionTime").gameObject.GetComponent<Text>();
-        dateString.text = Utilities.LoadStringFromFile("Date",30);
-        sessionsString.text = Utilities.LoadStringFromFile("SessionsHeader",30);
-        curSessionTime.text = Utilities.LoadStringFromFile("SessionTimeHeader",50);
+        dateString.text = Utilities.LoadStringFromFile("Date", 30);
+        sessionsString.text = Utilities.LoadStringFromFile("SessionsHeader", 30);
+        curSessionTime.text = Utilities.LoadStringFromFile("SessionTimeHeader", 50);
     }
 
     private void AddDateToScrollView(PlayDate date)
@@ -245,11 +251,11 @@ public class ControllerMenu : MonoBehaviour
             date.NumberOfSessions);
         curSessionTime.text = string.Format("{0}", date.GetRemainingSessionTimeText());
         var playDate = date.DateObject;
-        if (DateTime.Today == playDate)
-            dateStatus.sprite = (date.CurrentSession <= date.NumberOfSessions) ? null : DateStatisOkImage;
-        if (DateTime.Today > playDate)
-            dateStatus.sprite = (date.CurrentSession <= date.NumberOfSessions) ? DateStatusBadImage : DateStatisOkImage;
-        if (DateTime.Today < playDate)
+        if (UserInformation.SystemTime.Now().Date == playDate)
+            dateStatus.sprite = UserInformation.FinishedDay(date) ? DateStatisOkImage : null;
+        if (UserInformation.SystemTime.Now().Date > playDate)
+            dateStatus.sprite = UserInformation.FinishedDay(date) ? DateStatisOkImage : DateStatusBadImage;
+        if (UserInformation.SystemTime.Now().Date < playDate)
             dateStatus.sprite = null;
     }
 

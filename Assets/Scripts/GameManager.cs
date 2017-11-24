@@ -1,4 +1,5 @@
-﻿using Prime31.ZestKit;
+﻿using System;
+using Prime31.ZestKit;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -10,7 +11,7 @@ public class GameManager : MonoBehaviour
     public static float TotalTimePlayed = 0;
     public static bool ConnectionError { get; set; }
     public static int GameId;
-    public static int GameStartTime;
+    public static DateTime GameStartTime;
     private static bool _sentCanPlayStatusValue = false;
 
     public static bool SentCanPlayStatus

@@ -51,8 +51,8 @@ public static class Constants
 
     public const string TestCode = "desiree";
     public const string TestCodeControl = "desiree2";
-    public static int InvalidPlayerCode = 401;
-    public static int ControlSessionFlag = 1;
+    public const int InvalidPlayerCode = 401;
+    public const int ControlSessionFlag = 1;
 }
 
 [System.Flags]

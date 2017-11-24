@@ -72,7 +72,7 @@ public class UserInformation : IEnumerable
         var totalPlayTime = today.NumberOfSessions * today.SessionLength +
                             (today.NumberOfSessions - 1) * today.SessionInterval;
         var timeLeft = totalPlayTime - elapsedTime;
-        Debug.Log(string.Format("DEBUG|201711131017| {0} = {1} - {2}",timeLeft,totalPlayTime,elapsedTime));
+        Debug.Log(string.Format("DEBUG|201711131017| {0} = {1} - {2}", timeLeft, totalPlayTime, elapsedTime));
         Debug.Log("DEBUG|201711072029|" + today);
         return timeLeft;
     }
@@ -98,7 +98,6 @@ public class UserInformation : IEnumerable
                 GameManager.SentCanPlayStatus = true;
                 Debug.Log("INFO|201711202242|No more future time slots");
                 return CanPlayStatus.NoMoreTimeSlots;
-
             }
             if (GameManager.SentCanPlayStatus) return CanPlayStatus.HasNextTimeslot;
             GameManager.SentCanPlayStatus = true;
@@ -124,7 +123,7 @@ public class UserInformation : IEnumerable
             Debug.Log("INFO|201711202245|Before 8AM");
             return CanPlayStatus.HasNextTimeslot;
         }
-        
+
         var today = GetToday();
         if (Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval)
         {
@@ -173,7 +172,7 @@ public class UserInformation : IEnumerable
             t.Seconds);
     }
 
-    private static bool FinishedDay(PlayDate playdate)
+    public static bool FinishedDay(PlayDate playdate)
     {
         return playdate.CurrentSession == playdate.NumberOfSessions &&
                playdate.CurrentSessionTimeSecs >= playdate.SessionLength;
@@ -187,6 +186,7 @@ public class UserInformation : IEnumerable
     public void AddPlayTime(int length, int score)
     {
         var today = GetPlayDateByDateTime(SystemTime.Now().Date);
+        if (today == null) return;
         if (today.CurrentSession == 0)
             today.CurrentSession = 1;
         if (today.CurrentSessionTimeSecs == today.SessionLength)
@@ -195,7 +195,7 @@ public class UserInformation : IEnumerable
             today.CurrentSession++;
             today.LastSessionsEndTime = 0;
         }
-        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), Utilities.SecondsToTime(GameManager.GameStartTime),
+        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), GameManager.GameStartTime.ToShortTimeString(),
             today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
         Debug.Log(string.Format(
@@ -241,6 +241,9 @@ public class UserInformation : IEnumerable
             Utilities.PrintArray(_scoreReportsToBeSent.ToArray())));
         if (request.responseCode == Constants.InvalidPlayerCode)
             DisablePlayer();
+        if (request.isHttpError && !IsTestUser())
+            Debug.Log(string.Format("INFO|201711241158|Player recieved response {0} from server after score report",
+                request.responseCode));
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) yield break;
         GameManager.ConnectionError = true;
         Debug.Log(string.Format("ERROR|201710221548|{0}", request.error));
@@ -261,6 +264,8 @@ public class UserInformation : IEnumerable
             Utilities.PrintArray(_scoreReportsToBeSent.ToArray())));
         while (!request.isDone)
             Thread.Sleep(250);
+        if (request.responseCode == Constants.InvalidPlayerCode)
+            DisablePlayer();
         if (!request.isNetworkError && (request.responseCode == 200 || IsTestUser())) return;
         GameManager.ConnectionError = true;
         Debug.Log(string.Format("ERROR|201710221550|{0}", request.error));
@@ -285,9 +290,12 @@ public class UserInformation : IEnumerable
 
     public void DisablePlayer()
     {
-        foreach (var playdate in UserLocalData.PlayDates.Where(playDate => playDate.DateObject >= DateTime.Today))
+        Debug.Log(string.Format("INFO|201711241150|Player {0} is disabled", UserLocalData.UserCode));
+        foreach (var playdate in UserLocalData.PlayDates.Where(playDate => playDate.DateObject >= SystemTime.Now().Date)
+        )
             playdate.DateObject = playdate.DateObject.Date.AddYears(-1);
         UserLocalData.Save(UserLocalData);
+        GameManager.ConnectionError = true;
     }
 
     public void AddScoreReport(ScoreReports scoreReport)

@@ -82,14 +82,6 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
     // Update is called once per frame
     void Update()
     {
-        if (_mainGame.GetState() == GameState.Playing || _mainGame.GetState() == GameState.SelectionStarted ||
-            _mainGame.GetState() == GameState.Animating)
-        {
-            if (!_gamePaused)
-                UpdateTimers();
-            if (Input.GetKeyDown(KeyCode.Escape))
-                PauseGame();
-        }
         if (GameManager.ConnectionError)
         {
             GameManager.ConnectionError = false;
@@ -97,6 +89,12 @@ public class ControllerGame : MonoBehaviour, IControllerInterface
             StartCoroutine(ShowMessage("Connection_Error", GameManager.Score,
                 Mathf.CeilToInt(GameManager.TotalTimePlayed)));
         }
+        if (_mainGame.GetState() != GameState.Playing && _mainGame.GetState() != GameState.SelectionStarted &&
+            _mainGame.GetState() != GameState.Animating) return;
+        if (!_gamePaused)
+            UpdateTimers();
+        if (Input.GetKeyDown(KeyCode.Escape))
+            PauseGame();
     }
 
     public void PauseGame()

@@ -123,7 +123,7 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 2017.1123.2200
+  bundleVersion: 2017.1124.1155
   preloadedAssets: []
   metroInputSource: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -155,7 +155,7 @@ PlayerSettings:
     tvOS: com.OranShuster.CandyCrushPsycho
   buildNumber:
     iOS: 0
-  AndroidBundleVersionCode: 2200
+  AndroidBundleVersionCode: 1155
   AndroidMinSdkVersion: 16
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 1

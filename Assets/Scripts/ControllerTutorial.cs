@@ -47,7 +47,7 @@ public class ControllerTutorial : MonoBehaviour, IControllerInterface
         TutorialText.text = Utilities.LoadStringFromFile(tutorialHeaderStringName, 35);
         MenuButton.GetComponentInChildren<Text>().text = Utilities.LoadStringFromFile("Menu");
         if (GameManager.SeriesDelta == 0)
-            GameManager.GameStartTime = Utilities.GetEpochTime();
+            GameManager.GameStartTime = UserInformation.SystemTime.Now();
         Debug.Log(string.Format("INFO|201710221539|Level {0} Tutorial started",GameManager.SeriesDelta));
     }
 

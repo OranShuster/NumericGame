@@ -76,7 +76,10 @@ public enum LoseReasons
 
 public enum CanPlayStatus
 {
+    None,
     CanPlay,
     HasNextTimeslot,
-    NoMoreTimeSlots
+    PlayerDisabled,
+    GameDone,
+    WrongTIme
 }

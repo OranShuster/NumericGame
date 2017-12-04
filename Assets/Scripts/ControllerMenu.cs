@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using Prime31.ZestKit;
 using UnityEngine;
@@ -47,22 +46,37 @@ public class ControllerMenu : MonoBehaviour
     void Update()
     {
         var canPlayStatus = UserInformation.CanPlay();
-        switch (canPlayStatus)
+        if (GameManager.SentCanPlayStatus != canPlayStatus.Status)
+            Debug.Log(canPlayStatus.Message);
+        switch (canPlayStatus.Status)
         {
-            case CanPlayStatus.NoMoreTimeSlots:
-                StartGameButton.interactable = false;
-                StartGameButtonText.text = Utilities.LoadStringFromFile("NoMoreGames", 30);
-                return;
             case CanPlayStatus.HasNextTimeslot:
                 StartGameButton.interactable = false;
                 StartGameButtonText.text = string.Format("({1}) {0}", Utilities.LoadStringFromFile("NewGameButton", 30),
                     UserInformation.TimeToNextSession());
-                return;
-            default:
+                break;
+            case CanPlayStatus.CanPlay:
                 StartGameButton.interactable = true;
-                StartGameButtonText.text = Utilities.LoadStringFromFile("NewGameButton", 30);
-                return;
+                StartGameButtonText.text = string.Format("{0}", Utilities.LoadStringFromFile("NewGameButton", 30));
+                break;
+            case CanPlayStatus.PlayerDisabled:
+                StartGameButton.interactable = false;
+                StartGameButtonText.text = string.Format("{0}", Utilities.LoadStringFromFile("PlayerDisabled", 30));
+                break;
+            case CanPlayStatus.GameDone:
+                StartGameButton.interactable = false;
+                StartGameButtonText.text = string.Format("{0}", Utilities.LoadStringFromFile("GameDone", 30));
+                break;
+            case CanPlayStatus.None:
+                break;
+            case CanPlayStatus.WrongTIme:
+                StartGameButton.interactable = false;
+                StartGameButtonText.text = string.Format("{0}", Utilities.LoadStringFromFile("WrongTime", 30));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
+        GameManager.SentCanPlayStatus = canPlayStatus.Status;
     }
 
     public void StartGame()
@@ -118,7 +132,7 @@ public class ControllerMenu : MonoBehaviour
             UserInformation.AddPlayTime(timeToAdd, scoreToAdd);
             UpdateStatisticsScrollView();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             //IGNORE
         }
@@ -126,25 +140,25 @@ public class ControllerMenu : MonoBehaviour
 
     public void ResetTime()
     {
-        UserInformation.SystemTime.ResetDateTime();
+        GameManager.SystemTime.ResetDateTime();
         UpdateStatisticsScrollView();
     }
 
     public void ChangeTimeMinute(int amount)
     {
-        UserInformation.SystemTime.SetDateTime(UserInformation.SystemTime.Now().AddMinutes(amount));
+        GameManager.SystemTime.SetDateTime(GameManager.SystemTime.Now().AddMinutes(amount));
         UpdateStatisticsScrollView();
     }
 
     public void ChangeTimeHour(int amount)
     {
-        UserInformation.SystemTime.SetDateTime(UserInformation.SystemTime.Now().AddHours(amount));
+        GameManager.SystemTime.SetDateTime(GameManager.SystemTime.Now().AddHours(amount));
         UpdateStatisticsScrollView();
     }
 
     public void ChangeTimeDay(int amount)
     {
-        UserInformation.SystemTime.SetDateTime(UserInformation.SystemTime.Now().AddDays(amount));
+        GameManager.SystemTime.SetDateTime(GameManager.SystemTime.Now().AddDays(amount));
         UpdateStatisticsScrollView();
     }
 
@@ -214,7 +228,7 @@ public class ControllerMenu : MonoBehaviour
         var timeText = go.transform.Find("Time").gameObject.GetComponent<Text>();
         lengthText.text = round.GetRoundLengthText();
         scoreText.text = round.RoundScore.ToString();
-        timeText.text = round.RoundTime;
+        timeText.text = round.RoundStartTime.ToShortTimeString();
     }
 
     private GameObject InstantiateDateRow()
@@ -251,11 +265,11 @@ public class ControllerMenu : MonoBehaviour
             date.NumberOfSessions);
         curSessionTime.text = string.Format("{0}", date.GetRemainingSessionTimeText());
         var playDate = date.DateObject;
-        if (UserInformation.SystemTime.Now().Date == playDate)
+        if (GameManager.SystemTime.Now().Date == playDate)
             dateStatus.sprite = UserInformation.FinishedDay(date) ? DateStatisOkImage : null;
-        if (UserInformation.SystemTime.Now().Date > playDate)
+        if (GameManager.SystemTime.Now().Date > playDate)
             dateStatus.sprite = UserInformation.FinishedDay(date) ? DateStatisOkImage : DateStatusBadImage;
-        if (UserInformation.SystemTime.Now().Date < playDate)
+        if (GameManager.SystemTime.Now().Date < playDate)
             dateStatus.sprite = null;
     }
 

@@ -9,7 +9,7 @@ public static class Utilities
 {
     public static int GetEpochTime()
     {
-        return (int) UserInformation.SystemTime.Now().ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+        return (int) GameManager.SystemTime.Now().ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
     }
 
     public static string LoadStringFromFile(string key, int lineLength = 15)
@@ -37,8 +37,8 @@ public static class Utilities
             SessionLength = SessionLength,
             NumberOfSessions = SessionNum,
             DateObject = DateTime.Today,
-            Control = control ? 1 : 0 ,
-            Code = control  ? "desiree2" : "desiree",
+            Control = control ? 1 : 0,
+            Code = control ? "desiree2" : "desiree",
             SessionInterval = SessionInterval
         };
         mockDates[1] = new PlayDate
@@ -46,8 +46,8 @@ public static class Utilities
             SessionLength = SessionLength,
             NumberOfSessions = SessionNum,
             DateObject = DateTime.Today.AddDays(1),
-            Control = control ? 1 : 0 ,
-            Code = control  ? "desiree2" : "desiree",
+            Control = control ? 1 : 0,
+            Code = control ? "desiree2" : "desiree",
             SessionInterval = SessionInterval
         };
         mockDates[2] = new PlayDate
@@ -55,8 +55,8 @@ public static class Utilities
             SessionLength = SessionLength,
             NumberOfSessions = SessionNum,
             DateObject = DateTime.Today.AddDays(2),
-            Control = control ? 1 : 0 ,
-            Code = control  ? "desiree2" : "desiree",
+            Control = control ? 1 : 0,
+            Code = control ? "desiree2" : "desiree",
             SessionInterval = SessionInterval
         };
         var userLocalData = new UserLocalData(mockDates, control ? "desiree2" : "desiree");
@@ -177,18 +177,16 @@ public class LogMessage
 
 public static class DebugUtilities
 {
-    public static void DebugPositions(GameObject hitGo, GameObject hitGo2)
+    public static string DebugPositions(GameObject hitGo, GameObject hitGo2)
     {
-        var lala =
-            hitGo.GetComponent<NumberCell>().Row + "-"
-            + hitGo.GetComponent<NumberCell>().Column + "-"
-            + hitGo2.GetComponent<NumberCell>().Row + "-"
-            + hitGo2.GetComponent<NumberCell>().Column;
+        return hitGo.GetComponent<NumberCell>().Row + "-"
+               + hitGo.GetComponent<NumberCell>().Column + "-"
+               + hitGo2.GetComponent<NumberCell>().Row + "-"
+               + hitGo2.GetComponent<NumberCell>().Column;
     }
 
     public static void ShowArray(ShapesMatrix shapes, int size)
     {
-
         Debug.Log(string.Format("DEBUG|201710221545|{0}", GetArrayContents(shapes, size)));
     }
 
@@ -197,7 +195,6 @@ public static class DebugUtilities
         var x = string.Empty;
         for (var row = 0; row < size; row++)
         {
-
             for (var column = 0; column < size; column++)
             {
                 if (shapes[row, column] == null)

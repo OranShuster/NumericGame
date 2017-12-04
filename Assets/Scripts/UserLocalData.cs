@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -14,14 +15,14 @@ public class Rounds
 {
     public int RoundLength;
     public int RoundScore;
-    public string RoundTime;
+    public DateTime RoundStartTime;
     public int SessionInd;
 
-    public Rounds(int length, int score, string time, int sessionInd)
+    public Rounds(int length, int score, DateTime startTime, int sessionInd)
     {
         RoundLength = length;
         RoundScore = score;
-        RoundTime = time;
+        RoundStartTime = startTime;
         SessionInd = sessionInd;
     }
 
@@ -120,10 +121,12 @@ public class UserLocalData
 {
     public PlayDate[] PlayDates { get; set; }
     public string UserCode;
+    public bool PlayerDisabled = false;
 
     public UserLocalData(string userDataJson, string userCode)
     {
         PlayDates = JsonConvert.DeserializeObject<PlayDate[]>(userDataJson);
+        PlayDates = PlayDates.OrderBy(x => x.DateObject).ToArray();
         UserCode = userCode;
     }
 

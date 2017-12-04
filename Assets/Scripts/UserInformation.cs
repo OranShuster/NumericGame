@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Utilities;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -62,6 +64,18 @@ public class UserInformation : IEnumerable
         return jsonString;
     }
 
+    DateTime GetLastRoundTime()
+    {
+        var lastDayWithRounds = Array.FindLast(UserLocalData.PlayDates, x => x.GameRounds.Count > 0);
+        if (lastDayWithRounds == null)
+            return GameManager.SystemTime.Now();
+        var rounds = lastDayWithRounds.GameRounds;
+        if (rounds == null)
+            return GameManager.SystemTime.Now();
+        var lastRoundTime = rounds.Max(x => x.RoundStartTime.AddSeconds(x.RoundLength));
+        return lastRoundTime;
+    }
+
     public int CalculateRemainingPlayTime()
     {
         var today = GetToday();
@@ -72,70 +86,64 @@ public class UserInformation : IEnumerable
         var totalPlayTime = today.NumberOfSessions * today.SessionLength +
                             (today.NumberOfSessions - 1) * today.SessionInterval;
         var timeLeft = totalPlayTime - elapsedTime;
-        Debug.Log(string.Format("DEBUG|201711131017| {0} = {1} - {2}", timeLeft, totalPlayTime, elapsedTime));
-        Debug.Log("DEBUG|201711072029|" + today);
         return timeLeft;
     }
 
-    public CanPlayStatus CanPlay()
+    public CanPlayResult CanPlay()
     {
-        //Check past days
-        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < SystemTime.Now().Date)
+        //Check if diabled
+        if (UserLocalData.PlayerDisabled)
+        {
+            return new CanPlayResult(CanPlayStatus.PlayerDisabled, "INFO|201711202241|Player is disabled");
+        }
+        //Check past days are finished
+        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < GameManager.SystemTime.Now().Date)
             .Any(day => !FinishedDay(day)))
         {
-            if (GameManager.SentCanPlayStatus) return CanPlayStatus.NoMoreTimeSlots;
-            GameManager.SentCanPlayStatus = true;
-            Debug.Log("INFO|201711202241|Past days are not finished");
-            return CanPlayStatus.NoMoreTimeSlots;
+            DisablePlayer();
+            return new CanPlayResult(CanPlayStatus.PlayerDisabled, "INFO|201711202241|Past days are not finished");
         }
-
         //Check Today
-        if (!DateExistsAndHasSessions(SystemTime.Now().Date))
+        if (DateExistsAndHasSessions(GameManager.SystemTime.Now().Date))
         {
-            if (GetNextPlayDate() == null)
+            //Check if you are after 8:00AM
+            if (GameManager.SystemTime.Now() < GameManager.SystemTime.Now().Date.AddHours(8))
             {
-                if (GameManager.SentCanPlayStatus) return CanPlayStatus.NoMoreTimeSlots;
-                GameManager.SentCanPlayStatus = true;
-                Debug.Log("INFO|201711202242|No more future time slots");
-                return CanPlayStatus.NoMoreTimeSlots;
+                return new CanPlayResult(CanPlayStatus.HasNextTimeslot, "INFO|201711202245|Before 8AM");
             }
-            if (GameManager.SentCanPlayStatus) return CanPlayStatus.HasNextTimeslot;
-            GameManager.SentCanPlayStatus = true;
-            Debug.Log("INFO|201711202242|Has future time slot");
-            return CanPlayStatus.HasNextTimeslot;
-        }
-        var remainingGameTime = CalculateRemainingPlayTime();
-        var timeRemainingInDay = (int) (SystemTime.Now().Date.AddDays(1) - SystemTime.Now()).TotalSeconds;
-        //Check if the sessions can be finished
-        if (timeRemainingInDay < remainingGameTime)
-        {
-            if (GameManager.SentCanPlayStatus) return CanPlayStatus.NoMoreTimeSlots;
-            GameManager.SentCanPlayStatus = true;
-            Debug.Log(string.Format("INFO|201711202244|Not enough remaining time {0}/{1}", remainingGameTime,
-                timeRemainingInDay));
-            return CanPlayStatus.NoMoreTimeSlots;
-        }
-        //Check if you are after 8:00AM
-        if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
-        {
-            if (GameManager.SentCanPlayStatus) return CanPlayStatus.HasNextTimeslot;
-            GameManager.SentCanPlayStatus = true;
-            Debug.Log("INFO|201711202245|Before 8AM");
-            return CanPlayStatus.HasNextTimeslot;
-        }
 
-        var today = GetToday();
-        if (Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval)
-        {
-            if (GameManager.SentCanPlayStatus) return CanPlayStatus.HasNextTimeslot;
-            GameManager.SentCanPlayStatus = true;
-            Debug.Log("INFO|201711202247|Session interval time not passed");
-            return CanPlayStatus.HasNextTimeslot;
+            //Check if the sessions can be finished
+            var remainingGameTime = CalculateRemainingPlayTime();
+            var timeRemainingInDay = (int) (GameManager.SystemTime.Now().Date.AddDays(1) - GameManager.SystemTime.Now()).TotalSeconds;
+            if (timeRemainingInDay < remainingGameTime)
+            {
+                DisablePlayer();
+                return new CanPlayResult(CanPlayStatus.PlayerDisabled, string.Format(
+                    "INFO|201711202244|Not enough remaining time {0}/{1}", remainingGameTime,
+                    timeRemainingInDay));
+            }
+
+            //Check time since last session ended
+            var today = GetToday();
+            if (Utilities.GetEpochTime() - today.LastSessionsEndTime < today.SessionInterval)
+            {
+                return new CanPlayResult(CanPlayStatus.HasNextTimeslot,
+                    "INFO|201711202247|Session interval time not passed");
+            }
+
+            //Check last rounds is before now
+            var lastRoundTime = GetLastRoundTime();
+            if (GameManager.SystemTime.Now().AddSeconds(1) <= lastRoundTime)
+            {
+                return new CanPlayResult(CanPlayStatus.WrongTIme,
+                    string.Format("INFO|20171204|Wrong Clock now = {0} last round time={1}",
+                        GameManager.SystemTime.Now().ToShortTimeString(), lastRoundTime.ToShortTimeString()));
+            }
+            return new CanPlayResult(CanPlayStatus.CanPlay, "INFO|201711202248|Can play");
         }
-        if (GameManager.SentCanPlayStatus) return CanPlayStatus.CanPlay;
-        GameManager.SentCanPlayStatus = true;
-        Debug.Log("INFO|201711202248|Can play");
-        return CanPlayStatus.CanPlay;
+        return GetNextPlayDate() == null
+            ? new CanPlayResult(CanPlayStatus.GameDone, "INFO|201711202242|Finished all time slots")
+            : new CanPlayResult(CanPlayStatus.HasNextTimeslot, "INFO|201711202242|Has future time slot");
     }
 
     private bool DateExists(DateTime datetime)
@@ -151,10 +159,10 @@ public class UserInformation : IEnumerable
     public string TimeToNextSession()
     {
         var nextPlayDate = GetNextPlayDate();
-        if (nextPlayDate.DateObject.Date > SystemTime.Now().Date)
+        if (nextPlayDate.DateObject.Date > GameManager.SystemTime.Now().Date)
             return GetTimeSpanToDateTime(nextPlayDate.DateObject.Date.AddHours(8));
-        if (SystemTime.Now() < SystemTime.Now().Date.AddHours(8))
-            return GetTimeSpanToDateTime(SystemTime.Now().Date.AddHours(8));
+        if (GameManager.SystemTime.Now() < GameManager.SystemTime.Now().Date.AddHours(8))
+            return GetTimeSpanToDateTime(GameManager.SystemTime.Now().Date.AddHours(8));
         var t = TimeSpan.FromSeconds(nextPlayDate.SessionInterval -
                                      (Utilities.GetEpochTime() - nextPlayDate.LastSessionsEndTime));
         return string.Format("{0:D2}:{1:D2}:{2:D2}",
@@ -165,7 +173,7 @@ public class UserInformation : IEnumerable
 
     public static string GetTimeSpanToDateTime(DateTime to)
     {
-        var t = to.Subtract(SystemTime.Now());
+        var t = to.Subtract(GameManager.SystemTime.Now());
         return string.Format("{0:D2}:{1:D2}:{2:D2}",
             t.Hours,
             t.Minutes,
@@ -185,7 +193,7 @@ public class UserInformation : IEnumerable
 
     public void AddPlayTime(int length, int score)
     {
-        var today = GetPlayDateByDateTime(SystemTime.Now().Date);
+        var today = GetPlayDateByDateTime(GameManager.GameStartTime);
         if (today == null) return;
         if (today.CurrentSession == 0)
             today.CurrentSession = 1;
@@ -195,7 +203,7 @@ public class UserInformation : IEnumerable
             today.CurrentSession++;
             today.LastSessionsEndTime = 0;
         }
-        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), GameManager.GameStartTime.ToShortTimeString(),
+        today.GameRounds.Add(new Rounds(length, Mathf.Max(0, score), GameManager.GameStartTime,
             today.CurrentSession));
         today.CurrentSessionTimeSecs += length;
         Debug.Log(string.Format(
@@ -224,7 +232,7 @@ public class UserInformation : IEnumerable
 
     public PlayDate GetToday()
     {
-        return Array.Find(UserLocalData.PlayDates, x => x.DateObject == SystemTime.Now().Date);
+        return Array.Find(UserLocalData.PlayDates, x => x.DateObject == GameManager.SystemTime.Now().Date);
     }
 
     public IEnumerator SendUserInfoToServer()
@@ -285,15 +293,21 @@ public class UserInformation : IEnumerable
                 logUrl, response.responseCode));
         if (response.isHttpError || response.isNetworkError)
             yield break;
+        var responseDateHeader = response.GetResponseHeader("Date");
+        var serverDateTime = DateTime.ParseExact(responseDateHeader, "R", CultureInfo.InvariantCulture);
+        if (GameManager.SystemTime.DeltaTimeSpan == TimeSpan.Zero)
+        {
+            GameManager.SystemTime.SetDateTime(serverDateTime.Add(TimeZone.CurrentTimeZone.GetUtcOffset(serverDateTime)));
+            Debug.Log(string.Format("DEBUG|201712041636|Current time from server is {0}", GameManager.SystemTime.Now()));
+        }
+
         Debug.Log(string.Format("DEBUG|201722101155|Sent log reports to {0}", logUrl));
     }
 
     public void DisablePlayer()
     {
         Debug.Log(string.Format("INFO|201711241150|Player {0} is disabled", UserLocalData.UserCode));
-        foreach (var playdate in UserLocalData.PlayDates.Where(playDate => playDate.DateObject >= SystemTime.Now().Date)
-        )
-            playdate.DateObject = playdate.DateObject.Date.AddYears(-1);
+        UserLocalData.PlayerDisabled = true;
         UserLocalData.Save(UserLocalData);
         GameManager.ConnectionError = true;
     }
@@ -319,19 +333,16 @@ public class UserInformation : IEnumerable
     {
         _scoreReportsToBeSent.Clear();
     }
+}
 
-    public static class SystemTime
+public class CanPlayResult
+{
+    public CanPlayStatus Status;
+    public string Message;
+
+    public CanPlayResult(CanPlayStatus status, string msg)
     {
-        public static Func<DateTime> Now = () => DateTime.Now;
-
-        public static void SetDateTime(DateTime dateTimeNow)
-        {
-            Now = () => dateTimeNow;
-        }
-
-        public static void ResetDateTime()
-        {
-            Now = () => DateTime.Now;
-        }
+        Status = status;
+        Message = msg;
     }
 }

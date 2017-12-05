@@ -43,7 +43,9 @@ public class GameManager : MonoBehaviour
 
     public static class SystemTime
     {
+        public static bool ServerTimeSet = false;
         public static TimeSpan DeltaTimeSpan = TimeSpan.Zero;
+        public static TimeSpan ServerTimeSpan = TimeSpan.Zero;
         public static Func<DateTime> Now = () => DateTime.Now.Add(DeltaTimeSpan);
 
         public static void SetDateTime(DateTime dateTimeNow)
@@ -60,7 +62,7 @@ public class GameManager : MonoBehaviour
 
         public static void ResetDateTime()
         {
-            DeltaTimeSpan = TimeSpan.Zero;
+            DeltaTimeSpan = ServerTimeSet ? ServerTimeSpan : TimeSpan.Zero;
             Debug.Log(string.Format("DEBUG|201712041719|Updated time to {0}",Now()));
         }
     }

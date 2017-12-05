@@ -81,8 +81,8 @@ public class UserInformation : IEnumerable
         var today = GetToday();
         var elapsedTime = (today.CurrentSession - 1) * today.SessionLength + today.CurrentSessionTimeSecs;
         elapsedTime += (today.CurrentSession - 1) * today.SessionInterval;
-        if (today.LastSessionsEndTime != 0)
-            elapsedTime += Utilities.GetEpochTime() - today.LastSessionsEndTime;
+        if (today.LastSessionsEndTime !=0)
+            elapsedTime += Mathf.Min(Utilities.GetEpochTime() - today.LastSessionsEndTime, today.SessionInterval) ;
         var totalPlayTime = today.NumberOfSessions * today.SessionLength +
                             (today.NumberOfSessions - 1) * today.SessionInterval;
         var timeLeft = totalPlayTime - elapsedTime;
@@ -91,30 +91,32 @@ public class UserInformation : IEnumerable
 
     public CanPlayResult CanPlay()
     {
+        var now = GameManager.SystemTime.Now();
         //Check if diabled
         if (UserLocalData.PlayerDisabled)
         {
             return new CanPlayResult(CanPlayStatus.PlayerDisabled, "INFO|201711202241|Player is disabled");
         }
         //Check past days are finished
-        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < GameManager.SystemTime.Now().Date)
+        if (UserLocalData.PlayDates.Where(day => day.DateObject.Date < now.Date)
             .Any(day => !FinishedDay(day)))
         {
             DisablePlayer();
             return new CanPlayResult(CanPlayStatus.PlayerDisabled, "INFO|201711202241|Past days are not finished");
         }
         //Check Today
-        if (DateExistsAndHasSessions(GameManager.SystemTime.Now().Date))
+        if (DateExistsAndHasSessions(now.Date))
         {
             //Check if you are after 8:00AM
-            if (GameManager.SystemTime.Now() < GameManager.SystemTime.Now().Date.AddHours(8))
+            if (now < now.Date.AddHours(8))
             {
                 return new CanPlayResult(CanPlayStatus.HasNextTimeslot, "INFO|201711202245|Before 8AM");
             }
 
             //Check if the sessions can be finished
             var remainingGameTime = CalculateRemainingPlayTime();
-            var timeRemainingInDay = (int) (GameManager.SystemTime.Now().Date.AddDays(1) - GameManager.SystemTime.Now()).TotalSeconds;
+            var tomorrow = now.Date.AddDays(1);
+            var timeRemainingInDay = (int) (tomorrow - now).TotalSeconds;
             if (timeRemainingInDay < remainingGameTime)
             {
                 DisablePlayer();
@@ -133,11 +135,11 @@ public class UserInformation : IEnumerable
 
             //Check last rounds is before now
             var lastRoundTime = GetLastRoundTime();
-            if (GameManager.SystemTime.Now().AddSeconds(1) <= lastRoundTime)
+            if (now.AddSeconds(1) <= lastRoundTime)
             {
                 return new CanPlayResult(CanPlayStatus.WrongTIme,
                     string.Format("INFO|20171204|Wrong Clock now = {0} last round time={1}",
-                        GameManager.SystemTime.Now().ToShortTimeString(), lastRoundTime.ToShortTimeString()));
+                        now.ToShortTimeString(), lastRoundTime.ToShortTimeString()));
             }
             return new CanPlayResult(CanPlayStatus.CanPlay, "INFO|201711202248|Can play");
         }
@@ -295,10 +297,13 @@ public class UserInformation : IEnumerable
             yield break;
         var responseDateHeader = response.GetResponseHeader("Date");
         var serverDateTime = DateTime.ParseExact(responseDateHeader, "R", CultureInfo.InvariantCulture);
-        if (GameManager.SystemTime.DeltaTimeSpan == TimeSpan.Zero)
+        if (!GameManager.SystemTime.ServerTimeSet)
         {
-            GameManager.SystemTime.SetDateTime(serverDateTime.Add(TimeZone.CurrentTimeZone.GetUtcOffset(serverDateTime)));
-            Debug.Log(string.Format("DEBUG|201712041636|Current time from server is {0}", GameManager.SystemTime.Now()));
+            GameManager.SystemTime.SetDateTime(
+                serverDateTime.Add(TimeZone.CurrentTimeZone.GetUtcOffset(serverDateTime)));
+            GameManager.SystemTime.ServerTimeSet = true;
+            Debug.Log(string.Format("DEBUG|201712041636|Current time from server is {0}",
+                GameManager.SystemTime.Now()));
         }
 
         Debug.Log(string.Format("DEBUG|201722101155|Sent log reports to {0}", logUrl));

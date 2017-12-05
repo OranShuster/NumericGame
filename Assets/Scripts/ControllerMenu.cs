@@ -129,12 +129,13 @@ public class ControllerMenu : MonoBehaviour
             var secondsToAdd = int.Parse(secondsInputField.text);
             var scoreToAdd = int.Parse(scoreInputField.text);
             var timeToAdd = minutesToAdd * 60 + secondsToAdd;
+            GameManager.GameStartTime = GameManager.SystemTime.Now();
             UserInformation.AddPlayTime(timeToAdd, scoreToAdd);
             UpdateStatisticsScrollView();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            //IGNORE
+            Debug.Log(string.Format("DEBUG|201712060004|{0}",ex));
         }
     }
 

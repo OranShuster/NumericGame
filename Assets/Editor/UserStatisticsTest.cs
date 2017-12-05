@@ -248,9 +248,10 @@ public class UserStatisticsTest
             GameManager.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(rand.Next(0, 7)));
             Assert.AreEqual(CanPlayStatus.HasNextTimeslot, _userStatistics.CanPlay().Status);
             var expectedTimeSpan =
-                TimeSpan.Parse(UserInformation.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex).AddHours(8))).TotalSeconds;
+                TimeSpan.Parse(UserInformation.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex).AddHours(8)))
+                    .TotalSeconds;
             var firstSessionGameTime = rand.Next(9, 12);
-            Assert.AreEqual(expectedTimeSpan, TimeSpan.Parse(_userStatistics.TimeToNextSession()).TotalSeconds,1);
+            Assert.AreEqual(expectedTimeSpan, TimeSpan.Parse(_userStatistics.TimeToNextSession()).TotalSeconds, 1);
             GameManager.SystemTime.SetDateTime(DateTime.Today.AddDays(dayIndex).AddHours(firstSessionGameTime));
             Assert.AreEqual(CanPlayStatus.CanPlay, _userStatistics.CanPlay().Status);
             AddPlayTime(SessionLength / 2, 500);
@@ -261,7 +262,7 @@ public class UserStatisticsTest
                 TimeSpan.Parse(
                     UserInformation.GetTimeSpanToDateTime(GameManager.SystemTime.Now()
                         .AddSeconds(SessionInterval + 1))).TotalSeconds;
-            Assert.AreEqual(expectedTimeSpan, TimeSpan.Parse(_userStatistics.TimeToNextSession()).TotalSeconds,1);
+            Assert.AreEqual(expectedTimeSpan, TimeSpan.Parse(_userStatistics.TimeToNextSession()).TotalSeconds, 1);
             GameManager.SystemTime.AddTimeSpanDelta(new TimeSpan(0, 0, 0, SessionInterval + 1));
             Assert.AreEqual(CanPlayStatus.CanPlay, _userStatistics.CanPlay().Status);
             AddPlayTime(SessionLength, 2500);
@@ -271,8 +272,9 @@ public class UserStatisticsTest
             {
                 Assert.AreEqual(CanPlayStatus.HasNextTimeslot, _userStatistics.CanPlay().Status);
                 expectedTimeSpan = TimeSpan.Parse(
-                    UserInformation.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex + 1).AddHours(8))).TotalSeconds;
-                Assert.AreEqual(expectedTimeSpan, TimeSpan.Parse(_userStatistics.TimeToNextSession()).TotalSeconds,1);
+                        UserInformation.GetTimeSpanToDateTime(DateTime.Today.AddDays(dayIndex + 1).AddHours(8)))
+                    .TotalSeconds;
+                Assert.AreEqual(expectedTimeSpan, TimeSpan.Parse(_userStatistics.TimeToNextSession()).TotalSeconds, 1);
             }
             else
             {
@@ -296,18 +298,6 @@ public class UserStatisticsTest
         GameManager.SystemTime.SetDateTime(DateTime.Today.AddDays(1).AddHours(15).AddMinutes(3)
             .AddSeconds(SessionInterval - 1));
         Assert.AreEqual(CanPlayStatus.HasNextTimeslot, _userStatistics.CanPlay().Status);
-    }
-
-    [Test]
-    public void FirstRemainingTimeCheck()
-    {
-        _userStatistics = new UserInformation();
-        Assert.IsNotNull(_userStatistics.UserLocalData);
-        GameManager.SystemTime.SetDateTime(DateTime.Today.AddHours(24 - SessionInterval).AddSeconds(-1));
-        Assert.AreEqual(CanPlayStatus.HasNextTimeslot, _userStatistics.CanPlay().Status);
-        GameManager.SystemTime.SetDateTime(DateTime.Today.AddDays(1).AddHours(24)
-            .AddSeconds(-1 * SessionInterval - 1));
-        Assert.AreEqual(CanPlayStatus.PlayerDisabled, _userStatistics.CanPlay().Status);
     }
 
     [TearDown]
